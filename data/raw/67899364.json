@@ -1,0 +1,23 @@
+{
+  "page_id": 67899364,
+  "revision_id": 1372232735,
+  "title": "Google Colab",
+  "url": "https://en.wikipedia.org/wiki/Google_Colab",
+  "summary": "Google Colab is a free, cloud-based Jupyter Notebook environment provided by Google. It allows users to write and execute Python code through the browser, especially suited for machine learning, data analysis, and education.  Google Colab provides an online integrated development environment (IDE) for Python that requires no setup and runs entirely in the cloud. It offers free access to computing resources, including GPUs and TPUs, making it popular among researchers and students working on deep learning and data science projects.",
+  "content": "Google Colab is a free, cloud-based Jupyter Notebook environment provided by Google. It allows users to write and execute Python code through the browser, especially suited for machine learning, data analysis, and education.  Google Colab provides an online integrated development environment (IDE) for Python that requires no setup and runs entirely in the cloud. It offers free access to computing resources, including GPUs and TPUs, making it popular among researchers and students working on deep learning and data science projects.\n\n\nFeatures\n\nSupports Python 3, R, and Julia\nBuilt on top of Jupyter Notebook\nFree access to limited GPU/TPU computing resources\nIntegration with Google Drive for saving and loading notebooks\nAbility to share notebooks like Google Docs\nMultiple users can collaborate and work on the same document at the same time\nCompatible with popular machine learning libraries such as TensorFlow, PyTorch, and scikit-learn\n\n\nLimitations\nIdle timeouts and session limits\nLimited access to high-performance hardware without a paid subscription\n\n\nSee also\nAmazon SageMaker – Cloud machine-learning platform\nCoCalc — does Jupyter notebooks, Markdown, LaTeX, RMarkdown, Linux terminal, SageMath, GNU Octave.\nDataflow.zone – cloud-based AI and data engineering platform integrating Jupyter, Airflow, MLflow, DBT, and Streamlit\nFirebase Studio and Google Cloud Shell – other online IDEs from Google\nGitHub Codespaces – Online integrated development environment platform from GitHub\nKaggle § Kaggle Notebooks\nTermux – Terminal emulator for Android, useful for additional recent packages\nList of online integrated development environments\nList of online educational resources\nList of Python software\nList of data science software\nComparison of machine learning software\n\n\nReferences",
+  "categories": [
+    "All articles with self-published sources",
+    "Articles with self-published sources from August 2025",
+    "Articles with short description",
+    "Cloud computing",
+    "Educational software",
+    "Google software",
+    "Integrated development environments",
+    "Machine learning",
+    "Online integrated development environments",
+    "Proprietary software",
+    "Short description is different from Wikidata",
+    "Software programmed in Python",
+    "Web applications"
+  ]
+}

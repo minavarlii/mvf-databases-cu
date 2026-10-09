@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "mvf-databases-cu"
+version = "0.1.0"
+description = "MariaDB-native vector search and RAG project."
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy[asyncio]",
+    "asyncmy",
+    "httpx",
+    "pydantic>=2",
+    "pydantic-settings",
+    "sentence-transformers",
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+    "mypy",
+]
+
+
+[tool.setuptools.packages.find]
+include = [
+    "backend*",
+    "scripts*",
+]
+exclude = [
+    "data*",
+    "database*",
+    "tests*",
+    "docs*",
+]
+
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "N",
+    "UP",
+    "B",
+]
+
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

@@ -1,0 +1,155 @@
+{
+  "query": "neural network training",
+  "limit": 5,
+  "warmups": 5,
+  "runs": 50,
+  "hybrid_category": "Machine learning",
+  "linked_source_title": "Machine learning",
+  "dataset": {
+    "article_count": 285,
+    "vector_count": 3940,
+    "article_link_count": 2710
+  },
+  "semantic": {
+    "latency": {
+      "runs": 50,
+      "mean_ms": 2.448406680159678,
+      "median_ms": 2.383270499194623,
+      "p50_ms": 2.383270499194623,
+      "p95_ms": 2.9934210499050096,
+      "min_ms": 2.050999999482883,
+      "max_ms": 3.3933340000658063,
+      "stddev_ms": 0.30076877365700166
+    },
+    "execution_plan": [
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "c",
+        "access_type": "index",
+        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+        "key": "ix_chunks_embedding",
+        "rows": 5,
+        "extra": ""
+      },
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "a",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY",
+        "key": "PRIMARY",
+        "rows": 1,
+        "extra": ""
+      }
+    ]
+  },
+  "hybrid": {
+    "latency": {
+      "runs": 50,
+      "mean_ms": 230.31516574003035,
+      "median_ms": 229.93166699961876,
+      "p50_ms": 229.93166699961876,
+      "p95_ms": 233.5207331505444,
+      "min_ms": 227.13429200121027,
+      "max_ms": 242.88512500061188,
+      "stddev_ms": 2.6171586993825766
+    },
+    "execution_plan": [
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "cat",
+        "access_type": "const",
+        "possible_keys": "PRIMARY,uq_categories_name",
+        "key": "uq_categories_name",
+        "rows": 1,
+        "extra": "Using index; Using temporary; Using filesort"
+      },
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "a",
+        "access_type": "index",
+        "possible_keys": "PRIMARY",
+        "key": "ix_articles_title",
+        "rows": 204,
+        "extra": "Using index"
+      },
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "ac",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY,fk_article_categories_category",
+        "key": "fk_article_categories_category",
+        "rows": 1,
+        "extra": "Using index"
+      },
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "c",
+        "access_type": "ref",
+        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+        "key": "ix_chunks_article_id",
+        "rows": 11,
+        "extra": ""
+      }
+    ]
+  },
+  "linked": {
+    "latency": {
+      "runs": 50,
+      "mean_ms": 88.17231922010251,
+      "median_ms": 88.12833299998601,
+      "p50_ms": 88.12833299998601,
+      "p95_ms": 89.3338914494052,
+      "min_ms": 86.94541700060654,
+      "max_ms": 90.56537499964179,
+      "stddev_ms": 0.7290747524918008
+    },
+    "execution_plan": [
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "source",
+        "access_type": "ref",
+        "possible_keys": "PRIMARY,ix_articles_title",
+        "key": "ix_articles_title",
+        "rows": 1,
+        "extra": "Using where; Using index; Using temporary; Using filesort"
+      },
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "al",
+        "access_type": "ref",
+        "possible_keys": "PRIMARY,fk_article_links_target",
+        "key": "PRIMARY",
+        "rows": 1,
+        "extra": ""
+      },
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "target",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY",
+        "key": "PRIMARY",
+        "rows": 1,
+        "extra": ""
+      },
+      {
+        "select_id": 1,
+        "select_type": "SIMPLE",
+        "table": "c",
+        "access_type": "ref",
+        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+        "key": "uq_chunks_article_chunk_index",
+        "rows": 11,
+        "extra": ""
+      }
+    ]
+  }
+}

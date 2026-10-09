@@ -1,0 +1,17 @@
+{
+  "page_id": 83051633,
+  "revision_id": 1353601724,
+  "title": "Data-centric AI",
+  "url": "https://en.wikipedia.org/wiki/Data-centric_AI",
+  "summary": "Data-centric AI is an approach within artificial intelligence that emphasizes on improving the quality, consistency and representativeness of the data used to train machine learning models, rather than focusing primarily on optimizing model architectures or algorithms. This idea has gained traction as researchers and practitioners have come to believe that many performance limitations of machine learning systems stem from issues such as noisy labels, biased datasets, and lack of coverage in the data. Data-centric AI involves disciplined approach to data cleaning, augmentation, labeling, and governance that improves model performance and reliability in applications such as computer vision, natural language processing, and further.",
+  "content": "Data-centric AI is an approach within artificial intelligence that emphasizes on improving the quality, consistency and representativeness of the data used to train machine learning models, rather than focusing primarily on optimizing model architectures or algorithms. This idea has gained traction as researchers and practitioners have come to believe that many performance limitations of machine learning systems stem from issues such as noisy labels, biased datasets, and lack of coverage in the data. Data-centric AI involves disciplined approach to data cleaning, augmentation, labeling, and governance that improves model performance and reliability in applications such as computer vision, natural language processing, and further.\n\n\nSee also\nArtificial intelligence\nMachine learning\nData preprocessing\nTraining data\nData quality\nFeature engineering\nMLOps\nData governance\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Articles with short description",
+    "Artificial intelligence",
+    "Artificial intelligence stubs",
+    "Data management",
+    "Machine learning",
+    "Short description matches Wikidata"
+  ]
+}

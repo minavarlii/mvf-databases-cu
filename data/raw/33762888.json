@@ -1,0 +1,18 @@
+{
+  "page_id": 33762888,
+  "revision_id": 1371233281,
+  "title": "Inferential theory of learning",
+  "url": "https://en.wikipedia.org/wiki/Inferential_theory_of_learning",
+  "summary": "Inferential Theory of Learning (ITL) is an area of machine learning which describes inferential processes performed by learning agents. ITL was proposed by Ryszard S. Michalski in 1991 as a unified framework for developing and implementing multistrategy learning systems, and was further developed in subsequent publications through the 1990s. In the ITL learning process is viewed as a search (inference) through hypotheses space guided by a specific goal. The results of learning need to be stored. Stored information will later be used by the learner for future inferences. Inferences are split into multiple categories including conclusive, deduction, and induction. In order for an inference to be considered complete it was required that all categories must be taken into account. This is how the ITL varies from other machine learning theories like Computational Learning Theory and Statistical Learning Theory; which both use singular forms of inference.",
+  "content": "Inferential Theory of Learning (ITL) is an area of machine learning which describes inferential processes performed by learning agents. ITL was proposed by Ryszard S. Michalski in 1991 as a unified framework for developing and implementing multistrategy learning systems, and was further developed in subsequent publications through the 1990s. In the ITL learning process is viewed as a search (inference) through hypotheses space guided by a specific goal. The results of learning need to be stored. Stored information will later be used by the learner for future inferences. Inferences are split into multiple categories including conclusive, deduction, and induction. In order for an inference to be considered complete it was required that all categories must be taken into account. This is how the ITL varies from other machine learning theories like Computational Learning Theory and Statistical Learning Theory; which both use singular forms of inference.\n\n\nUsage\nThe most relevant published usage of ITL was in scientific journal published in 2012 and used ITL as a way to describe how agent-based learning works. According to the journal \"The Inferential Theory of Learning (ITL) provides an elegant way of describing learning processes by agents\".\n\n\nReferences\n\n\nFurther reading",
+  "categories": [
+    "All stub articles",
+    "Articles with short description",
+    "Cybernetics",
+    "Learning",
+    "Machine learning",
+    "Machine learning stubs",
+    "Short description matches Wikidata",
+    "Systems theory stubs"
+  ]
+}

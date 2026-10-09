@@ -1,0 +1,31 @@
+{
+  "page_id": 83055336,
+  "revision_id": 1372436501,
+  "title": "Dataset shift",
+  "url": "https://en.wikipedia.org/wiki/Dataset_shift",
+  "summary": "Dataset shift is a phenomenon in machine learning and statistics in which the joint distribution of input variables and target labels is different in the training phase and the deployment or test phase (i.e., \n  \n    \n      \n        \n          P\n          \n            t\n            r\n            a\n            i\n            n\n          \n        \n        (\n        X\n        ,\n        Y\n        )\n        ≠\n        \n          P\n          \n            t\n            e\n            s\n            t\n          \n        \n        (\n        X\n        ,\n        Y\n        )\n      \n    \n    {\\displaystyle P_{train}(X,Y)\\neq P_{test}(X,Y)}\n  \n). This happens when the statistical properties of data used to train a model are no longer representative of the data encountered in real-world use, often resulting in degraded predictive performance and diminished generalization ability.\nDataset shift is a generic term for a number of particular types of distributional change. Covariate shift is when the distribution of the input features changes, but the conditional relationship between inputs and outputs remains constant. Prior probability shift (or label shift) happens when the distribution of target labels changes, but the conditional distribution of inputs given labels stays the same. Concept shift (also known as concept drift) is the change of the conditional relationship between inputs and outputs that renders previously learned patterns invalid over time.\nA key challenge for deploying machine learning systems is dataset shift, in particular in dynamic environments where the data distributions change over time. Detecting and mitigating such shifts is an active area of research, e.g., drift detection, domain adaptation, continual learning.",
+  "content": "Dataset shift is a phenomenon in machine learning and statistics in which the joint distribution of input variables and target labels is different in the training phase and the deployment or test phase (i.e., \n  \n    \n      \n        \n          P\n          \n            t\n            r\n            a\n            i\n            n\n          \n        \n        (\n        X\n        ,\n        Y\n        )\n        ≠\n        \n          P\n          \n            t\n            e\n            s\n            t\n          \n        \n        (\n        X\n        ,\n        Y\n        )\n      \n    \n    {\\displaystyle P_{train}(X,Y)\\neq P_{test}(X,Y)}\n  \n). This happens when the statistical properties of data used to train a model are no longer representative of the data encountered in real-world use, often resulting in degraded predictive performance and diminished generalization ability.\nDataset shift is a generic term for a number of particular types of distributional change. Covariate shift is when the distribution of the input features changes, but the conditional relationship between inputs and outputs remains constant. Prior probability shift (or label shift) happens when the distribution of target labels changes, but the conditional distribution of inputs given labels stays the same. Concept shift (also known as concept drift) is the change of the conditional relationship between inputs and outputs that renders previously learned patterns invalid over time.\nA key challenge for deploying machine learning systems is dataset shift, in particular in dynamic environments where the data distributions change over time. Detecting and mitigating such shifts is an active area of research, e.g., drift detection, domain adaptation, continual learning.\n\n\nSee also\nConcept drift\nDomain adaptation\nOverfitting\nStatistical classification\n\n\nReferences",
+  "categories": [
+    "All articles containing circular references",
+    "All articles covered by WikiProject Wikify",
+    "All articles lacking reliable references",
+    "All articles needing references cleanup",
+    "All articles with self-published sources",
+    "All orphaned articles",
+    "All stub articles",
+    "Articles covered by WikiProject Wikify from April 2026",
+    "Articles lacking reliable references from April 2026",
+    "Articles with multiple maintenance issues",
+    "Articles with self-published sources from April 2026",
+    "Articles with short description",
+    "Artificial intelligence",
+    "Artificial intelligence stubs",
+    "Data analysis",
+    "Machine learning",
+    "Orphaned articles from April 2026",
+    "Short description with empty Wikidata description",
+    "Statistical data",
+    "Use dmy dates from April 2026",
+    "Wikipedia references cleanup from April 2026"
+  ]
+}

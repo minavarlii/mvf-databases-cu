@@ -1,0 +1,16 @@
+{
+  "page_id": 926722,
+  "revision_id": 1354541687,
+  "title": "Relational data mining",
+  "url": "https://en.wikipedia.org/wiki/Relational_data_mining",
+  "summary": "Relational data mining is the data mining technique for relational\ndatabases. Unlike traditional data mining algorithms, which look for\npatterns in a single table (propositional patterns), \nrelational data mining algorithms look for patterns among multiple tables\n(relational patterns). For most types of propositional\npatterns, there are corresponding relational patterns. For example,\nthere are relational classification rules (relational classification), relational regression tree, and relational association rules.\nThere are several approaches to relational data mining:",
+  "content": "Relational data mining is the data mining technique for relational\ndatabases. Unlike traditional data mining algorithms, which look for\npatterns in a single table (propositional patterns), \nrelational data mining algorithms look for patterns among multiple tables\n(relational patterns). For most types of propositional\npatterns, there are corresponding relational patterns. For example,\nthere are relational classification rules (relational classification), relational regression tree, and relational association rules.\nThere are several approaches to relational data mining:\n\nInductive Logic Programming (ILP)\nStatistical Relational Learning (SRL)\nGraph Mining\nPropositionalization\nMulti-view learning\n\n\nAlgorithms\nMulti-Relation Association Rules: Multi-Relation Association Rules (MRAR) is a new class of association rules which in contrast to primitive, simple and even multi-relational association rules (that are usually extracted from multi-relational databases), each rule item consists of one entity but several relations. These relations indicate indirect relationship between the entities. Consider the following MRAR where the first item consists of three relations live in, nearby and humid: “Those who live in a place which is near by a city with humid climate type and also are younger than 20 -> their health condition is good”. Such association rules are extractable from RDBMS data or semantic web data.\n\n\nSoftware\nSafarii: a Data Mining environment for analysing large relational databases based on a multi-relational data mining engine.\nDataconda: a software, free for research and teaching purposes, that helps mining relational databases without the use of SQL.\n\n\nDatasets\nRelational dataset repository: a collection of publicly available relational datasets.\n\n\nSee also\nData mining\nStructure mining\nDatabase mining\n\n\nReferences\n\n\nExternal links\nWeb page for a text book on relational data mining",
+  "categories": [
+    "All stub articles",
+    "Data processing",
+    "Database stubs",
+    "Machine learning",
+    "Machine learning stubs",
+    "Relational model"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "page_id": 74598694,
+  "revision_id": 1315779664,
+  "title": "Reciprocal human machine learning",
+  "url": "https://en.wikipedia.org/wiki/Reciprocal_human_machine_learning",
+  "summary": "Reciprocal Human Machine Learning (RHML) is an interdisciplinary approach to designing human-AI interaction systems. RHML aims to enable continual learning between humans and machine learning models by having them learn from each other. This approach keeps the human expert \"in the loop\" to oversee and enhance machine learning performance and simultaneously support the human expert continue learning.",
+  "content": "Reciprocal Human Machine Learning (RHML) is an interdisciplinary approach to designing human-AI interaction systems. RHML aims to enable continual learning between humans and machine learning models by having them learn from each other. This approach keeps the human expert \"in the loop\" to oversee and enhance machine learning performance and simultaneously support the human expert continue learning.\n\n\nBackground\nRHML emerged in the context of the rise of big data analytics and artificial intelligence for intelligent tasks like sense-making and decision-making. As machine learning advanced to take on more roles, researchers realized fully autonomous systems had limitations and needed human guidance.\nRHML extends the concept of human-in-the-loop systems by promoting reciprocal learning. Humans learn from their interactions with machine learning models, staying up-to-date on evolving technology. The models also learn from human feedback and oversight. This amplification of learning on both sides is a key focus of RHML.\nThe approach draws on theories of learning in dyads from education and psychology. It also builds on human-computer interaction and human-centered design principles. Implementing RHML requires developing specialized tools and interfaces tailored to the application\n\n\nApplications\nRHML has been explored across diverse domains including:\n\nCybersecurity - Software to enable reciprocal learning between experts and AI models for social media threat detection.\nOrganizational decision-making - RHML to structure collaboration between humans and AI systems.\nWorkplace training - Using RHML for workers to learn from AI technologies on the job.\nOpen science - Using human and AI collaboration to promote open science.\nProduction and logistics - turning workers and intelligent machines into teammates.\nRHML maintains human oversight and control over AI systems, while enabling cutting-edge machine learning performance. This collaborative approach highlights the importance of keeping the human expert involved in the loop.\nAn example of RHML in application is Free Spirit (AFSFCV), an open-source architecture first published in early 2025 as a whitepaper, proposing a visually structured approach to intent-based human–AI interaction.\n\n\nReferences",
+  "categories": [
+    "All articles with unsourced statements",
+    "All orphaned articles",
+    "Articles with short description",
+    "Articles with unsourced statements from July 2025",
+    "Human–computer interaction",
+    "Machine learning",
+    "Orphaned articles from March 2024",
+    "Short description matches Wikidata"
+  ]
+}

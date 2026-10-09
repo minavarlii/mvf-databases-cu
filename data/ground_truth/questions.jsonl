@@ -1,0 +1,40 @@
+{"id":"q001","question":"What learning approach uses labeled examples to teach a model how to predict outputs for new inputs?","relevant_titles":["Machine learning"]}
+{"id":"q002","question":"How can attackers intentionally manipulate inputs or training data to cause a machine learning system to make mistakes?","relevant_titles":["Adversarial machine learning"]}
+{"id":"q003","question":"What learning strategy lets a model choose which unlabeled examples would be most useful to have annotated?","relevant_titles":["Active learning (machine learning)"]}
+{"id":"q004","question":"How can a system automatically identify observations that differ significantly from normal behavior?","relevant_titles":["Anomaly detection"]}
+{"id":"q005","question":"Why can making a predictive model more complex reduce underfitting while increasing sensitivity to training data?","relevant_titles":["Bias–variance tradeoff"]}
+{"id":"q006","question":"How can model performance be estimated by repeatedly dividing available data into training and validation subsets?","relevant_titles":["Cross-validation (statistics)"]}
+{"id":"q007","question":"How can many devices collaboratively train a model without sending all of their raw local data to a central server?","relevant_titles":["Federated learning"]}
+{"id":"q008","question":"What process involves constructing or transforming input variables so that a machine learning model can learn more effectively?","relevant_titles":["Feature engineering"]}
+{"id":"q009","question":"What happens when the statistical properties of data change over time and a previously trained model becomes less accurate?","relevant_titles":["Concept drift"]}
+{"id":"q010","question":"How can machine learning systems be evaluated or designed to avoid systematically disadvantaging particular groups?","relevant_titles":["Fairness (machine learning)","Algorithmic bias"]}
+{"id":"q011","question":"Why are numerical variables sometimes normalized or standardized before they are given to a machine learning algorithm?","relevant_titles":["Feature scaling"]}
+{"id":"q012","question":"What technique converts features into indices of a fixed-size vector space using a hash function instead of maintaining a vocabulary?","relevant_titles":["Feature hashing"]}
+{"id":"q013","question":"What problem occurs when the number of dimensions becomes so large that data becomes sparse and many algorithms perform poorly?","relevant_titles":["Curse of dimensionality"]}
+{"id":"q014","question":"What technique artificially increases the variety of training examples by applying transformations to existing data?","relevant_titles":["Data augmentation"]}
+{"id":"q015","question":"What is the process of cleaning, transforming, and preparing raw data before it is used by a machine learning model?","relevant_titles":["Data preprocessing"]}
+{"id":"q016","question":"What method automatically searches for good hyperparameter settings by building a probabilistic model of an expensive objective function?","relevant_titles":["Bayesian optimization"]}
+{"id":"q017","question":"What type of model assigns a learned energy value to possible configurations and uses lower energy to represent more plausible states?","relevant_titles":["Energy-based model"]}
+{"id":"q018","question":"What machine learning problem involves deciding between exactly two possible output classes?","relevant_titles":["Binary classification"]}
+{"id":"q019","question":"Which table summarizes predictions using counts such as true positives, false positives, true negatives, and false negatives?","relevant_titles":["Confusion matrix"]}
+{"id":"q020","question":"What is the term for adapting a model trained on one data distribution so that it performs well on a different but related distribution?","relevant_titles":["Domain adaptation"]}
+{"id":"q021","question":"What phenomenon describes modern models whose test error can decrease again after they become large enough to interpolate the training data?","relevant_titles":["Double descent"]}
+{"id":"q022","question":"What privacy-preserving training method clips individual gradients and adds noise during stochastic gradient descent?","relevant_titles":["Differentially private stochastic gradient descent"]}
+{"id":"q023","question":"What model learns aligned image and text representations by using contrastive training on image-text pairs?","relevant_titles":["Contrastive Language–Image Pre-training"]}
+{"id":"q024","question":"What system automatically selects models, preprocessing steps, or hyperparameters with minimal manual machine learning engineering?","relevant_titles":["Automated machine learning"]}
+{"id":"q025","question":"What is it called when a model is further trained on a smaller task-specific dataset after being pretrained?","relevant_titles":["Fine-tuning (deep learning)"]}
+{"id":"q026","question":"What learning setting requires a model to solve a task from only a very small number of examples?","relevant_titles":["Few-shot learning"]}
+{"id":"q027","question":"What infrastructure stores reusable machine learning features so that the same feature definitions can be used during training and inference?","relevant_titles":["Feature store"]}
+{"id":"q028","question":"How can the importance of individual input variables to a model's predictions be estimated or ranked?","relevant_titles":["Feature Importance"]}
+{"id":"q029","question":"What problem occurs when training and production datasets follow different statistical distributions?","relevant_titles":["Dataset shift"]}
+{"id":"q030","question":"What field studies whether advanced artificial intelligence systems pursue goals compatible with human intentions and values?","relevant_titles":["AI alignment"]}
+{"id":"q031","question":"What type of systematic error can cause an algorithm to produce unfair or skewed outcomes for certain populations?","relevant_titles":["Algorithmic bias","Fairness (machine learning)"]}
+{"id":"q032","question":"What machine learning approach learns immediately from training examples instead of postponing generalization until a query is received?","relevant_titles":["Eager learning"]}
+{"id":"q033","question":"What technique reduces the size of a decision tree by removing branches that add little predictive value?","relevant_titles":["Decision tree pruning"]}
+{"id":"q034","question":"What method attempts to reconstruct internal structures from multiple tomographic measurements using deep learning techniques?","relevant_titles":["Deep tomographic reconstruction"]}
+{"id":"q035","question":"What field combines robotics with ideas about learning and development so robots can progressively acquire cognitive abilities?","relevant_titles":["Developmental robotics"]}
+{"id":"q036","question":"What dilemma describes the tradeoff between trying uncertain actions to gain information and choosing actions already known to perform well?","relevant_titles":["Exploration–exploitation dilemma"]}
+{"id":"q037","question":"What probabilistic sequence model predicts structured labels while conditioning on an observed input sequence?","relevant_titles":["Conditional random field"]}
+{"id":"q038","question":"What technique represents text by counting how often words occur while largely ignoring grammar and word order?","relevant_titles":["Bag-of-words model"]}
+{"id":"q039","question":"What tree-based data structure can speed up nearest-neighbor search in multidimensional metric spaces?","relevant_titles":["Ball tree"]}
+{"id":"q040","question":"What neural-network mechanism allows a model to assign different importance to different elements of an input sequence when computing a representation?","relevant_titles":["Attention (machine learning)"]}

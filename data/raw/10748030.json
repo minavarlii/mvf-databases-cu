@@ -1,0 +1,15 @@
+{
+  "page_id": 10748030,
+  "revision_id": 1339949102,
+  "title": "Offline learning",
+  "url": "https://en.wikipedia.org/wiki/Offline_learning",
+  "summary": "Offline learning is a machine learning training approach in which a model is trained on a fixed dataset that is not updated during the learning process. This dataset is collected beforehand, and the learning typically occurs in a batch mode (i.e., the model is updated using batches of data, rather than a single input-output pair at a time). Once the model is trained, it can make predictions on new, unseen data.\nIn online learning, only the set of possible elements is known, whereas in offline learning, the learner also knows the order in which they are presented.",
+  "content": "Offline learning is a machine learning training approach in which a model is trained on a fixed dataset that is not updated during the learning process. This dataset is collected beforehand, and the learning typically occurs in a batch mode (i.e., the model is updated using batches of data, rather than a single input-output pair at a time). Once the model is trained, it can make predictions on new, unseen data.\nIn online learning, only the set of possible elements is known, whereas in offline learning, the learner also knows the order in which they are presented.\n\n\nSee also\nOnline machine learning\nIncremental learning\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Articles with short description",
+    "Machine learning",
+    "Machine learning stubs",
+    "Short description is different from Wikidata"
+  ]
+}

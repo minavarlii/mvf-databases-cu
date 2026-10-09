@@ -1,0 +1,15 @@
+{
+  "page_id": 31978226,
+  "revision_id": 1371835753,
+  "title": "Life-time of correlation",
+  "url": "https://en.wikipedia.org/wiki/Life-time_of_correlation",
+  "summary": "In probability theory and related fields, the life-time of correlation measures the timespan over which there is appreciable autocorrelation or cross-correlation in stochastic processes.",
+  "content": "In probability theory and related fields, the life-time of correlation measures the timespan over which there is appreciable autocorrelation or cross-correlation in stochastic processes.\n\n\nDefinition\n\nThe correlation coefficient ρ, expressed as an autocorrelation function or cross-correlation function, depends on the lag-time between the times being considered. Typically such functions, ρ(t), decay to zero with increasing lag-time, but they can assume values across all levels of correlations: strong and weak, and positive and negative as in the table.\nThe life-time of a correlation is defined as the length of time when the correlation coefficient is at the strong level. The durability of correlation is determined by signal (the strong level of correlation is separated from weak and negative levels). The mean life-time of correlation could measure how the durability of correlation depends on the window width size (the window is the length of time series used to calculate correlation).\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Machine learning",
+    "Machine learning stubs",
+    "Probability stubs",
+    "Stochastic processes"
+  ]
+}

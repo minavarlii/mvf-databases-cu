@@ -1,0 +1,28 @@
+{
+  "page_id": 81330704,
+  "revision_id": 1365220437,
+  "title": "TensorFlow Hub",
+  "url": "https://en.wikipedia.org/wiki/TensorFlow_Hub",
+  "summary": "TensorFlow Hub (also styled TF Hub) is an open-source machine learning library and online repository that provides TensorFlow model components, called modules. \nIt is maintained by Google as part of the TensorFlow ecosystem and allows developers to discover, publish, and reuse pretrained models for tasks such as computer vision, natural language processing, and transfer learning.",
+  "content": "TensorFlow Hub (also styled TF Hub) is an open-source machine learning library and online repository that provides TensorFlow model components, called modules. \nIt is maintained by Google as part of the TensorFlow ecosystem and allows developers to discover, publish, and reuse pretrained models for tasks such as computer vision, natural language processing, and transfer learning.\n\n\nOverview\nTensorFlow Hub provides a central platform where developers and researchers can access pre-trained models and integrate them directly into TensorFlow workflows. Each module encapsulates a computation graph and its trained weights, with standardized input and output signatures. Modules can be loaded using the hub.load() function or through Keras integration via hub.KerasLayer, enabling users to perform transfer learning or feature extraction.\n\n\nHistory\nTensorFlow Hub was announced by Google in March 2018, with the first public version released shortly after. Its introduction coincided with the growing adoption of transfer learning techniques and the need for standardized model packaging. Over time, the hub expanded to include models such as the BERT family, MobileNet, EfficientNet, and the Universal Sentence Encoder.\nIn 2020, research on “Regret selection in TensorFlow Hub” explored the problem of identifying optimal models for downstream tasks given a large repository of alternatives.\n\n\nApplications\nTensorFlow Hub hosts a variety of models across machine learning domains:\n\nNatural language processing: BERT, ALBERT language model, and Universal Sentence Encoder.\nComputer vision: ResNet, Inception (deep learning), MobileNet, EfficientNet.\nSpeech and audio: spectrogram feature extractors and automatic speech recognition models.\nMultilingual embeddings: cross-lingual and sentence-level representations for machine translation and semantic similarity.\nModules are widely used in education, academic research, and industry for prototyping and production deployment.\n\n\nReferences\n\n\nExternal links\nOfficial website \nhub on GitHub",
+  "categories": [
+    "All Wikipedia articles needing clarification",
+    "All Wikipedia articles written in American English",
+    "All articles with specifically marked weasel-worded phrases",
+    "All articles with unsourced statements",
+    "Articles containing suspected AI-generated texts from February 2026",
+    "Articles with short description",
+    "Articles with specifically marked weasel-worded phrases from February 2026",
+    "Articles with unsourced statements from February 2026",
+    "Artificial intelligence",
+    "Deep learning software",
+    "Free software programmed in Python",
+    "Google software",
+    "Machine learning",
+    "Short description is different from Wikidata",
+    "Software using the Apache license",
+    "Use American English from February 2026",
+    "Use mdy dates from February 2026",
+    "Wikipedia articles needing clarification from February 2026"
+  ]
+}

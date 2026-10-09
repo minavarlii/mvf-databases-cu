@@ -1,0 +1,19 @@
+{
+  "page_id": 84154381,
+  "revision_id": 1375080004,
+  "title": "MLX (machine learning framework)",
+  "url": "https://en.wikipedia.org/wiki/MLX_(machine_learning_framework)",
+  "summary": "MLX is an open-source machine learning framework developed by Apple and designed primarily for Apple silicon. It is used for training and running machine learning models and is optimized for Apple silicon's unified memory architecture, allowing the CPU and GPU to work with the same data without copying it between separate memory pools. MLX can be used for applications including large language model training and inference, image generation, and speech recognition.",
+  "content": "MLX is an open-source machine learning framework developed by Apple and designed primarily for Apple silicon. It is used for training and running machine learning models and is optimized for Apple silicon's unified memory architecture, allowing the CPU and GPU to work with the same data without copying it between separate memory pools. MLX can be used for applications including large language model training and inference, image generation, and speech recognition.\n\n\nHistory\nApple's machine learning research team released MLX in December 2023. It was initially developed by Awni Hannun, Jagrit Digani, Angelos Katharopoulos, and Ronan Collobert and released under the MIT License. Its design was influenced by numerical and machine learning frameworks including NumPy, PyTorch, and JAX.\nA Swift interface for MLX was released in February 2024, allowing machine learning research using Swift on Apple silicon. In March 2026, Ollama introduced support for MLX for running local language models on Apple silicon Macs.\n\n\nFeatures\nMLX can be used to run and train artificial intelligence models, including large language models, locally on Apple silicon Macs. It provides higher-level neural network and optimization tools similar to PyTorch and supports automatic differentiation, lazy computation, dynamic computation graphs, vectorization, and execution on CPUs and GPUs. On Apple silicon, arrays are stored in shared unified memory and can be processed by either the CPU or GPU without transferring them between separate memory spaces.\nMLX provides interfaces for Swift and C, while MLX Core provides bindings for Python and C++. Its Python API is modeled after NumPy, and MLX can run on Apple platforms that support Metal.\nThe MLX ecosystem includes MLX LM, a package for generating text with and fine-tuning large language models. Apple provides MLX examples for models including Llama, Stable Diffusion, and Whisper. The framework's current releases also provide CPU and CUDA backends for Linux.\n\n\nSee also\nComparison of deep learning software\nComparison of machine learning software\nCore ML\nLists of open-source artificial intelligence software\nList of Mac software\nSmall language model\n\n\nReferences\n\n\nExternal links\nMLX at Apple open-source\nMLX community on Hugging Face",
+  "categories": [
+    "2023 software",
+    "Apple Inc. software",
+    "Articles with short description",
+    "Data mining and machine learning software",
+    "Free software programmed in C++",
+    "Machine learning",
+    "Open-source artificial intelligence",
+    "Short description matches Wikidata",
+    "Software using the MIT license"
+  ]
+}

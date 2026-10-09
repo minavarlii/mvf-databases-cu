@@ -1,0 +1,23 @@
+{
+  "page_id": 83050970,
+  "revision_id": 1351521272,
+  "title": "Edge inference",
+  "url": "https://en.wikipedia.org/wiki/Edge_inference",
+  "summary": "Edge inference is the process of running machine learning or deep learning models on local devices (edge devices) such as smartphones, IoT devices, embedded systems, and edge servers instead of centralized cloud computing infrastructure.  A key feature of edge computing is edge inference, which allows for real-time data processing, low latency, and improved privacy by reducing the amount of data sent to remote servers.",
+  "content": "Edge inference is the process of running machine learning or deep learning models on local devices (edge devices) such as smartphones, IoT devices, embedded systems, and edge servers instead of centralized cloud computing infrastructure.  A key feature of edge computing is edge inference, which allows for real-time data processing, low latency, and improved privacy by reducing the amount of data sent to remote servers.\n\n\nSee also\nEdge computing\nTinyML\nEmbedded system\nArtificial intelligence\nFog computing\n\n\nReferences",
+  "categories": [
+    "All Wikipedia articles written in Indian English",
+    "All orphaned articles",
+    "All stub articles",
+    "Articles with short description",
+    "Artificial intelligence",
+    "Artificial intelligence stubs",
+    "Distributed computing",
+    "Embedded systems",
+    "Machine learning",
+    "Orphaned articles from April 2026",
+    "Short description matches Wikidata",
+    "Use Indian English from April 2026",
+    "Use dmy dates from April 2026"
+  ]
+}

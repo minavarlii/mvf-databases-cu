@@ -1,0 +1,18 @@
+{
+  "page_id": 83051736,
+  "revision_id": 1367256254,
+  "title": "Representation collapse",
+  "url": "https://en.wikipedia.org/wiki/Representation_collapse",
+  "summary": "Representation collapse is a phenomenon in machine learning and representation learning where a model maps different inputs to the same or very similar embeddings, which means it loses important information about how the data is spread out. It is frequently encountered in self-supervised learning, especially within contrastive and non-contrastive frameworks, when training objectives or model architectures do not maintain variance across representations. Collapse results in degenerate solutions characterized by uninformative learned features, significantly impairing downstream task performance. Various techniques have been proposed to mitigate representation collapse, including the use of negative samples, architectural asymmetry, stop-gradient operations, variance regularization, and redundancy reduction objectives, as seen in methods such as SimCLR, BYOL, and VICReg. Comprehending and averting representation collapse is regarded as a fundamental challenge in the advancement of stable and efficient self-supervised learning systems.",
+  "content": "Representation collapse is a phenomenon in machine learning and representation learning where a model maps different inputs to the same or very similar embeddings, which means it loses important information about how the data is spread out. It is frequently encountered in self-supervised learning, especially within contrastive and non-contrastive frameworks, when training objectives or model architectures do not maintain variance across representations. Collapse results in degenerate solutions characterized by uninformative learned features, significantly impairing downstream task performance. Various techniques have been proposed to mitigate representation collapse, including the use of negative samples, architectural asymmetry, stop-gradient operations, variance regularization, and redundancy reduction objectives, as seen in methods such as SimCLR, BYOL, and VICReg. Comprehending and averting representation collapse is regarded as a fundamental challenge in the advancement of stable and efficient self-supervised learning systems.\n\n\nSee also\nContrastive learning\nDimensionality reduction\nFeature extraction\nOverfitting\nRepresentation learning\nSelf-supervised learning\n\n\nReferences",
+  "categories": [
+    "All orphaned articles",
+    "All stub articles",
+    "Articles with short description",
+    "Artificial intelligence",
+    "Artificial intelligence stubs",
+    "Machine learning",
+    "Orphaned articles from April 2026",
+    "Short description matches Wikidata"
+  ]
+}

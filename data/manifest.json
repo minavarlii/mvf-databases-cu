@@ -1,0 +1,11 @@
+{
+  "dataset": null,
+  "source": "English Wikipedia",
+  "retrieved_at": null,
+  "category": null,
+  "article_count": 0,
+  "embedding_model": null,
+  "embedding_dimensions": 384,
+  "chunk_size": null,
+  "chunk_overlap": null
+}

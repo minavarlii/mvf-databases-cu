@@ -1,0 +1,26 @@
+{
+  "page_id": 83531761,
+  "revision_id": 1378840154,
+  "title": "GLM (AI)",
+  "url": "https://en.wikipedia.org/wiki/GLM_(AI)",
+  "summary": "GLM, short for General Language Model, is a series of open weight large language models developed by Chinese software company Z.ai. Though the first GLM model was published on 3 March 2021, it was released under the name ChatGLM as an AI-based chatbot in March 2023. It is also used in AI-assisted software development.\nGLM is the flagship model series of Z.ai, one of the six AI tigers of China. The weights of most GLM models are released under the MIT License or Apache License 2.0, allowing them to be run either locally or in the cloud.",
+  "content": "GLM, short for General Language Model, is a series of open weight large language models developed by Chinese software company Z.ai. Though the first GLM model was published on 3 March 2021, it was released under the name ChatGLM as an AI-based chatbot in March 2023. It is also used in AI-assisted software development.\nGLM is the flagship model series of Z.ai, one of the six AI tigers of China. The weights of most GLM models are released under the MIT License or Apache License 2.0, allowing them to be run either locally or in the cloud.\n\n\nHistory\nGLM was first described in an 18 March 2021 paper titled GLM: General Language Model Pretraining with Autoregressive Blank Infilling. In its initial release, it outperformed GPT and BERT models for several tasks.\nGLM was released as a chatbot in March 2023 under the name ChatGLM. The company's benchmarks show that the 5.2 iteration of the model released in June 2026 was nearly as performant as Claude Opus 4.7 to 4.8.\nBeginning with GLM-5, Z.ai adopted the DeepSeek Sparse Attention mechanism. Hugging Face self-hosted GLM-5.2 for data processing to mitigate a cyberattack autonomously conducted by two OpenAI models, including GPT-5.6 Sol, that had escaped their sandbox in July 2026. Prior to deploying GLM-5.2, Hugging Face had attempted to use American proprietary frontier models, which were prevented by their AI safety guardrails from answering the company's requests.\nZ.ai released GLM-5.3 on 14 August 2026 and made the model's weights available two weeks later. Later that month, Z.ai anonymously previewed a model called Ox Alpha on OpenRouter, which was released with weights on 26 August as GLM-5.3-Flash. Upon full release, Z.ai disclosed that they had been serving the model using AI chips manufactured in China. GLM-5.3-Flash incorporates Kimi Delta Attention, developed by competing Chinese lab Moonshot AI. GLM-5.3 was noted to be particularly strong in cybersecurity capability by the original developers at Z.ai. CAISI found it to be the most advanced in cybersecurity among open-weight models, while Anthropic found GLM-5.3's cybersecurity capability to be on the same level as Claude Mythos Preview (April 2026).\n\n\nModels\n\n\nProducts\nIn addition to the ability to run locally via Ollama or llama.cpp, GLM models are available via API at per-token costs directly from Z.ai. Z.ai also offers a subscription-based plan for API model access, the GLM Coding Plan. The plan is priced at approximately one tenth of a subscription to Claude Code. Z.ai also collaborated with Alibaba Cloud to release AutoGLM, a tool to run GLM from a mobile phone app similarly to OpenClaw.\n\n\nSee also\n\nList of large language models\nLists of open-source artificial intelligence software\n\n\nReferences",
+  "categories": [
+    "2021 establishments in China",
+    "2021 in artificial intelligence",
+    "2021 software",
+    "Articles containing Chinese-language text",
+    "Articles with short description",
+    "Artificial intelligence industry in China",
+    "CS1 Chinese-language sources (zh)",
+    "CS1 uses Chinese-language script (zh)",
+    "Chatbots",
+    "Generative pre-trained transformers",
+    "Large language models",
+    "Machine learning",
+    "Open-source artificial intelligence",
+    "Short description matches Wikidata",
+    "Use dmy dates from June 2026",
+    "Virtual assistants"
+  ]
+}

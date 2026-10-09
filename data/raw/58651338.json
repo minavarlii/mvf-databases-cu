@@ -1,0 +1,19 @@
+{
+  "page_id": 58651338,
+  "revision_id": 1377902002,
+  "title": "Halite AI Programming Competition",
+  "url": "https://en.wikipedia.org/wiki/Halite_AI_Programming_Competition",
+  "summary": "Halite is an open-source computer programming contest developed by the hedge fund/tech firm Two Sigma in partnership with a team at Cornell Tech. Programmers can see the game environment and learn everything they need to know about the game. Participants are asked to build bots in whichever language they choose to compete on a two-dimensional virtual battle field.",
+  "content": "Halite is an open-source computer programming contest developed by the hedge fund/tech firm Two Sigma in partnership with a team at Cornell Tech. Programmers can see the game environment and learn everything they need to know about the game. Participants are asked to build bots in whichever language they choose to compete on a two-dimensional virtual battle field.\n\n\nHistory\nBenjamin Spector and Michael Truell created the first Halite competition in 2016, before partnering with Two Sigma later that year.\n\n\nHalite I\nHalite I asked participants to conquer territory on a grid. It launched in November 2016 and ended in February 2017. Halite I attracted about 1,500 players.\n\n\nHalite II\nHalite II was similar to Halite I, but with a space-war theme. It ran from October 2017 until January 2018. The second installment of the competition attracted about 6,000 individual players from more than 100 countries. Among the participants were professors, physicists and NASA engineers, as well as high school and university students.\n\n\nHalite III\nHalite III launched in mid-October 2018. It ran from October 2018 to January 2019, with an ocean themed playing field. Players were asked to collect and manage Halite, an energy resource. By the end of the competition, Halite III included more than 4000 players and 460 organizations.\n\n\nHalite IV\nHalite IV was hosted by Kaggle, and launched in mid-June 2020.\n\n\nHalite II results\nHalite II concluded on January 29, 2018. The competition was won by a player using the username \"reCurs3\", who worked at Ubisoft in Montreal; second place went to \"FakePsyho\", a Polish puzzle-competition champion working at OpenAI,and third place went to \"shummie\", an actuary at Allstate in Chicago. Organizers noted that college students and even high school students placed competitively against the professional entrants.\n\n\nInfrastructure\nHalite is deployed on Google Cloud Platform. Two Sigma has stated that it created Halite to extend the spirit of its internal programming competitions—such as a 2016 robotic air hockey challenge—to the wider community, and to provide an accessible way for participants to engage with artificial intelligence and machine learning. By the time of Halite III, the competition's tooling supported bot development in more than 20 programming languages.\n\n\nSee also\nList of computer science awards\nCompetitive programming\n\n\nReferences\n\n\nExternal links\nHalite AI Challenge",
+  "categories": [
+    "2016 establishments",
+    "2016 establishments in the United States",
+    "Articles with short description",
+    "Artificial intelligence competitions",
+    "Esports competitions",
+    "Free and open-source software",
+    "Machine learning",
+    "Programming contests",
+    "Short description matches Wikidata"
+  ]
+}

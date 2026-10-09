@@ -1,0 +1,20 @@
+{
+  "page_id": 82949175,
+  "revision_id": 1377203057,
+  "title": "Comparison of machine learning software",
+  "url": "https://en.wikipedia.org/wiki/Comparison_of_machine_learning_software",
+  "summary": "The following tables are a comparison of machine learning software such as software frameworks, libraries, and computer programs used for machine learning.",
+  "content": "The following tables are a comparison of machine learning software such as software frameworks, libraries, and computer programs used for machine learning.\n\n\nMachine learning software\n\n\nOther comparisons\n\n\nMachine learning helper libraries and platforms\nApache OpenNLP — natural language processing toolkit\nCUDA — GPU computing platform used to accelerate machine learning and deep learning workloads\nHorovod — distributed training framework for deep learning\nHugging Face Transformers — library of pretrained transformer models built on other machine learning frameworks\nKubeflow — machine learning platform for Kubernetes\nMallet — toolkit for natural language processing and text analysis\nNumPy — numerical computing library used in machine learning\nOpenCV — computer vision library with machine learning functions\nONNX — open format for representing machine learning models\npandas — data analysis and data preparation library used in machine learning\nPlaidML — tensor compiler and backend for machine learning frameworks\nPolars — Dataframe library used for machine learning data preparation and analysis\nPyArrow — columnar data library used in machine learning data processing\nROOT (TMVA) — data analysis framework with machine learning tools\nSciPy — scientific computing and optimization library used in machine learning\n\n\nOnline development environments for machine learning\nGoogle Colab — hosted Jupyter Notebook environment commonly used for machine learning and deep learning\nJupyterLab — notebook-based development environment for machine learning and data science\nJupyter Notebook — interactive notebook environment used for machine learning and data science\nKaggle — online data science and machine learning platform\n\n\nSee also\n\nComparison of deep learning software\nComparison of statistical packages\nData mining\nDeep learning\nList of datasets for machine-learning research\nList of machine learning algorithms\nList of Python machine learning and deep learning software\nLists of open-source artificial intelligence software\nOutline of machine learning\n\n\nExternal links\nYellowbrick — machine learning visualization library for model selection and diagnostics\nELI5 — library for explaining and debugging machine learning models\nInterpretML — interpretable machine learning toolkit\nSHAP — library for explaining machine learning model predictions\n\n\nReferences",
+  "categories": [
+    "All articles needing additional references",
+    "All articles that may contain original research",
+    "Articles needing additional references from April 2026",
+    "Articles that may contain original research from April 2026",
+    "Articles with multiple maintenance issues",
+    "Articles with short description",
+    "Machine learning",
+    "Short description with empty Wikidata description",
+    "Software comparisons",
+    "Use mdy dates from April 2026"
+  ]
+}

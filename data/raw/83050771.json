@@ -1,0 +1,14 @@
+{
+  "page_id": 83050771,
+  "revision_id": 1375587188,
+  "title": "TinyML",
+  "url": "https://en.wikipedia.org/wiki/TinyML",
+  "summary": "TinyML (short for tiny machine learning) is an area of machine learning that focuses on deploying and running models on low-power, resource-constrained embedded systems such as microcontrollers and edge devices.\nTinyML supports on-device inference with low latency and minimal reliance on cloud connectivity, which makes it suitable for applications in the Internet of Things (IoT), wearable devices, and real-time systems.",
+  "content": "TinyML (short for tiny machine learning) is an area of machine learning that focuses on deploying and running models on low-power, resource-constrained embedded systems such as microcontrollers and edge devices.\nTinyML supports on-device inference with low latency and minimal reliance on cloud connectivity, which makes it suitable for applications in the Internet of Things (IoT), wearable devices, and real-time systems.\n\n\nHistory\nThe idea of running machine learning models on embedded systems has gained traction in the late 2010s, as model compression, quantization, and efficient neural network architectures progressed.\nThe term TinyML was popularized in 2019 with the publication of the book TinyML by Pete Warden and Daniel Situnayake and the creation of the TinyML Foundation.\n\n\nSee also\nEdge computing\nArtificial intelligence\n\n\nFurther reading\nWarden, Pete; Situnayake, Daniel (2020). TinyML: machine learning with TensorFlow Lite on Arduino and ultra-low-power microcontrollers (1st ed.). Bejing Boston Farnham Sebastopol Tokyo: O'Reilly. ISBN 978-1-4920-5204-3.\n\n\nReferences",
+  "categories": [
+    "Articles with short description",
+    "Machine learning",
+    "Short description is different from Wikidata",
+    "Use dmy dates from April 2026"
+  ]
+}

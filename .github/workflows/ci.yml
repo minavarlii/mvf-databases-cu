@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  quality:
+    name: Quality and Tests
+    runs-on: ubuntu-latest
+
+    env:
+      APP_NAME: MVF
+      APP_ENV: test
+      DEBUG: "false"
+
+      DB_HOST: localhost
+      DB_PORT: "3306"
+      DB_NAME: mvf
+      DB_USER: mvf
+      DB_PASSWORD: mvf_ci_password
+
+      OPENAI_API_KEY: ""
+      OPENAI_MODEL: gpt-6-luna
+
+      FRONTEND_ORIGIN: http://localhost:5173
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project
+        run: python -m pip install -e ".[dev]"
+
+      - name: Start MariaDB
+        run: docker compose up -d mariadb
+
+      - name: Wait for MariaDB
+        run: |
+          for attempt in {1..30}; do
+            if docker compose exec -T mariadb \
+              mariadb-admin \
+              ping \
+              -u"${DB_USER}" \
+              -p"${DB_PASSWORD}" \
+              --silent; then
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          docker compose logs mariadb
+          exit 1
+
+      - name: Apply relational schema
+        run: |
+          docker compose exec -T mariadb \
+            mariadb \
+            -u"${DB_USER}" \
+            -p"${DB_PASSWORD}" \
+            "${DB_NAME}" \
+            < database/schema/001_schema.sql
+
+      - name: Apply vector index
+        run: |
+          docker compose exec -T mariadb \
+            mariadb \
+            -u"${DB_USER}" \
+            -p"${DB_PASSWORD}" \
+            "${DB_NAME}" \
+            < database/schema/002_vector_index.sql
+
+      - name: Verify database
+        run: python -m scripts.verify_database
+
+      - name: Ruff
+        run: ruff check backend scripts tests experiments
+
+      - name: Ruff format
+        run: ruff format --check backend scripts tests experiments
+
+      - name: mypy
+        run: mypy backend scripts experiments tests
+
+      - name: pytest
+        run: pytest -v
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v

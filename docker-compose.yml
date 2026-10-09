@@ -1,0 +1,32 @@
+services:
+  mariadb:
+    image: mariadb:11.8
+    container_name: mvf-mariadb
+    restart: unless-stopped
+
+    environment:
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}_root
+
+    ports:
+      - "${DB_PORT}:3306"
+
+    volumes:
+      - mvf_mariadb_data:/var/lib/mysql
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--connect",
+          "--innodb_initialized"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mvf_mariadb_data:

@@ -1,0 +1,15 @@
+{
+  "page_id": 19317802,
+  "revision_id": 1363129618,
+  "title": "Decision list",
+  "url": "https://en.wikipedia.org/wiki/Decision_list",
+  "summary": "Decision lists are a representation for Boolean functions which can be easily learned from examples.  Single term decision lists are more expressive than disjunctions and conjunctions; however, 1-term decision lists are less expressive than the general disjunctive normal form and the conjunctive normal form.\nThe language specified by a k-length decision list includes as a subset the language specified by a k-depth decision tree.\nLearning decision lists can be used for attribute efficient learning, a type of machine learning.",
+  "content": "Decision lists are a representation for Boolean functions which can be easily learned from examples.  Single term decision lists are more expressive than disjunctions and conjunctions; however, 1-term decision lists are less expressive than the general disjunctive normal form and the conjunctive normal form.\nThe language specified by a k-length decision list includes as a subset the language specified by a k-depth decision tree.\nLearning decision lists can be used for attribute efficient learning, a type of machine learning.\n\n\nDefinition\nA decision list (DL) of length r is of the form:\n\nif f1 then \n    output b1\nelse if f2 then\n    output b2\n...\nelse if fr then\n    output br\n\nwhere fi is the ith formula and bi is the ith boolean for \n  \n    \n      \n        i\n        ∈\n        {\n        1...\n        r\n        }\n      \n    \n    {\\displaystyle i\\in \\{1...r\\}}\n  \n.  The last if-then-else is the default case, which means formula fr is always equal to true. A k-DL is a decision list where all of formulas have at most k terms.  Sometimes \"decision list\" is used to refer to a 1-DL, where all of the formulas are either a variable or its negation.\n\n\nSee also\nDecision stump\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Articles with short description",
+    "Machine learning",
+    "Machine learning stubs",
+    "Short description with empty Wikidata description"
+  ]
+}

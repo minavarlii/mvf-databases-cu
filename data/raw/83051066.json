@@ -1,0 +1,18 @@
+{
+  "page_id": 83051066,
+  "revision_id": 1352290186,
+  "title": "Feature store",
+  "url": "https://en.wikipedia.org/wiki/Feature_store",
+  "summary": "A feature store is a centralized repository used in machine learning to store, manage, and serve features for model training and inference. It provides a unified interface for data scientists and engineers to access curated, reusable features derived from raw data, ensuring consistency between training and production environments. Feature stores typically support batch and real-time data pipelines, enabling efficient feature computation, storage, and retrieval at scale.\nFeature stores play a critical role in operationalizing machine learning systems by improving reproducibility, reducing data leakage, and promoting collaboration across teams. They often have features like feature versioning, metadata management, and access control that help keep data quality and governance high.",
+  "content": "A feature store is a centralized repository used in machine learning to store, manage, and serve features for model training and inference. It provides a unified interface for data scientists and engineers to access curated, reusable features derived from raw data, ensuring consistency between training and production environments. Feature stores typically support batch and real-time data pipelines, enabling efficient feature computation, storage, and retrieval at scale.\nFeature stores play a critical role in operationalizing machine learning systems by improving reproducibility, reducing data leakage, and promoting collaboration across teams. They often have features like feature versioning, metadata management, and access control that help keep data quality and governance high.\n\n\nSee also\nMachine learning\nFeature engineering\nData pipeline\nData warehouse\nData lake\nMLOps\nData preprocessing\nBig data\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Artificial intelligence",
+    "Artificial intelligence stubs",
+    "Data engineering",
+    "Data management",
+    "Databases",
+    "Machine learning",
+    "Software architecture"
+  ]
+}

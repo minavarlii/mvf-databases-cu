@@ -1,0 +1,23 @@
+{
+  "page_id": 73291892,
+  "revision_id": 1369696855,
+  "title": "Few-shot learning",
+  "url": "https://en.wikipedia.org/wiki/Few-shot_learning",
+  "summary": "Few-shot learning (FSL) is a problem setup in machine learning in which a model learns to perform a task, typically classification, from only a small number of labeled examples per class, rather than the large datasets required by conventional supervised learning. \nOne-shot learning is the special case of the N-way K-shot framing in which K equals one, such that the model must generalize from exactly one example per class.\nThe limiting case of few-shot learning is zero-shot learning that requires no training on examples of the class to be classified; instead, the classification task must be generalized from examples of other classes.",
+  "content": "Few-shot learning (FSL) is a problem setup in machine learning in which a model learns to perform a task, typically classification, from only a small number of labeled examples per class, rather than the large datasets required by conventional supervised learning. \nOne-shot learning is the special case of the N-way K-shot framing in which K equals one, such that the model must generalize from exactly one example per class.\nThe limiting case of few-shot learning is zero-shot learning that requires no training on examples of the class to be classified; instead, the classification task must be generalized from examples of other classes.\n\n\nSee also\nTransfer learning\nMeta-learning (computer science)\nOne-shot learning (computer vision)\n\n\nReferences",
+  "categories": [
+    "All articles needing expert attention",
+    "All stub articles",
+    "Articles needing expert attention from June 2026",
+    "Articles needing expert attention with no reason or talk parameter",
+    "Articles with short description",
+    "Artificial intelligence articles needing expert attention",
+    "Artificial intelligence stubs",
+    "Computer vision",
+    "Machine learning",
+    "Machine learning stubs",
+    "Natural language processing",
+    "Natural language processing stubs",
+    "Short description is different from Wikidata"
+  ]
+}

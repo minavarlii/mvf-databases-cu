@@ -1,0 +1,16 @@
+{
+  "page_id": 67507846,
+  "revision_id": 1308121206,
+  "title": "VACUUM",
+  "url": "https://en.wikipedia.org/wiki/VACUUM",
+  "summary": "VACUUM\n is a set of normative guidance principles for achieving training and test dataset quality for structured datasets in data science and machine learning. The garbage-in, garbage out principle motivates a solution to the problem of data quality but does not offer a specific solution. Unlike the majority of the ad-hoc data quality assessment metrics often used by practitioners VACUUM specifies qualitative principles for data quality management and serves as a basis for defining more detailed quantitative metrics of data quality.\nVACUUM is an acronym that stands for:",
+  "content": "VACUUM\n is a set of normative guidance principles for achieving training and test dataset quality for structured datasets in data science and machine learning. The garbage-in, garbage out principle motivates a solution to the problem of data quality but does not offer a specific solution. Unlike the majority of the ad-hoc data quality assessment metrics often used by practitioners VACUUM specifies qualitative principles for data quality management and serves as a basis for defining more detailed quantitative metrics of data quality.\nVACUUM is an acronym that stands for:\n\nvalid\naccurate\nconsistent\nuniform\nunified\nmodel\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Articles with short description",
+    "CS1 maint: deprecated archival service",
+    "Machine learning",
+    "Machine learning stubs",
+    "Short description matches Wikidata"
+  ]
+}

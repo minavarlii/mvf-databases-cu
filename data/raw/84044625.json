@@ -1,0 +1,18 @@
+{
+  "page_id": 84044625,
+  "revision_id": 1375746723,
+  "title": "Neuralese",
+  "url": "https://en.wikipedia.org/wiki/Neuralese",
+  "summary": "In artificial intelligence (AI) research, neuralese is a method where large language models (LLMs) perform intermediate reasoning steps in their high-dimensional latent space (vector embeddings) rather than outputting human-readable text tokens. While standard chain-of-thought reasoning forces a model to generate a sequence of words, neuralese allows the model to pass raw, continuous vectors between computational layers, creating a high-bandwidth, non-linguistic reasoning channel.",
+  "content": "In artificial intelligence (AI) research, neuralese is a method where large language models (LLMs) perform intermediate reasoning steps in their high-dimensional latent space (vector embeddings) rather than outputting human-readable text tokens. While standard chain-of-thought reasoning forces a model to generate a sequence of words, neuralese allows the model to pass raw, continuous vectors between computational layers, creating a high-bandwidth, non-linguistic reasoning channel.\n\n\nSee also\n\nArtificial intelligence safety\nInterpretability (machine learning)\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Articles with short description",
+    "Artificial intelligence",
+    "Artificial intelligence engineering",
+    "Artificial intelligence stubs",
+    "Large language models",
+    "Machine learning",
+    "Short description matches Wikidata"
+  ]
+}

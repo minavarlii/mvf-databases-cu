@@ -1,0 +1,18 @@
+{
+  "page_id": 14271782,
+  "revision_id": 1351593818,
+  "title": "Semantic analysis (machine learning)",
+  "url": "https://en.wikipedia.org/wiki/Semantic_analysis_(machine_learning)",
+  "summary": "In machine learning, semantic analysis of a text corpus is the task of building structures that approximate concepts from a large set of documents. It generally does not involve prior semantic understanding of the documents.\nSemantic analysis strategies include:",
+  "content": "In machine learning, semantic analysis of a text corpus is the task of building structures that approximate concepts from a large set of documents. It generally does not involve prior semantic understanding of the documents.\nSemantic analysis strategies include:\n\nMetalanguages based on first-order logic, which can analyze the speech of humans.\nUnderstanding the semantics of a text is symbol grounding: if language is grounded, it is equal to recognizing a machine-readable meaning. For the restricted domain of spatial analysis, a computer-based language understanding system was demonstrated.\nLatent semantic analysis (LSA), a class of techniques where documents are represented as vectors in a term space. A prominent example is probabilistic latent semantic analysis (PLSA).\nLatent Dirichlet allocation, which involves attributing document terms to topics.\nn-grams and hidden Markov models, which work by representing the term stream as a Markov chain, in which each term is derived from preceding terms.\n\n\nStochastic semantic analysis\n\n\nSee also\nExplicit semantic analysis\nInformation extraction\nSemantic similarity\nStochastic semantic analysis\nOntology learning\n\n\nReferences",
+  "categories": [
+    "All articles needing additional references",
+    "All stub articles",
+    "Articles needing additional references from January 2021",
+    "Articles with excerpts",
+    "Articles with short description",
+    "Machine learning",
+    "Machine learning stubs",
+    "Short description matches Wikidata"
+  ]
+}

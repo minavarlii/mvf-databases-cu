@@ -1,0 +1,16 @@
+{
+  "page_id": 81339528,
+  "revision_id": 1357609653,
+  "title": "Croissant (metadata format)",
+  "url": "https://en.wikipedia.org/wiki/Croissant_(metadata_format)",
+  "summary": "Croissant is a metadata format design to support sharing of datasets for machine learning applications. It is a platform-agnostic schema used to standardize metadata in data repositories like Hugging Face, kaggle, Dataverse and OpenML.",
+  "content": "Croissant is a metadata format design to support sharing of datasets for machine learning applications. It is a platform-agnostic schema used to standardize metadata in data repositories like Hugging Face, kaggle, Dataverse and OpenML.\n\n\nStructure\nCroissant builds upon schema.org, uses primarily JSON-LD, and divides metadata in four \"layers\": Dataset Metadata, Resource, Structure and Semantic:\n\nThe Dataset Metadata layer constrains which schema.org properties should be used, including additional properties, linking together the resources (files) of the dataset with general metadata, like licensing and citation information.\nThe Resource layer describes the individual files and sets of those using two new classes, FileObject and FileSet. A FileSet may be a collection of related images.\nThe Structure layer specifies how the files are organized in the dataset. A RecordSet class describes how resources are present, configurations that may very a lot between modality. This specification facilitates interoperability of the datasets.\nFinally, the Semantic layer adds information for practical reuse of the dataset, such as splits for train, test and validation subsets.\nIt also provides a default extension for metadata related to responsible AI.\nThe use of a standard machine-readable structure increases, for example, the discoverability of datasets in search engines such as Google Dataset Search.\n\n\nHistory\nCroissant was shared in arXiv in March 2024 and published in the proceedings of NeurIPS 2024. It started as community driven as a MLCommons Croissant Working Group, including stakeholders organizations from academia and industry, including Google, the open data institute, Sage Bionetworks and King's College London.\nVariations of Croissant are developed to support datasets in different areas of research, such as Geo-Croissant for geospatial datasets. Other technical extensions, such as support for RDF, soon followed.\nIn May 2026, a library called \"Croissant Baker\" was shared in arXiv, providing support for automatic metadata generation from specialized file formats like FHIR, NIfTI and DICOM. \n\n\nReferences\n\n\nExternal links\nCroissant format specification",
+  "categories": [
+    "Articles with short description",
+    "Data formats",
+    "JSON",
+    "Machine learning",
+    "Metadata standards",
+    "Short description matches Wikidata"
+  ]
+}

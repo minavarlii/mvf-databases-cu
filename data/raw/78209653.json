@@ -1,0 +1,15 @@
+{
+  "page_id": 78209653,
+  "revision_id": 1314618586,
+  "title": "Three-factor learning",
+  "url": "https://en.wikipedia.org/wiki/Three-factor_learning",
+  "summary": "In neuroscience and machine learning, three-factor learning is the combination of Hebbian plasticity with a third modulatory factor to stabilise and enhance synaptic learning. This third factor can represent various signals such as reward, punishment, error, surprise, or novelty, often implemented through neuromodulators.",
+  "content": "In neuroscience and machine learning, three-factor learning is the combination of Hebbian plasticity with a third modulatory factor to stabilise and enhance synaptic learning. This third factor can represent various signals such as reward, punishment, error, surprise, or novelty, often implemented through neuromodulators.\n\n\nDescription\nThree-factor learning introduces the concept of eligibility traces, which flag synapses for potential modification pending the arrival of the third factor, and helps temporal credit assignement by bridging the gap between rapid neuronal firing and slower behavioral timescales, from which learning can be done. Biological basis for Three-factor learning rules have been supported by experimental evidence. This approach addresses the instability of classical Hebbian learning by minimizing autocorrelation and maximizing cross-correlation between inputs.\n\n\nReferences",
+  "categories": [
+    "All Wikipedia articles needing clarification",
+    "All stub articles",
+    "Machine learning",
+    "Machine learning stubs",
+    "Wikipedia articles needing clarification from January 2025"
+  ]
+}

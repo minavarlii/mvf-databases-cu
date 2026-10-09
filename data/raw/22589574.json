@@ -1,0 +1,13 @@
+{
+  "page_id": 22589574,
+  "revision_id": 1368636219,
+  "title": "Instance-based learning",
+  "url": "https://en.wikipedia.org/wiki/Instance-based_learning",
+  "summary": "In machine learning, instance-based learning (sometimes called memory-based learning) is a family of learning algorithms that compare new problem instances with instances seen in training, which have been stored in memory. Because computation is postponed until a new instance is observed, these algorithms are sometimes referred to as \"lazy.\"",
+  "content": "In machine learning, instance-based learning (sometimes called memory-based learning) is a family of learning algorithms that compare new problem instances with instances seen in training, which have been stored in memory. Because computation is postponed until a new instance is observed, these algorithms are sometimes referred to as \"lazy.\"\n\n\nMethod\nIt is called instance-based because it constructs hypotheses directly from the training instances themselves.\nAn example of an instance-based learning algorithm is the k-nearest neighbors algorithm. It stores (a subset of) its training set; when predicting a value or class for a new instance, it computes distances or similarities between this instance and the training instances to make a decision.\nFor classification, the k nearest instances can be combined by majority voting or distance-weighted voting; for regression, their target values can be combined by a mean or weighted mean. The choice of distance metric and feature scaling can change which instances are identified as nearest.\n\n\nComputational characteristics\nThe hypothesis complexity can grow with the data. In the worst case, a hypothesis is a list of n training items and the computational complexity of classifying a single new instance is O(n) if the cost of comparing two instances is treated as constant.\nDeferring computation makes training inexpensive but shifts computation to prediction time. For a basic k-nearest neighbors classifier using a simple Minkowski distance, exhaustive search over n stored samples described by d features takes O(dn) time. A balanced k-d tree can reduce retrieval time to O(d log n), although this advantage diminishes as the number of features grows.\nTo reduce the storage required for training instances and sensitivity to noise in the training set, instance reduction algorithms have been proposed.\n\n\nSee also\nAnalogical modeling\n\n\nReferences",
+  "categories": [
+    "All stub articles",
+    "Machine learning",
+    "Machine learning stubs"
+  ]
+}
