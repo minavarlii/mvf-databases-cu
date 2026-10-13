@@ -46,8 +46,20 @@ On the current corpus, MariaDB's native vector index provides an observed **177.
 - Exact article-level retrieval evaluation
 - Vector-index vs brute-force benchmarks
 - Ruff, mypy, and pytest quality checks
+- Reproducible clean-database GitHub Actions CI
 
 ---
+
+# Team
+
+MVF was developed as a Constructor University database project for the
+MariaDB student database projects, 2026-09.
+
+- **Vasif Ismayilov** — backend architecture, MariaDB schema design,
+  vector search, ingestion pipeline, RAG integration, benchmarking,
+  retrieval evaluation
+- **Mina Elif Varli** — frontend implementation and API integration
+- **Fidan Mammadova** — database experiments and evaluation support
 
 # Architecture
 
@@ -192,6 +204,78 @@ DISTANCE = cosine;
 
 ---
 
+# Schema Design Rationale
+
+MVF separates source documents, relational metadata, graph relationships, and
+retrievable vector units according to how each type of data is queried.
+
+## `articles` and `chunks`
+
+Article-level metadata and complete source text are stored in `articles`, while
+semantic retrieval operates on `chunks`.
+
+This avoids repeating article metadata for every vector and keeps the
+retrievable unit aligned with the exact text represented by the embedding.
+
+Each chunk stores:
+
+```text
+article_id
+chunk_index
+content
+token_count
+embedding
+```
+
+The `(article_id, chunk_index)` uniqueness constraint gives every chunk a
+deterministic identity within its article.
+
+## Normalized category model
+
+Categories are represented through:
+
+```text
+categories
+article_categories
+```
+
+rather than being embedded as JSON or duplicated on every chunk.
+
+This normalized design lets MariaDB use ordinary relational indexes and joins
+for category filtering and makes hybrid search a true relational/vector query
+instead of application-side post-filtering.
+
+## Materialized local article graph
+
+Wikipedia links are stored in `article_links` as directed relationships between
+articles that exist in the local corpus.
+
+This lets graph-constrained semantic search remain inside MariaDB using normal
+joins before vector ranking.
+
+Links to pages outside the local corpus are intentionally excluded because
+those pages do not have local article rows or vector representations.
+
+## Embeddings belong to chunks
+
+Embeddings are stored directly in `chunks` rather than in a separate generic
+vector table.
+
+The embedding represents the chunk itself, so keeping both together avoids an
+extra join in the hot semantic-search path and keeps the vector index attached
+to the exact retrievable entity.
+
+## Why relational and vector data share one database
+
+The schema is intentionally designed so relational metadata and vector data can
+participate in the same SQL statement.
+
+That is essential for MVF's hybrid and linked retrieval modes and is the main
+reason MariaDB is used as the retrieval engine rather than only as a metadata
+store.
+
+---
+
 # Embedding Configuration
 
 MVF currently uses:
@@ -206,6 +290,142 @@ Vector distance:       cosine
 ```
 
 Chunking uses the tokenizer associated with the embedding model rather than approximate character-based splitting.
+
+---
+
+# Design Decisions
+
+## Why `all-MiniLM-L6-v2`
+
+MVF uses `sentence-transformers/all-MiniLM-L6-v2` as a practical local
+embedding model for the project corpus.
+
+Its 384-dimensional output keeps vector storage compact and maps directly to
+MariaDB:
+
+```sql
+VECTOR(384)
+```
+
+The model is small enough for reproducible local indexing while still
+providing useful semantic retrieval quality on the current Wikipedia corpus.
+
+The embedding model is deliberately kept outside MariaDB. MariaDB is
+responsible for storing embeddings, indexing them, evaluating similarity,
+combining vector ranking with relational constraints, and exposing execution
+plans and timings.
+
+## Why 384 dimensions
+
+The embedding dimensionality is dictated by the selected model and is kept
+unchanged throughout the pipeline.
+
+Using the model's native 384-dimensional representation avoids lossy
+projection and maps directly to:
+
+```sql
+VECTOR(384)
+```
+
+This keeps the schema explicit and guarantees that ingestion, indexing,
+querying, and evaluation all operate on the same vector shape.
+
+## Why 220-token chunks
+
+Semantic retrieval operates on chunks rather than whole Wikipedia articles.
+
+A chunk size of 220 model tokens was chosen as a practical balance between
+retrieval granularity and semantic context. Larger chunks reduce precision by
+mixing more topics into each retrievable unit, while very small chunks increase
+the vector count and risk removing context needed to answer conceptual
+questions.
+
+Chunking is based on the tokenizer of the embedding model rather than
+approximate character counts.
+
+## Why 40-token overlap
+
+Adjacent chunks overlap by 40 model tokens.
+
+The overlap reduces the risk that information crossing a chunk boundary is
+split into two unrelated retrieval units while keeping duplication moderate.
+The overlap is intentionally smaller than the chunk size so neighboring chunks
+retain continuity without becoming near-duplicates.
+
+## Why cosine distance
+
+MVF stores L2-normalized embeddings and evaluates semantic similarity with
+cosine distance:
+
+```sql
+VEC_DISTANCE_COSINE(...)
+```
+
+The MariaDB vector index therefore uses the same metric:
+
+```sql
+DISTANCE = cosine
+```
+
+Using the same distance definition for indexed retrieval, brute-force
+comparison, and evaluation keeps the benchmark directly interpretable.
+
+## Why `M = 8`
+
+The current MariaDB vector index uses:
+
+```sql
+M = 8
+```
+
+`M` controls graph connectivity in the native vector index and therefore
+affects index size, insertion cost, search behavior, and recall.
+
+`M = 8` is the project's baseline configuration for the current corpus size.
+The value is documented explicitly rather than hidden in application code, and
+the project treats it as a database tuning parameter that can be evaluated
+independently in controlled experiments.
+
+## Why Wikipedia
+
+English Wikipedia provides a reproducible public source with useful relational
+structure in addition to article text:
+
+- stable page identifiers;
+- article categories;
+- directed article-to-article links;
+- enough natural language to evaluate semantic retrieval.
+
+That makes it possible to demonstrate three different MariaDB retrieval
+strategies on one corpus:
+
+- global semantic vector search;
+- category-constrained hybrid search;
+- graph-constrained linked search.
+
+## Why the hybrid filter is inside the vector subquery
+
+The category restriction is applied inside the vector candidate query rather
+than after top-k retrieval.
+
+Applying the filter after global top-k retrieval could return fewer than the
+requested number of category-matching results and would rank candidates from
+the wrong search space.
+
+The current query shape lets MariaDB optimize the filtered candidate set before
+the final top-k is returned.
+
+## Why linked search remains relational-first
+
+Linked search was tested with both the original relational-first plan and a
+vector-first derived-table rewrite.
+
+The vector-first rewrite did not improve the measured workload, while the
+relational-first plan efficiently reduced the candidate set through
+`article_links` and `ix_chunks_article_id`.
+
+The production linked query therefore intentionally keeps the relational-first
+shape instead of forcing the vector index where it is not the cheapest plan.
 
 ---
 
@@ -346,6 +566,40 @@ A vector-first derived-table rewrite was benchmarked separately and did not impr
 
 ---
 
+# Why MariaDB-Native Retrieval
+
+MVF intentionally keeps vector retrieval in MariaDB instead of storing
+relational data in MariaDB and querying a separate vector database.
+
+The same server can combine:
+
+```text
+relational article metadata
+category membership
+directed article links
+native vectors
+```
+
+inside individual SQL statements.
+
+For semantic search, MariaDB performs native nearest-neighbor ranking through
+the vector index.
+
+For hybrid search, a relational category constraint and vector ranking are
+combined in one query.
+
+For linked search, relational joins restrict the graph-constrained candidate
+set before cosine ranking.
+
+This design avoids application-side synchronization between a relational
+database and a separate vector store. It also lets MariaDB's optimizer decide
+when the vector index or a relational index is cheaper.
+
+The optimizer experiments in this repository show why that matters: semantic,
+hybrid, and linked retrieval do not all benefit from the same execution plan.
+
+---
+
 # Optimizer Statistics
 
 Bulk ingestion and vector indexing materially change table cardinalities. MVF
@@ -433,6 +687,38 @@ Debug information includes:
 | Articles without chunks | 0 |
 
 The corpus is currently centered on Wikipedia's machine-learning category.
+
+---
+
+# Benchmark Methodology
+
+Performance measurements are designed to isolate database retrieval rather than
+embedding generation.
+
+Unless an experiment states otherwise:
+
+- the query embedding is generated before database timing starts;
+- the same embedding is reused when comparing query variants;
+- all variants run against the same MariaDB instance and corpus;
+- 5 warm-up executions are performed before measurement;
+- 50 measured executions are collected;
+- mean, median, and P95 latency are reported;
+- the result limit is fixed at 5 for the main benchmark;
+- the benchmark query is `neural network training`;
+- optimizer statistics are refreshed after bulk ingestion and indexing;
+- indexed and brute-force searches use the same cosine-distance definition.
+
+The vector-index vs brute-force benchmark compares database execution
+strategies rather than end-to-end API latency.
+
+Retrieval quality is evaluated separately with 40 manually prepared
+ground-truth questions using Recall@K and MRR.
+
+Machine-readable benchmark results are stored under:
+
+```text
+experiments/results/
+```
 
 ---
 
@@ -661,11 +947,12 @@ mvf-databases-cu/
 │   ├── index_vs_bruteforce.py
 │   ├── latency.py
 │   ├── linked_optimizer_probe.py
-│   ├── optimizer_probe.py
 │   ├── recall.py
 │   └── search_strategies.py
 ├── scripts/
 ├── tests/
+│   ├── fixtures/
+│   │   └── ci_seed.sql
 │   ├── integration/
 │   └── unit/
 ├── .env.example
@@ -865,6 +1152,27 @@ pytest -v
 
 The current local quality gate is green: Ruff passes, mypy passes, and **27 / 27 automated tests** pass. The suite covers API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, and embedding behavior.
 
+The same quality gate is executed automatically on GitHub Actions for pushes
+and pull requests to `main`.
+
+The CI environment starts a clean MariaDB 11.8 service, applies the project
+schema and native vector index, loads a deterministic integration-test fixture,
+and then runs:
+
+```text
+Ruff linting
+Ruff formatting check
+mypy
+pytest
+```
+
+The integration suite therefore does not depend on a developer's pre-existing
+local database contents.
+
+The development dependency for Ruff is pinned so local formatting and CI
+formatting use the same formatter version.
+
+
 ---
 
 # Useful Make Commands
@@ -909,9 +1217,20 @@ corpus size
 benchmark warm-ups
 benchmark runs
 ground-truth questions
+CI integration-test fixture
 ```
 
 Raw Wikipedia snapshots are preserved separately from vector generation, and experiment outputs are stored as machine-readable JSON.
+
+Dataset and retrieval configuration metadata is also summarized in:
+
+```text
+data/manifest.json
+```
+
+The manifest records the corpus size, embedding model and dimensions, chunking
+configuration, vector-index configuration, distance metric, and MariaDB version.
+
 
 ---
 

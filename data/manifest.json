@@ -1,11 +1,23 @@
 {
-  "dataset": null,
-  "source": "English Wikipedia",
+  "dataset": "Wikipedia machine-learning corpus",
+  "source": "English Wikipedia via MediaWiki API",
   "retrieved_at": null,
-  "category": null,
-  "article_count": 0,
-  "embedding_model": null,
+  "category": "Machine learning",
+  "article_count": 285,
+  "vector_chunk_count": 3940,
+  "article_link_count": 2710,
+  "ground_truth_questions": 40,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
   "embedding_dimensions": 384,
-  "chunk_size": null,
-  "chunk_overlap": null
+  "embedding_normalization": "L2",
+  "distance_metric": "cosine",
+  "chunk_size": 220,
+  "chunk_overlap": 40,
+  "vector_index": {
+    "type": "MariaDB VECTOR INDEX",
+    "name": "ix_chunks_embedding",
+    "M": 8,
+    "distance": "cosine"
+  },
+  "mariadb_version": "11.8.9-MariaDB-ubu2404"
 }
