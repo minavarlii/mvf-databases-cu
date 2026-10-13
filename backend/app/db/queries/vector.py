@@ -11,22 +11,32 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 SEMANTIC_SEARCH_SQL = """
 SELECT
-    c.id AS chunk_id,
+    c.chunk_id,
     c.article_id,
     a.title AS article_title,
     c.chunk_index,
     c.content,
     c.token_count,
-    VEC_DISTANCE_COSINE(
-        c.embedding,
-        VEC_FromText(:embedding)
-    ) AS distance
-FROM chunks AS c
+    c.distance
+FROM (
+    SELECT
+        id AS chunk_id,
+        article_id,
+        chunk_index,
+        content,
+        token_count,
+        VEC_DISTANCE_COSINE(
+            embedding,
+            VEC_FromText(:embedding)
+        ) AS distance
+    FROM chunks
+    ORDER BY distance ASC
+    LIMIT :limit
+) AS c
 INNER JOIN articles AS a
     ON a.id = c.article_id
-ORDER BY distance ASC
-LIMIT :limit
-""".strip()
+ORDER BY c.distance ASC
+"""
 
 
 ARTICLE_SEARCH_SQL = """
@@ -52,27 +62,39 @@ LIMIT :limit
 
 HYBRID_SEARCH_SQL = """
 SELECT
-    c.id AS chunk_id,
+    c.chunk_id,
     c.article_id,
     a.title AS article_title,
     c.chunk_index,
     c.content,
     c.token_count,
-    VEC_DISTANCE_COSINE(
-        c.embedding,
-        VEC_FromText(:embedding)
-    ) AS distance
-FROM chunks AS c
+    c.distance
+FROM (
+    SELECT
+        id AS chunk_id,
+        article_id,
+        chunk_index,
+        content,
+        token_count,
+        VEC_DISTANCE_COSINE(
+            embedding,
+            VEC_FromText(:embedding)
+        ) AS distance
+    FROM chunks
+    WHERE article_id IN (
+        SELECT ac.article_id
+        FROM article_categories AS ac
+        INNER JOIN categories AS cat
+            ON cat.id = ac.category_id
+        WHERE cat.name = :category
+    )
+    ORDER BY distance ASC
+    LIMIT :limit
+) AS c
 INNER JOIN articles AS a
     ON a.id = c.article_id
-INNER JOIN article_categories AS ac
-    ON ac.article_id = a.id
-INNER JOIN categories AS cat
-    ON cat.id = ac.category_id
-WHERE cat.name = :category
-ORDER BY distance ASC
-LIMIT :limit
-""".strip()
+ORDER BY c.distance ASC
+"""
 
 
 LINKED_SEARCH_SQL = """

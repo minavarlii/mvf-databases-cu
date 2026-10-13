@@ -13,33 +13,43 @@
   "semantic": {
     "latency": {
       "runs": 50,
-      "mean_ms": 2.448406680159678,
-      "median_ms": 2.383270499194623,
-      "p50_ms": 2.383270499194623,
-      "p95_ms": 2.9934210499050096,
-      "min_ms": 2.050999999482883,
-      "max_ms": 3.3933340000658063,
-      "stddev_ms": 0.30076877365700166
+      "mean_ms": 1.3926383199850534,
+      "median_ms": 1.304229499965004,
+      "p50_ms": 1.304229499965004,
+      "p95_ms": 1.8164603498689753,
+      "min_ms": 1.1245000000599248,
+      "max_ms": 2.1638749999510765,
+      "stddev_ms": 0.22907375089134435
     },
     "execution_plan": [
       {
         "select_id": 1,
-        "select_type": "SIMPLE",
-        "table": "c",
-        "access_type": "index",
-        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
-        "key": "ix_chunks_embedding",
+        "select_type": "PRIMARY",
+        "table": "<derived2>",
+        "access_type": "ALL",
+        "possible_keys": null,
+        "key": null,
         "rows": 5,
-        "extra": ""
+        "extra": "Using filesort"
       },
       {
         "select_id": 1,
-        "select_type": "SIMPLE",
+        "select_type": "PRIMARY",
         "table": "a",
         "access_type": "eq_ref",
         "possible_keys": "PRIMARY",
         "key": "PRIMARY",
         "rows": 1,
+        "extra": ""
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "chunks",
+        "access_type": "index",
+        "possible_keys": null,
+        "key": "ix_chunks_embedding",
+        "rows": 3077,
         "extra": ""
       }
     ]
@@ -47,67 +57,77 @@
   "hybrid": {
     "latency": {
       "runs": 50,
-      "mean_ms": 230.31516574003035,
-      "median_ms": 229.93166699961876,
-      "p50_ms": 229.93166699961876,
-      "p95_ms": 233.5207331505444,
-      "min_ms": 227.13429200121027,
-      "max_ms": 242.88512500061188,
-      "stddev_ms": 2.6171586993825766
+      "mean_ms": 2.35932828001296,
+      "median_ms": 2.2382915001344372,
+      "p50_ms": 2.2382915001344372,
+      "p95_ms": 3.017337500045869,
+      "min_ms": 1.9178330001068389,
+      "max_ms": 3.4059590000197204,
+      "stddev_ms": 0.3770302282741865
     },
     "execution_plan": [
       {
         "select_id": 1,
-        "select_type": "SIMPLE",
+        "select_type": "PRIMARY",
+        "table": "<derived2>",
+        "access_type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "rows": 5,
+        "extra": "Using filesort"
+      },
+      {
+        "select_id": 1,
+        "select_type": "PRIMARY",
+        "table": "a",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY",
+        "key": "PRIMARY",
+        "rows": 1,
+        "extra": ""
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
         "table": "cat",
         "access_type": "const",
         "possible_keys": "PRIMARY,uq_categories_name",
         "key": "uq_categories_name",
         "rows": 1,
-        "extra": "Using index; Using temporary; Using filesort"
-      },
-      {
-        "select_id": 1,
-        "select_type": "SIMPLE",
-        "table": "a",
-        "access_type": "index",
-        "possible_keys": "PRIMARY",
-        "key": "ix_articles_title",
-        "rows": 204,
         "extra": "Using index"
       },
       {
-        "select_id": 1,
-        "select_type": "SIMPLE",
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "chunks",
+        "access_type": "index",
+        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+        "key": "ix_chunks_embedding",
+        "rows": 3077,
+        "extra": ""
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
         "table": "ac",
         "access_type": "eq_ref",
         "possible_keys": "PRIMARY,fk_article_categories_category",
         "key": "fk_article_categories_category",
         "rows": 1,
         "extra": "Using index"
-      },
-      {
-        "select_id": 1,
-        "select_type": "SIMPLE",
-        "table": "c",
-        "access_type": "ref",
-        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
-        "key": "ix_chunks_article_id",
-        "rows": 11,
-        "extra": ""
       }
     ]
   },
   "linked": {
     "latency": {
       "runs": 50,
-      "mean_ms": 88.17231922010251,
-      "median_ms": 88.12833299998601,
-      "p50_ms": 88.12833299998601,
-      "p95_ms": 89.3338914494052,
-      "min_ms": 86.94541700060654,
-      "max_ms": 90.56537499964179,
-      "stddev_ms": 0.7290747524918008
+      "mean_ms": 87.91397993998544,
+      "median_ms": 87.59035400009907,
+      "p50_ms": 87.59035400009907,
+      "p95_ms": 89.72714984987533,
+      "min_ms": 85.86441700003888,
+      "max_ms": 101.80412499994418,
+      "stddev_ms": 2.2120041738978253
     },
     "execution_plan": [
       {
@@ -127,7 +147,7 @@
         "access_type": "ref",
         "possible_keys": "PRIMARY,fk_article_links_target",
         "key": "PRIMARY",
-        "rows": 1,
+        "rows": 10,
         "extra": ""
       },
       {
@@ -146,8 +166,8 @@
         "table": "c",
         "access_type": "ref",
         "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
-        "key": "uq_chunks_article_chunk_index",
-        "rows": 11,
+        "key": "ix_chunks_article_id",
+        "rows": 10,
         "extra": ""
       }
     ]

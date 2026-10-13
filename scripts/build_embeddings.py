@@ -8,7 +8,10 @@ from dataclasses import dataclass
 
 from sqlalchemy import select
 
-from backend.app.db import database_manager
+from backend.app.db import (
+    analyze_core_tables,
+    database_manager,
+)
 from backend.app.db.models import Article
 from backend.app.services import (
     ChunkingService,
@@ -147,6 +150,9 @@ async def run(
                 f"{result.article_title} "
                 f"({result.chunk_count} chunks)"
             )
+
+        await analyze_core_tables(session)
+        await session.commit()
 
     return summary
 

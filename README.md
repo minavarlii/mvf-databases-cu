@@ -22,7 +22,7 @@ The current corpus contains:
 - **2,710 directed local article links**
 - **40 manually prepared retrieval-evaluation questions**
 
-On the current corpus, MariaDB's native vector index provides approximately a **100× speedup** over brute-force cosine search.
+On the current corpus, MariaDB's native vector index provides an observed **177.92× speedup** over brute-force cosine search for the benchmark query.
 
 ---
 
@@ -215,21 +215,31 @@ The embedding for the user's query is generated in Python. The vector retrieval 
 
 ```sql
 SELECT
-    c.id AS chunk_id,
+    c.chunk_id,
     c.article_id,
     a.title AS article_title,
     c.chunk_index,
     c.content,
     c.token_count,
-    VEC_DISTANCE_COSINE(
-        c.embedding,
-        VEC_FromText(:embedding)
-    ) AS distance
-FROM chunks AS c
+    c.distance
+FROM (
+    SELECT
+        id AS chunk_id,
+        article_id,
+        chunk_index,
+        content,
+        token_count,
+        VEC_DISTANCE_COSINE(
+            embedding,
+            VEC_FromText(:embedding)
+        ) AS distance
+    FROM chunks
+    ORDER BY distance ASC
+    LIMIT :limit
+) AS c
 INNER JOIN articles AS a
     ON a.id = c.article_id
-ORDER BY distance ASC
-LIMIT :limit;
+ORDER BY c.distance ASC;
 ```
 
 MariaDB therefore handles vector storage, vector indexing, cosine-distance evaluation, ranking, limiting, and query optimization.
@@ -264,18 +274,55 @@ For the current corpus, MariaDB selects `ix_chunks_embedding`.
 
 ## Hybrid Search
 
-Hybrid search combines relational category filtering and semantic vector ranking:
+Hybrid search combines a relational category constraint with semantic vector ranking.
 
-```text
-chunks
-  JOIN articles
-  JOIN article_categories
-  JOIN categories
-WHERE category = ?
-ORDER BY vector distance
+The category restriction is placed inside the vector candidate query so the
+database can optimize the filtered top-k directly:
+
+```sql
+SELECT
+    c.chunk_id,
+    c.article_id,
+    a.title AS article_title,
+    c.chunk_index,
+    c.content,
+    c.token_count,
+    c.distance
+FROM (
+    SELECT
+        id AS chunk_id,
+        article_id,
+        chunk_index,
+        content,
+        token_count,
+        VEC_DISTANCE_COSINE(
+            embedding,
+            VEC_FromText(:embedding)
+        ) AS distance
+    FROM chunks
+    WHERE article_id IN (
+        SELECT ac.article_id
+        FROM article_categories AS ac
+        INNER JOIN categories AS cat
+            ON cat.id = ac.category_id
+        WHERE cat.name = :category
+    )
+    ORDER BY distance ASC
+    LIMIT :limit
+) AS c
+INNER JOIN articles AS a
+    ON a.id = c.article_id
+ORDER BY c.distance ASC;
 ```
 
-This provides an optimizer comparison: depending on filter selectivity, MariaDB may favor relational indexes rather than the global vector index.
+For the benchmark category `Machine learning`, this shape uses
+`ix_chunks_embedding` and reduces mean database latency from roughly **227 ms**
+for the previous relational-first form to **2.359 ms**, while preserving the
+checked top-k results.
+
+For smaller filtered candidate sets, MariaDB may still prefer
+`ix_chunks_article_id`, which can be cheaper.
+
 
 ## Linked Search
 
@@ -294,6 +341,41 @@ cosine ranking
 ```
 
 The query combines relational joins, graph constraints, and vector similarity inside MariaDB.
+
+A vector-first derived-table rewrite was benchmarked separately and did not improve this workload (approximately 87.4 ms current vs. 88.4 ms proposed). The production linked query therefore intentionally remains relational-first and uses `ix_chunks_article_id`.
+
+---
+
+# Optimizer Statistics
+
+Bulk ingestion and vector indexing materially change table cardinalities. MVF
+therefore refreshes MariaDB optimizer statistics after both data-loading
+workflows:
+
+```sql
+ANALYZE TABLE
+    articles,
+    chunks,
+    article_categories,
+    categories,
+    article_links;
+```
+
+The maintenance logic is centralized in:
+
+```text
+backend/app/db/maintenance.py
+```
+
+and is called after the main work in:
+
+```text
+scripts/ingest.py
+scripts/build_embeddings.py
+```
+
+This keeps optimizer decisions reproducible after corpus growth or vector
+rebuilds.
 
 ---
 
@@ -370,13 +452,23 @@ Measured runs:  50
 
 ## Search Strategy Benchmark
 
-| Strategy | Mean | Median | P95 |
-|---|---:|---:|---:|
-| Semantic | **2.448 ms** | 2.383 ms | 2.993 ms |
-| Hybrid | 230.315 ms | 229.932 ms | 233.521 ms |
-| Linked | 88.172 ms | 88.128 ms | 89.334 ms |
+| Strategy | Mean | Median | P95 | Main retrieval index |
+|---|---:|---:|---:|---|
+| Semantic | **1.393 ms** | 1.304 ms | 1.816 ms | `ix_chunks_embedding` |
+| Hybrid | **2.359 ms** | 2.238 ms | 3.017 ms | `ix_chunks_embedding` |
+| Linked | 87.914 ms | 87.590 ms | 89.727 ms | `ix_chunks_article_id` |
 
-The semantic query uses the native vector index. Hybrid and linked search expose different optimizer strategies because relational constraints change the candidate space and execution plan.
+Semantic and hybrid retrieval use the native vector index for the benchmark
+workload. Linked search remains relational-first because its graph constraint
+creates a different candidate set and the measured alternative plan was not
+faster.
+
+The latest machine-readable strategy result is stored in:
+
+```text
+experiments/results/search_strategies.json
+```
+
 
 ---
 
@@ -384,16 +476,25 @@ The semantic query uses the native vector index. Hybrid and linked search expose
 
 | Mode | Mean | P95 |
 |---|---:|---:|
-| MariaDB `VECTOR INDEX` | **2.346 ms** | 2.926 ms |
-| Brute-force cosine search | 235.097 ms | 237.871 ms |
+| MariaDB `VECTOR INDEX` | **1.302 ms** | 1.688 ms |
+| Brute-force cosine search | 231.728 ms | 236.068 ms |
 
 Measured speedup:
 
 ```text
-100.20×
+177.92×
 ```
 
-At approximately four thousand vectors, native MariaDB vector indexing is already dramatically faster than evaluating cosine distance against the complete vector table.
+At approximately four thousand vectors, native MariaDB vector indexing is
+already dramatically faster than evaluating cosine distance against the full
+vector table.
+
+Current benchmark artifact:
+
+```text
+experiments/results/index_vs_bruteforce_20261013T155049Z.json
+```
+
 
 ---
 
@@ -402,7 +503,7 @@ At approximately four thousand vectors, native MariaDB vector indexing is alread
 | Corpus | Vectors | Semantic Mean | VECTOR INDEX Speedup |
 |---|---:|---:|---:|
 | 100 articles | 1,426 | ~1.94 ms | ~47× |
-| 285 articles | 3,940 | ~2.45 ms | ~100× |
+| 285 articles | 3,940 | ~1.39 ms | ~178× |
 
 As the corpus grew, indexed semantic latency increased only modestly while brute-force search became substantially more expensive.
 
@@ -410,16 +511,18 @@ As the corpus grew, indexed semantic latency increased only modestly while brute
 
 # Retrieval Quality
 
-The retrieval evaluation uses 40 manually prepared conceptual and paraphrased questions.
+The production retrieval evaluation uses 40 manually prepared conceptual and
+paraphrased questions and exercises the same MariaDB vector-index path used by
+semantic search.
 
 | Metric | Result |
 |---|---:|
 | Recall@1 | **67.5%** |
 | Recall@3 | **87.5%** |
 | Recall@5 | **87.5%** |
-| Recall@10 | **92.5%** |
-| MRR | **0.782** |
-| Misses@10 | 3 / 40 |
+| Recall@10 | **95.0%** |
+| MRR | **0.784** |
+| Misses@10 | **2 / 40** |
 
 Ground truth is stored in:
 
@@ -427,13 +530,19 @@ Ground truth is stored in:
 data/ground_truth/questions.jsonl
 ```
 
+Current production-evaluation artifact:
+
+```text
+experiments/results/recall_20261013T155054Z.json
+```
+
+
 ---
 
 # Exact Article-Level Evaluation
 
-Production semantic search retrieves chunks. To verify that article-level recall is not distorted by chunk duplication or candidate-pool size, MVF also implements an exhaustive article-level evaluation oracle.
-
-Each article receives the distance of its closest chunk:
+MVF also implements an exhaustive article-level reference evaluation. Each
+article receives the distance of its closest chunk:
 
 ```sql
 MIN(
@@ -444,7 +553,7 @@ MIN(
 )
 ```
 
-The exact article-level evaluation produces the same top-10 metrics:
+The exact reference produces:
 
 ```text
 Recall@1  = 67.5%
@@ -452,9 +561,21 @@ Recall@3  = 87.5%
 Recall@5  = 87.5%
 Recall@10 = 92.5%
 MRR       = 0.782
+Misses@10 = 3 / 40
 ```
 
-This confirms that the remaining top-10 failures reflect actual semantic-ranking competition rather than an evaluation artifact.
+The production vector-index path and the exhaustive article-level reference are
+reported separately because they evaluate different retrieval paths and may
+differ slightly around the cutoff. In the current run,
+`Fine-tuning (deep learning)` is rank 10 in production retrieval and rank 11 in
+the exhaustive article-level ranking.
+
+Current exact-evaluation artifact:
+
+```text
+experiments/results/article_recall_20261013T155110Z.json
+```
+
 
 ---
 
@@ -517,7 +638,8 @@ mvf-databases-cu/
 │       ├── db/
 │       │   ├── models/
 │       │   ├── queries/
-│       │   └── repositories/
+│       │   ├── repositories/
+│       │   └── maintenance.py
 │       ├── generators/
 │       ├── services/
 │       └── main.py
@@ -538,6 +660,8 @@ mvf-databases-cu/
 │   ├── explain.py
 │   ├── index_vs_bruteforce.py
 │   ├── latency.py
+│   ├── linked_optimizer_probe.py
+│   ├── optimizer_probe.py
 │   ├── recall.py
 │   └── search_strategies.py
 ├── scripts/
@@ -739,7 +863,7 @@ mypy backend scripts experiments tests
 pytest -v
 ```
 
-The current test suite contains **27 automated tests** covering API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, and embedding behavior.
+The current local quality gate is green: Ruff passes, mypy passes, and **27 / 27 automated tests** pass. The suite covers API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, and embedding behavior.
 
 ---
 
@@ -795,9 +919,9 @@ Raw Wikipedia snapshots are preserved separately from vector generation, and exp
 
 The corpus is focused on machine-learning-related Wikipedia articles rather than general web search.
 
-The lightweight `all-MiniLM-L6-v2` embedding model does not produce perfect ranking for every semantic query. Current Recall@10 is **92.5%**.
+The lightweight `all-MiniLM-L6-v2` embedding model does not produce perfect ranking for every semantic query. Current production Recall@10 is **95.0%**; the exhaustive article-level reference reaches **92.5%** at the same cutoff.
 
-Hybrid and graph-constrained queries can also be substantially slower than global vector-index search because MariaDB may choose relational-first execution strategies.
+Hybrid search now uses the native vector index efficiently for the benchmark category. Linked graph-constrained search remains relational-first because controlled optimizer experiments showed that this is the cheaper plan for that candidate set.
 
 These behaviors are measured and documented rather than hidden because optimizer behavior and retrieval trade-offs are central to the project.
 
@@ -840,4 +964,4 @@ exact article-level evaluation
 integration and unit tests
 ```
 
-The next stage is frontend integration and end-to-end validation of the complete application before the repository is finalized.
+The MariaDB retrieval layer has been validated with query-plan inspection, optimizer-statistics refresh, performance benchmarking, retrieval evaluation, and automated regression tests. The next stage is frontend integration and final end-to-end application validation.

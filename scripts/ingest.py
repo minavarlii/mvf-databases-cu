@@ -5,7 +5,10 @@ import asyncio
 from pathlib import Path
 
 from backend.app.clients import MediaWikiClient
-from backend.app.db import database_manager
+from backend.app.db import (
+    analyze_core_tables,
+    database_manager,
+)
 from backend.app.services import IngestionService
 
 
@@ -53,6 +56,7 @@ async def run(
     Args:
         category: Wikipedia category name.
         limit: Maximum number of articles to ingest.
+        concurrency: Maximum number of concurrent MediaWiki requests.
     """
     if concurrency <= 0:
         raise ValueError("Concurrency must be greater than zero.")
@@ -78,7 +82,9 @@ async def run(
 
             await session.commit()
 
-    await database_manager.dispose()
+            await analyze_core_tables(session)
+
+            await session.commit()
 
     print(
         f"Successfully ingested "
@@ -93,11 +99,15 @@ async def main() -> None:
     """Run the ingestion command."""
     arguments = parse_arguments()
 
-    await run(
-        category=arguments.category,
-        limit=arguments.limit,
-        concurrency=arguments.concurrency,
-    )
+    try:
+        await run(
+            category=arguments.category,
+            limit=arguments.limit,
+            concurrency=arguments.concurrency,
+        )
+
+    finally:
+        await database_manager.dispose()
 
 
 if __name__ == "__main__":
