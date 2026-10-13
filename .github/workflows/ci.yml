@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_DATABASE: mvf
+          MARIADB_USER: mvf
+          MARIADB_PASSWORD: mvf_ci_password
+          MARIADB_ROOT_PASSWORD: mvf_ci_root_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      APP_NAME: MVF
+      APP_ENV: test
+      DEBUG: "false"
+
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: mvf
+      DB_USER: mvf
+      DB_PASSWORD: mvf_ci_password
+
+      OPENAI_API_KEY: ""
+      OPENAI_MODEL: gpt-6-luna
+
+      FRONTEND_ORIGIN: http://localhost:5173
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install MariaDB client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mariadb-client
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Wait for MariaDB
+        run: |
+          for attempt in {1..30}; do
+            if mariadb-admin ping \
+              -h 127.0.0.1 \
+              -P 3306 \
+              -u mvf \
+              -pmvf_ci_password \
+              --silent
+            then
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          exit 1
+
+      - name: Apply database schema
+        run: |
+          mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u mvf \
+            -pmvf_ci_password \
+            mvf \
+            < database/schema/001_schema.sql
+
+          mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u mvf \
+            -pmvf_ci_password \
+            mvf \
+            < database/schema/002_vector_index.sql
+
+      - name: Seed integration-test data
+        run: |
+          mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u mvf \
+            -pmvf_ci_password \
+            mvf \
+            < tests/fixtures/ci_seed.sql
+
+      - name: Verify MariaDB
+        run: python -m scripts.verify_database
+
+      - name: Ruff
+        run: ruff check backend scripts tests experiments
+
+      - name: Ruff format
+        run: ruff format --check backend scripts tests experiments
+
+      - name: Mypy
+        run: mypy backend scripts experiments tests
+
+      - name: Pytest
+        run: pytest -v

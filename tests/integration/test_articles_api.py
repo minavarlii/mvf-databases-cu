@@ -15,7 +15,7 @@ def test_list_articles(
 
     assert payload["limit"] == 5
     assert payload["offset"] == 0
-    assert payload["total"] >= 100
+    assert payload["total"] >= 1
     assert len(payload["items"]) <= 5
 
     article = payload["items"][0]
