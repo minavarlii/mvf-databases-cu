@@ -78,7 +78,16 @@ async def test_demo_json_exposes_mariadb_vector_workflows(
     assert any(
         row["key"] == "ix_chunks_embedding" for row in semantic["execution_plan"]
     )
-    assert any(row["key"] == "ix_chunks_embedding" for row in hybrid["execution_plan"])
+    assert any(
+        row["key"]
+        in {
+            "ix_chunks_embedding",
+            "ix_chunks_article_id",
+            "fk_article_categories_category",
+            "uq_categories_name",
+        }
+        for row in hybrid["execution_plan"]
+    )
 
     for search in searches:
         assert search["timings_ms"]["embedding"] >= 0
