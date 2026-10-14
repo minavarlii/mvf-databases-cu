@@ -372,19 +372,45 @@ comparison, and evaluation keeps the benchmark directly interpretable.
 
 ## Why `M = 8`
 
-The current MariaDB vector index uses:
+The production MariaDB vector index uses:
 
 ```sql
 M = 8
 ```
 
-`M` controls graph connectivity in the native vector index and therefore
-affects index size, insertion cost, search behavior, and recall.
+This value is backed by a controlled parameter study over:
 
-`M = 8` is the project's baseline configuration for the current corpus size.
-The value is documented explicitly rather than hidden in application code, and
-the project treats it as a database tuning parameter that can be evaluated
-independently in controlled experiments.
+```text
+M = 4, 8, 16, 32
+```
+
+using the complete 40-question ground-truth evaluation.
+
+All tested values produced the same retrieval quality:
+
+```text
+Recall@1  = 67.5%
+Recall@3  = 87.5%
+Recall@5  = 87.5%
+Recall@10 = 92.5%
+MRR       = 0.782
+```
+
+However, index-build cost increased substantially:
+
+```text
+M=4   -> 156 ms
+M=8   -> 309 ms
+M=16  -> 1.01 s
+M=32  -> 3.74 s
+```
+
+`M = 8` is therefore retained as the production baseline: increasing
+connectivity did not improve retrieval quality on the current corpus, while
+larger values made index construction significantly more expensive.
+
+This is a corpus-specific engineering decision rather than a claim that
+`M = 8` is universally optimal.
 
 ## Why Wikipedia
 
@@ -784,6 +810,54 @@ experiments/results/index_vs_bruteforce_20261013T155049Z.json
 
 ---
 
+# VECTOR INDEX `M` Parameter Study
+
+MVF evaluates MariaDB's native vector-index connectivity parameter `M` on the
+full 40-question ground-truth set.
+
+For every tested value, the vector index is rebuilt from the same 3,940-vector
+corpus. Query embeddings are precomputed once, the same 200-chunk candidate
+pool is used for every run, and retrieval quality is measured with the same
+Recall@K and MRR methodology as the production evaluation.
+
+| M | Index build | Mean query | Median query | P95 query | Recall@10 | MRR |
+|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 156.482 ms | 16.056 ms | 16.074 ms | 16.785 ms | 92.5% | 0.782 |
+| **8** | **309.248 ms** | **15.363 ms** | **14.854 ms** | 17.062 ms | **92.5%** | **0.782** |
+| 16 | 1009.647 ms | 15.569 ms | 15.456 ms | 17.177 ms | 92.5% | 0.782 |
+| 32 | 3739.729 ms | 15.205 ms | 14.882 ms | 16.147 ms | 92.5% | 0.782 |
+
+Retrieval quality was identical for all tested `M` values:
+
+```text
+Recall@1  = 67.5%
+Recall@3  = 87.5%
+Recall@5  = 87.5%
+Recall@10 = 92.5%
+MRR       = 0.782
+Misses@10 = 3 / 40
+```
+
+Increasing `M` therefore did not improve retrieval quality on the current
+corpus, while vector-index construction became substantially more expensive.
+
+`M = 8` remains the production configuration because it preserves the same
+measured retrieval quality as larger values, keeps index construction much
+cheaper than `M = 16` or `M = 32`, and provides competitive query latency.
+
+The result does not claim that `M = 8` is universally optimal. It is the
+measured trade-off chosen for this corpus and workload.
+
+Machine-readable experiment artifacts:
+
+```text
+experiments/results/vector_index_m_sweep_20261014T122949Z.json
+experiments/results/vector_index_m_ground_truth_20261014T123645Z.json
+```
+
+
+---
+
 # Scaling Observation
 
 | Corpus | Vectors | Semantic Mean | VECTOR INDEX Speedup |
@@ -948,7 +1022,9 @@ mvf-databases-cu/
 │   ├── latency.py
 │   ├── linked_optimizer_probe.py
 │   ├── recall.py
-│   └── search_strategies.py
+│   ├── search_strategies.py
+│   ├── vector_index_m_ground_truth.py
+│   └── vector_index_m_sweep.py
 ├── scripts/
 ├── tests/
 │   ├── fixtures/
@@ -1125,6 +1201,21 @@ Difficult-query diagnostics:
 python3 -m experiments.diagnose_misses
 ```
 
+Vector-index `M` single-query probe:
+
+```bash
+python3 -m experiments.vector_index_m_sweep
+```
+
+Full 40-question `M` parameter evaluation:
+
+```bash
+python3 -m experiments.vector_index_m_ground_truth
+```
+
+Both `M` experiments restore the production vector index to `M = 8` after
+completion.
+
 Experiment results are written under:
 
 ```text
@@ -1278,6 +1369,7 @@ catalog APIs
 MariaDB EXPLAIN diagnostics
 latency benchmarking
 index-vs-brute-force benchmarking
+VECTOR INDEX M-parameter evaluation
 retrieval evaluation
 exact article-level evaluation
 integration and unit tests
