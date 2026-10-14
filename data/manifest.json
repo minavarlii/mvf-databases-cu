@@ -19,5 +19,26 @@
     "M": 8,
     "distance": "cosine"
   },
-  "mariadb_version": "11.8.9-MariaDB-ubu2404"
+  "mariadb_version": "11.8.9-MariaDB-ubu2404",
+  "retrieved_at_note": "Exact corpus retrieval timestamp was not recorded in the original ingestion metadata.",
+  "demo": {
+    "command": "make demo",
+    "modes": [
+      "semantic",
+      "hybrid",
+      "linked"
+    ],
+    "shows": [
+      "sql",
+      "parameters",
+      "timings",
+      "explain"
+    ]
+  },
+  "quality_gate": {
+    "automated_tests": 28,
+    "ruff": true,
+    "mypy": true,
+    "pytest": true
+  }
 }

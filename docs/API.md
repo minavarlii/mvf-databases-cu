@@ -296,6 +296,12 @@ export interface CategoryListResponse {
 
 ---
 
+The timing values in this document are illustrative response-shape examples,
+not fixed performance guarantees. On the documented 285-article / 3,940-vector
+benchmark corpus, the optimized `Machine learning` hybrid workload uses
+`ix_chunks_embedding` and measures approximately 2–3 ms at the database-search
+layer. Absolute latency varies by machine, cache state, and workload.
+
 # Semantic Search
 
 ## `POST /api/search`
@@ -418,9 +424,9 @@ Whitespace-only text values are rejected.
       "limit": 5
     },
     "embedding_ms": 25.1,
-    "search_ms": 229.8,
+    "search_ms": 2.3,
     "explain_ms": 1.0,
-    "total_ms": 255.9,
+    "total_ms": 28.4,
     "execution_plan": []
   }
 }
@@ -708,6 +714,29 @@ export async function apiRequest<T>(
   return (await response.json()) as T;
 }
 ```
+
+---
+
+# Guided CLI Demo
+
+The repository also provides a non-HTTP worked example:
+
+```bash
+make demo
+```
+
+It runs semantic, hybrid, and linked search and prints the executed SQL, bound
+parameters, timings, and MariaDB `EXPLAIN` plans. It requires the indexed corpus
+but does not require an OpenAI API key.
+
+For machine-readable output:
+
+```bash
+python3 -m scripts.demo --json
+```
+
+This is useful for validating backend retrieval behavior before frontend
+integration.
 
 ---
 

@@ -47,6 +47,7 @@ On the current corpus, MariaDB's native vector index provides an observed **177.
 - Vector-index vs brute-force benchmarks
 - Ruff, mypy, and pytest quality checks
 - Reproducible clean-database GitHub Actions CI
+- Guided one-command MariaDB demo with SQL, timings, and EXPLAIN
 
 ---
 
@@ -563,7 +564,7 @@ ORDER BY c.distance ASC;
 
 For the benchmark category `Machine learning`, this shape uses
 `ix_chunks_embedding` and reduces mean database latency from roughly **227 ms**
-for the previous relational-first form to **2.359 ms**, while preserving the
+for the previous relational-first form to **2.270 ms**, while preserving the
 checked top-k results.
 
 For smaller filtered candidate sets, MariaDB may still prefer
@@ -766,9 +767,9 @@ Measured runs:  50
 
 | Strategy | Mean | Median | P95 | Main retrieval index |
 |---|---:|---:|---:|---|
-| Semantic | **1.393 ms** | 1.304 ms | 1.816 ms | `ix_chunks_embedding` |
-| Hybrid | **2.359 ms** | 2.238 ms | 3.017 ms | `ix_chunks_embedding` |
-| Linked | 87.914 ms | 87.590 ms | 89.727 ms | `ix_chunks_article_id` |
+| Semantic | **1.393 ms** | 1.362 ms | 1.781 ms | `ix_chunks_embedding` |
+| Hybrid | **2.270 ms** | 2.235 ms | 2.720 ms | `ix_chunks_embedding` |
+| Linked | 86.200 ms | 85.605 ms | 90.727 ms | `ix_chunks_article_id` |
 
 Semantic and hybrid retrieval use the native vector index for the benchmark
 workload. Linked search remains relational-first because its graph constraint
@@ -1026,10 +1027,15 @@ mvf-databases-cu/
 │   ├── vector_index_m_ground_truth.py
 │   └── vector_index_m_sweep.py
 ├── scripts/
+│   ├── demo.py
+│   ├── search.py
+│   ├── hybrid_search.py
+│   └── explain_search.py
 ├── tests/
 │   ├── fixtures/
 │   │   └── ci_seed.sql
 │   ├── integration/
+│   │   └── test_demo.py
 │   └── unit/
 ├── .env.example
 ├── .gitignore
@@ -1138,6 +1144,44 @@ make index-force
 
 ---
 
+# Guided MariaDB Demo
+
+Once MariaDB is running and the corpus has been indexed, run:
+
+```bash
+make demo
+```
+
+This produces a worked, end-to-end demonstration of all three retrieval modes:
+
+```text
+semantic search
+hybrid category-filtered search
+linked graph-constrained search
+```
+
+For each mode, the demo prints:
+
+- ranked results;
+- the MariaDB SQL executed;
+- bound parameters;
+- embedding, search, EXPLAIN, and total timings;
+- the MariaDB `EXPLAIN` plan and selected indexes.
+
+The command also prints the MariaDB version, corpus size, vector count, article-link
+count, and detected native vector index. It does not require an OpenAI API key.
+
+Machine-readable output is available with:
+
+```bash
+python3 -m scripts.demo --json
+```
+
+This command is intended as the shortest path for a newcomer to see the Area 4
+feature deliberately rather than infer it from application code.
+
+---
+
 # Run the API
 
 ```bash
@@ -1241,7 +1285,7 @@ mypy backend scripts experiments tests
 pytest -v
 ```
 
-The current local quality gate is green: Ruff passes, mypy passes, and **27 / 27 automated tests** pass. The suite covers API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, and embedding behavior.
+The current local quality gate is green: Ruff passes, mypy passes, and **28 / 28 automated tests** pass. The suite covers API integration, semantic/hybrid/linked retrieval, the guided demo, RAG behavior, chunking, and embedding behavior.
 
 The same quality gate is executed automatically on GitHub Actions for pushes
 and pull requests to `main`.
@@ -1279,6 +1323,7 @@ make ingest          Ingest Wikipedia corpus
 make index           Incrementally build embeddings
 make index-force     Force vector rebuild
 make api             Run FastAPI
+make demo            Run guided MariaDB vector-search demo
 make test            Run pytest
 make lint            Run Ruff
 make format          Format source files
@@ -1312,6 +1357,16 @@ CI integration-test fixture
 ```
 
 Raw Wikipedia snapshots are preserved separately from vector generation, and experiment outputs are stored as machine-readable JSON.
+
+The committed benchmark artifacts correspond to the documented
+285-article / 3,940-vector corpus. Re-running experiments on a different machine
+can change absolute latency values because hardware, buffer-pool state, and server
+conditions differ, but the corpus, query set, retrieval methodology, index
+configuration, warm-up policy, and measured-run counts are fixed.
+
+The guided demo is intentionally descriptive rather than a benchmark harness:
+its per-request timings include one live execution and should not be compared
+directly with the repeated benchmark tables above.
 
 Dataset and retrieval configuration metadata is also summarized in:
 
@@ -1367,6 +1422,7 @@ linked search
 RAG
 catalog APIs
 MariaDB EXPLAIN diagnostics
+guided MariaDB demo
 latency benchmarking
 index-vs-brute-force benchmarking
 VECTOR INDEX M-parameter evaluation

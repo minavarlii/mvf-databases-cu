@@ -29,6 +29,7 @@ endif
 	benchmark \
 	recall \
 	article-recall \
+	demo \
 	clean
 
 
@@ -144,6 +145,10 @@ recall:
 
 article-recall:
 	$(PYTHON) -m experiments.article_recall
+
+
+demo:
+	$(PYTHON) -m scripts.demo
 
 
 clean:

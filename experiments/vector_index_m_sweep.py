@@ -60,22 +60,50 @@ LIMIT :limit
 """
 
 
-DROP_INDEX_SQL = f"""
-DROP INDEX IF EXISTS {INDEX_NAME}
+DROP_INDEX_SQL = """
+DROP INDEX IF EXISTS ix_chunks_embedding
 ON chunks
 """
+
+CREATE_INDEX_SQL_BY_M = {
+    4: """
+CREATE VECTOR INDEX ix_chunks_embedding
+ON chunks (embedding)
+M = 4
+DISTANCE = cosine
+""",
+    8: """
+CREATE VECTOR INDEX ix_chunks_embedding
+ON chunks (embedding)
+M = 8
+DISTANCE = cosine
+""",
+    16: """
+CREATE VECTOR INDEX ix_chunks_embedding
+ON chunks (embedding)
+M = 16
+DISTANCE = cosine
+""",
+    32: """
+CREATE VECTOR INDEX ix_chunks_embedding
+ON chunks (embedding)
+M = 32
+DISTANCE = cosine
+""",
+}
 
 
 def create_index_sql(
     m_value: int,
 ) -> str:
-    """Build CREATE VECTOR INDEX SQL."""
-    return f"""
-CREATE VECTOR INDEX {INDEX_NAME}
-ON chunks (embedding)
-M = {m_value}
-DISTANCE = cosine
-"""
+    """Return static CREATE VECTOR INDEX SQL for a supported M value."""
+    try:
+        return CREATE_INDEX_SQL_BY_M[m_value]
+    except KeyError as exc:
+        raise ValueError(
+            f"Unsupported vector-index M value: {m_value}. "
+            "Supported values are 4, 8, 16, and 32."
+        ) from exc
 
 
 @dataclass(frozen=True, slots=True)
@@ -403,6 +431,7 @@ def parse_arguments() -> argparse.Namespace:
         "--m-values",
         type=int,
         nargs="+",
+        choices=DEFAULT_M_VALUES,
         default=list(DEFAULT_M_VALUES),
         help=("Vector-index M values to benchmark."),
     )
@@ -418,10 +447,6 @@ async def main() -> None:
 
     if not m_values:
         raise ValueError("At least one M value is required.")
-
-    for m_value in m_values:
-        if not 3 <= m_value <= 200:
-            raise ValueError("MariaDB VECTOR INDEX M must be between 3 and 200.")
 
     await run(m_values=m_values)
 
