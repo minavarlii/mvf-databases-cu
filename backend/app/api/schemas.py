@@ -263,3 +263,13 @@ class CategoryListResponse(BaseModel):
     """Represent the available categories."""
 
     items: list[CategoryResponse]
+
+
+class StatsResponse(BaseModel):
+    """Represent live application and database metadata."""
+
+    article_count: int
+    chunk_count: int
+    embedding_model: str
+    vector_dimensions: int
+    mariadb_version: str

@@ -7,6 +7,7 @@ from backend.app.api.routes import (
     categories_router,
     rag_router,
     search_router,
+    stats_router,
 )
 
 api_router = APIRouter(
@@ -20,3 +21,5 @@ api_router.include_router(categories_router)
 api_router.include_router(search_router)
 
 api_router.include_router(rag_router)
+
+api_router.include_router(stats_router)

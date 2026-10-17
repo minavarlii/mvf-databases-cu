@@ -12,10 +12,14 @@ from backend.app.api.routes.rag import (
 from backend.app.api.routes.search import (
     router as search_router,
 )
+from backend.app.api.routes.stats import (
+    router as stats_router,
+)
 
 __all__ = [
     "articles_router",
     "categories_router",
     "rag_router",
     "search_router",
+    "stats_router",
 ]
