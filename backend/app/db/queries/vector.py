@@ -39,6 +39,37 @@ ORDER BY c.distance ASC
 """
 
 
+SEMANTIC_EXPLAIN_SQL = """
+EXPLAIN
+SELECT
+    c.chunk_id,
+    c.article_id,
+    a.title AS article_title,
+    c.chunk_index,
+    c.content,
+    c.token_count,
+    c.distance
+FROM (
+    SELECT
+        id AS chunk_id,
+        article_id,
+        chunk_index,
+        content,
+        token_count,
+        VEC_DISTANCE_COSINE(
+            embedding,
+            VEC_FromText(:embedding)
+        ) AS distance
+    FROM chunks
+    ORDER BY distance ASC
+    LIMIT :limit
+) AS c
+INNER JOIN articles AS a
+    ON a.id = c.article_id
+ORDER BY c.distance ASC
+"""
+
+
 ARTICLE_SEARCH_SQL = """
 SELECT
     a.id AS article_id,
@@ -97,7 +128,71 @@ ORDER BY c.distance ASC
 """
 
 
+HYBRID_EXPLAIN_SQL = """
+EXPLAIN
+SELECT
+    c.chunk_id,
+    c.article_id,
+    a.title AS article_title,
+    c.chunk_index,
+    c.content,
+    c.token_count,
+    c.distance
+FROM (
+    SELECT
+        id AS chunk_id,
+        article_id,
+        chunk_index,
+        content,
+        token_count,
+        VEC_DISTANCE_COSINE(
+            embedding,
+            VEC_FromText(:embedding)
+        ) AS distance
+    FROM chunks
+    WHERE article_id IN (
+        SELECT ac.article_id
+        FROM article_categories AS ac
+        INNER JOIN categories AS cat
+            ON cat.id = ac.category_id
+        WHERE cat.name = :category
+    )
+    ORDER BY distance ASC
+    LIMIT :limit
+) AS c
+INNER JOIN articles AS a
+    ON a.id = c.article_id
+ORDER BY c.distance ASC
+"""
+
+
 LINKED_SEARCH_SQL = """
+SELECT
+    c.id AS chunk_id,
+    c.article_id,
+    target.title AS article_title,
+    c.chunk_index,
+    c.content,
+    c.token_count,
+    VEC_DISTANCE_COSINE(
+        c.embedding,
+        VEC_FromText(:embedding)
+    ) AS distance
+FROM article_links AS al
+INNER JOIN articles AS source
+    ON source.id = al.source_article_id
+INNER JOIN articles AS target
+    ON target.id = al.target_article_id
+INNER JOIN chunks AS c
+    ON c.article_id = target.id
+WHERE source.title = :source_title
+ORDER BY distance ASC
+LIMIT :limit
+""".strip()
+
+
+LINKED_EXPLAIN_SQL = """
+EXPLAIN
 SELECT
     c.id AS chunk_id,
     c.article_id,
@@ -395,7 +490,7 @@ class VectorQueries:
         embedding_json = self._serialize_embedding(embedding)
 
         result = await self._session.execute(
-            text(f"EXPLAIN {SEMANTIC_SEARCH_SQL}"),
+            text(SEMANTIC_EXPLAIN_SQL),
             {
                 "embedding": embedding_json,
                 "limit": limit,
@@ -434,7 +529,7 @@ class VectorQueries:
         embedding_json = self._serialize_embedding(embedding)
 
         result = await self._session.execute(
-            text(f"EXPLAIN {HYBRID_SEARCH_SQL}"),
+            text(HYBRID_EXPLAIN_SQL),
             {
                 "embedding": embedding_json,
                 "category": normalized_category,
@@ -474,7 +569,7 @@ class VectorQueries:
         embedding_json = self._serialize_embedding(embedding)
 
         result = await self._session.execute(
-            text(f"EXPLAIN {LINKED_SEARCH_SQL}"),
+            text(LINKED_EXPLAIN_SQL),
             {
                 "embedding": embedding_json,
                 "source_title": (normalized_source_title),

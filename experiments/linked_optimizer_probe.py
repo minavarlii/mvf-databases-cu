@@ -49,7 +49,71 @@ LIMIT :limit
 """
 
 
+CURRENT_LINKED_EXPLAIN_SQL = """
+EXPLAIN
+SELECT
+    c.id AS chunk_id,
+    c.article_id,
+    target.title AS article_title,
+    c.chunk_index,
+    c.content,
+    c.token_count,
+    VEC_DISTANCE_COSINE(
+        c.embedding,
+        VEC_FromText(:embedding)
+    ) AS distance
+FROM article_links AS al
+INNER JOIN articles AS source
+    ON source.id = al.source_article_id
+INNER JOIN articles AS target
+    ON target.id = al.target_article_id
+INNER JOIN chunks AS c
+    ON c.article_id = target.id
+WHERE source.title = :source_title
+ORDER BY distance ASC
+LIMIT :limit
+"""
+
+
 PROPOSED_LINKED_SQL = """
+SELECT
+    c.chunk_id,
+    c.article_id,
+    target.title AS article_title,
+    c.chunk_index,
+    c.content,
+    c.token_count,
+    c.distance
+FROM (
+    SELECT
+        id AS chunk_id,
+        article_id,
+        chunk_index,
+        content,
+        token_count,
+        VEC_DISTANCE_COSINE(
+            embedding,
+            VEC_FromText(:embedding)
+        ) AS distance
+    FROM chunks
+    WHERE article_id IN (
+        SELECT al.target_article_id
+        FROM article_links AS al
+        INNER JOIN articles AS source
+            ON source.id = al.source_article_id
+        WHERE source.title = :source_title
+    )
+    ORDER BY distance ASC
+    LIMIT :limit
+) AS c
+INNER JOIN articles AS target
+    ON target.id = c.article_id
+ORDER BY c.distance ASC
+"""
+
+
+PROPOSED_LINKED_EXPLAIN_SQL = """
+EXPLAIN
 SELECT
     c.chunk_id,
     c.article_id,
@@ -135,12 +199,12 @@ async def execute_query(
 
 async def explain_query(
     session: AsyncSession,
-    sql: str,
+    explain_sql: str,
     parameters: dict[str, str | int],
 ) -> list[RowMapping]:
-    """Return EXPLAIN rows."""
+    """Return EXPLAIN rows from a predeclared static SQL statement."""
     result = await session.execute(
-        text(f"EXPLAIN {sql}"),
+        text(explain_sql),
         parameters,
     )
 
@@ -266,7 +330,7 @@ async def run() -> None:
 
             current_plan = await explain_query(
                 session,
-                CURRENT_LINKED_SQL,
+                CURRENT_LINKED_EXPLAIN_SQL,
                 parameters,
             )
 
@@ -277,7 +341,7 @@ async def run() -> None:
 
             proposed_plan = await explain_query(
                 session,
-                PROPOSED_LINKED_SQL,
+                PROPOSED_LINKED_EXPLAIN_SQL,
                 parameters,
             )
 
