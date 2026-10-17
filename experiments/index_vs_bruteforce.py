@@ -18,7 +18,15 @@ from backend.app.services import EmbeddingService
 
 RESULTS_DIRECTORY = Path("experiments/results")
 
-VECTOR_INDEX_NAME = "ix_chunks_embedding"
+VECTOR_INDEX_IGNORED_SQL = """
+ALTER TABLE chunks
+ALTER INDEX ix_chunks_embedding IGNORED
+""".strip()
+
+VECTOR_INDEX_NOT_IGNORED_SQL = """
+ALTER TABLE chunks
+ALTER INDEX ix_chunks_embedding NOT IGNORED
+""".strip()
 
 DEFAULT_RUNS = 50
 DEFAULT_WARMUP_RUNS = 5
@@ -132,19 +140,10 @@ async def set_vector_index_ignored(
     Args:
         ignored: Whether the vector index should be ignored.
     """
-    state = "IGNORED" if ignored else "NOT IGNORED"
+    sql = VECTOR_INDEX_IGNORED_SQL if ignored else VECTOR_INDEX_NOT_IGNORED_SQL
 
     async with database_manager.session() as session:
-        await session.execute(
-            text(
-                f"""
-                ALTER TABLE chunks
-                ALTER INDEX {VECTOR_INDEX_NAME}
-                {state}
-                """
-            )
-        )
-
+        await session.execute(text(sql))
         await session.commit()
 
 
