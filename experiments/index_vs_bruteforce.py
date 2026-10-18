@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import json
 import statistics
+from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
@@ -15,6 +16,7 @@ from sqlalchemy import text
 from backend.app.db import database_manager
 from backend.app.db.queries import VectorQueries
 from backend.app.services import EmbeddingService
+from experiments.environment import collect_environment
 
 RESULTS_DIRECTORY = Path("experiments/results")
 
@@ -222,6 +224,7 @@ async def run(
 
     print("Generating query embedding...")
     embedding = await embedding_service.embed_text(query)
+    environment = await collect_environment()
 
     print("Benchmarking VECTOR INDEX search...")
 
@@ -272,6 +275,7 @@ async def run(
         "runs": runs,
         "warmup_runs": warmup_runs,
         "vector_count": int(vector_count or 0),
+        "environment": asdict(environment),
         "indexed": {
             "summary_ms": indexed_summary,
             "samples_ms": indexed_latencies,

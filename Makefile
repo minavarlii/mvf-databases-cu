@@ -11,7 +11,11 @@ endif
 .PHONY: \
 	install \
 	install-dev \
+	frontend-install \
+	frontend \
+	bootstrap \
 	db-up \
+	db-wait \
 	db-down \
 	db-reset \
 	db-status \
@@ -21,6 +25,7 @@ endif
 	index \
 	index-force \
 	api \
+	api-dev \
 	test \
 	lint \
 	format \
@@ -30,19 +35,55 @@ endif
 	recall \
 	article-recall \
 	demo \
+	environment \
+	ef-search \
+	hybrid-index \
 	clean
-
 
 install:
 	$(PYTHON) -m pip install -e .
 
-
 install-dev:
 	$(PYTHON) -m pip install -e ".[dev]"
+
+frontend-install:
+	cd frontend && npm ci
+
+frontend:
+	cd frontend && npm run dev
+
+bootstrap:
+	@test -f .env || cp .env.example .env
+	@test -f frontend/.env || cp frontend/.env.example frontend/.env
+	$(MAKE) install-dev
+	$(MAKE) frontend-install
+	$(MAKE) db-up
+	$(MAKE) db-wait
+	$(MAKE) db-init
+	$(MAKE) db-verify
+	$(MAKE) ingest
+	$(MAKE) index
 
 
 db-up:
 	docker compose up -d mariadb
+
+
+db-wait:
+	@echo "Waiting for MariaDB..."
+	@for attempt in {1..30}; do \
+		if docker compose exec -T mariadb \
+			mariadb-admin ping \
+			-u"$(DB_USER)" \
+			-p"$(DB_PASSWORD)" \
+			--silent >/dev/null 2>&1; then \
+			echo "MariaDB is ready."; \
+			exit 0; \
+		fi; \
+		sleep 2; \
+	done; \
+	echo "MariaDB did not become ready in time." >&2; \
+	exit 1
 
 
 db-down:
@@ -52,6 +93,7 @@ db-down:
 db-reset:
 	docker compose down -v
 	docker compose up -d mariadb
+	$(MAKE) db-wait
 
 
 db-status:
@@ -95,7 +137,13 @@ index-force:
 
 api:
 	$(UVICORN) backend.app.main:app \
-		--host 0.0.0.0 \
+		--host 127.0.0.1 \
+		--port 8000
+
+
+api-dev:
+	$(UVICORN) backend.app.main:app \
+		--host 127.0.0.1 \
 		--port 8000 \
 		--reload
 
@@ -149,6 +197,25 @@ article-recall:
 
 demo:
 	$(PYTHON) -m scripts.demo
+
+
+environment:
+	$(PYTHON) -m experiments.environment
+
+
+ef-search:
+	$(PYTHON) -m experiments.vector_ef_search \
+		--repeats 3 \
+		--warmup-rounds 1
+
+
+hybrid-index:
+	$(PYTHON) -m experiments.hybrid_index_probe \
+		--query "neural network training" \
+		--category "Machine learning" \
+		--limit 5 \
+		--warmups 5 \
+		--runs 50
 
 
 clean:

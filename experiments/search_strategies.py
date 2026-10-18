@@ -25,6 +25,7 @@ from backend.app.db.queries import (
     VectorSearchResult,
 )
 from backend.app.services import EmbeddingService
+from experiments.environment import EnvironmentMetadata, collect_environment
 
 RESULTS_DIRECTORY = Path("experiments/results")
 
@@ -71,6 +72,7 @@ class SearchStrategiesResult:
     hybrid_category: str
     linked_source_title: str
     dataset: DatasetStats
+    environment: EnvironmentMetadata
     semantic: StrategyResult
     hybrid: StrategyResult
     linked: StrategyResult
@@ -267,6 +269,7 @@ async def run_benchmark(
         raise ValueError("Limit must be greater than zero.")
 
     dataset = await load_dataset_stats()
+    environment = await collect_environment()
 
     embedding_service = EmbeddingService()
 
@@ -335,6 +338,7 @@ async def run_benchmark(
         hybrid_category=(normalized_category),
         linked_source_title=(normalized_source_title),
         dataset=dataset,
+        environment=environment,
         semantic=StrategyResult(
             latency=semantic_latency,
             execution_plan=tuple(semantic_plan),

@@ -35,6 +35,12 @@ Current corpus:
 
 The embedding model is `sentence-transformers/all-MiniLM-L6-v2`; chunks are 220 model tokens with 40-token overlap and L2-normalized embeddings.
 
+### Why this embedding model and corpus?
+
+MVF uses `sentence-transformers/all-MiniLM-L6-v2` because it produces compact 384-dimensional sentence embeddings, runs locally without a hosted embedding API, and maps directly to MariaDB `VECTOR(384)`. That keeps ingestion reproducible and vector/index storage modest while still providing useful semantic retrieval quality for the project corpus.
+
+The corpus is built reproducibly from the English Wikipedia `Machine learning` category through the MediaWiki API. Ingestion requests up to 300 pages (`make ingest`); the committed crawl produced **285 articles**, which are preserved as raw JSON snapshots under `data/raw/`. The project deliberately uses one coherent subject area so semantic, category-filtered, and article-link-constrained retrieval can be evaluated over the same relational corpus.
+
 ---
 
 ## Architecture
@@ -254,9 +260,51 @@ A later rebuilt-index `M` study also measured **92.5% Recall@10** for all tested
 
 A separate single-query exact-top-5 probe found chunk-level overlap of **0.8** for `M=4/8/16` but **0.4** for `M=32`. That result is kept as a documented ANN approximation/failure-mode observation even though the full 40-question article-level Recall@10 did not change.
 
+### Filtered ANN probe
+
+MVF also measures the category-filtered hybrid query with the native vector index enabled and optimizer-ignored, using the same query, category and top-k in both cases.
+
+| Hybrid mode | Mean latency | Top-k |
+|---|---:|---|
+| `ix_chunks_embedding` enabled | **2.528 ms** | reference |
+| Vector index optimizer-ignored | 231.508 ms | identical |
+
+Observed mean speedup: **91.56×**, with the **same top-k** in both runs.
+
+This directly verifies that the relational category predicate can coexist with native ANN retrieval in the same SQL statement and that the vector index is materially responsible for the measured hybrid-search speedup.
+
+Result artifact:
+
+```text
+experiments/results/hybrid_index_probe_20261018T110523Z.json
+```
+
+### Runtime HNSW `mhnsw_ef_search` study
+
+Build-time `M` is not the only ANN tuning surface. MVF therefore evaluates MariaDB's session-level `mhnsw_ef_search` across the complete 40-question ground-truth set. Each setting is measured in **3 complete passes** after a warm-up round, so both retrieval quality and between-pass latency variance are recorded.
+
+| `mhnsw_ef_search` | Aggregate mean | Aggregate P95 | Between-pass stddev | Recall@10 | MRR |
+|---:|---:|---:|---:|---:|---:|
+| **200** | **15.449 ms** | 16.889 ms | 0.348 ms | **92.5%** | **0.782** |
+| 400 | 16.170 ms | 17.614 ms | 0.228 ms | 92.5% | 0.782 |
+| 800 | 16.247 ms | 17.933 ms | 0.277 ms | 92.5% | 0.782 |
+| 1600 | 17.326 ms | 18.420 ms | 1.415 ms | 92.5% | 0.782 |
+
+On this 3,940-vector corpus, raising `mhnsw_ef_search` above 200 did **not** improve Recall@10 or MRR. Query latency instead increased slightly, and the 1600 setting showed noticeably more run-to-run noise because one pass contained an outlier. This is reported rather than discarded because the experiment is intended to expose real ANN/runtime behavior, not only the cleanest run.
+
+Result artifact:
+
+```text
+experiments/results/vector_ef_search_20261018T110906Z.json
+```
+
 Machine-readable results live in `experiments/results/`.
 
-> **Benchmark provenance:** the historical result JSON records MariaDB/corpus/query/run configuration but did not record the host machine/OS. Absolute latency is therefore hardware-dependent; the reproducible harness fixes the corpus, query, warm-ups, measured-run count, distance metric, and index configuration.
+> **Benchmark provenance:** the older committed benchmark JSON predates environment capture, so its absolute latency should be treated as hardware-dependent. New experiment artifacts record the execution environment automatically. The current reproduced studies were run on **Darwin 24.5.0 / arm64**, **Python 3.13.0**, with **MariaDB 11.8.9-MariaDB-ubu2404** in Docker. The harness fixes corpus size, query set, warm-ups, measured passes, distance metric and index configuration.
+
+`make environment` records OS, architecture, processor, Python and MariaDB version, and on macOS also records machine model, chip and memory when available.
+
+The exact timestamp of the original Wikipedia crawl was not recorded, so `data/manifest.json` intentionally keeps `retrieved_at: null` instead of inventing a date. Future ingestion runs should record the timestamp at collection time.
 
 ---
 
@@ -269,6 +317,8 @@ Machine-readable results live in `experiments/results/`.
 - Node.js **22+**
 - MariaDB is provided by Docker (`mariadb:11.8`)
 - optional: `OPENAI_API_KEY` for generated RAG answers
+
+Local services bind to loopback by default. MariaDB uses a separate `DB_ROOT_PASSWORD`, and `make api` runs without hot reload; `make api-dev` is available for local code-reload development.
 
 The first vector build downloads `sentence-transformers/all-MiniLM-L6-v2` if it is not already cached.
 
@@ -312,20 +362,12 @@ make api
 
 ```bash
 cd frontend
+cp .env.example .env
 npm ci
-```
-
-Create/configure the frontend environment so it points at the backend, for example:
-
-```env
-VITE_API_BASE_URL=http://localhost:8000
-```
-
-Then:
-
-```bash
 npm run dev
 ```
+
+`frontend/.env.example` already points `VITE_API_URL` at `http://localhost:8000`; set `VITE_USE_MOCK=true` if you want to explore the UI without a running backend.
 
 Open the Vite URL (normally `http://localhost:5173`).
 
@@ -346,6 +388,24 @@ python3 -m scripts.demo --json
 ```
 
 No OpenAI key is required for this retrieval demo.
+
+### One-command first-time bootstrap
+
+For a fresh checkout, the complete local data/retrieval setup can also be prepared with:
+
+```bash
+make bootstrap
+```
+
+This creates missing backend/frontend environment files from the checked-in examples, installs Python and frontend development dependencies, starts and waits for MariaDB, applies the schema, ingests the Wikipedia corpus, and builds the vector index. It intentionally does not start long-running API/frontend processes; run `make api` and `make frontend` in separate terminals afterwards.
+
+### Standalone SQL examples
+
+[`sql/examples.sql`](sql/examples.sql) is a MariaDB-client walkthrough independent of the Python API. It uses an existing stored chunk as the query vector so the semantic, category-filtered, linked-article and `EXPLAIN` examples can be pasted directly into a prepared MVF database.
+
+### Transactional consistency
+
+MariaDB stores the relational article and its vector chunk in the same InnoDB transaction. `tests/integration/test_vector_transaction.py` inserts an article plus `VECTOR(384)` chunk, verifies both are visible inside the transaction, rolls the transaction back, and then verifies that neither row remains. This demonstrates the database-native consistency advantage over synchronizing a relational database with a separate vector service.
 
 ---
 
@@ -368,6 +428,18 @@ Open **Evaluation** to inspect committed Recall@K/MRR, indexed-vs-brute-force la
 
 ---
 
+## Additional reproducibility probes
+
+```bash
+make environment
+make ef-search
+make hybrid-index
+```
+
+`make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.449 ms** at 200 to **17.326 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.528 ms vs 231.508 ms (91.56×)** with identical top-k. These probes directly measure runtime HNSW tuning and filtered-ANN behavior rather than inferring them from a single plan row.
+
+---
+
 ## Testing and CI
 
 Backend quality gate:
@@ -376,7 +448,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. The current backend suite collects **28 automated tests**, covering API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. With the transactional-vector regression test included, the backend suite collects **29 automated tests**, covering API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, and the guided demo.
 
 Frontend checks:
 
@@ -412,6 +484,8 @@ The repository keeps secrets out of source control through environment configura
 ├── experiments/              benchmark/evaluation harnesses
 │   └── results/              machine-readable result JSON
 ├── scripts/                  ingest/index/demo/search utilities
+├── sql/
+│   └── examples.sql          pasteable MariaDB vector-search walkthrough
 ├── tests/                    backend unit/integration tests + CI fixture
 ├── docs/
 │   ├── API.md

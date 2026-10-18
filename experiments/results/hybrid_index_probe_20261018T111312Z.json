@@ -1,0 +1,202 @@
+{
+  "executed_at": "2026-10-18T11:13:12.049909+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "query": "neural network training",
+  "category": "Machine learning",
+  "limit": 5,
+  "warmups": 5,
+  "runs": 50,
+  "indexed": {
+    "latency": {
+      "runs": 50,
+      "mean_ms": 2.49741254010587,
+      "median_ms": 2.4159999993571546,
+      "p95_ms": 3.1927919990266673,
+      "stddev_ms": 0.36114272770569505,
+      "minimum_ms": 2.004791997023858,
+      "maximum_ms": 3.408666998439003
+    },
+    "execution_plan": [
+      {
+        "select_id": 1,
+        "select_type": "PRIMARY",
+        "table": "<derived2>",
+        "access_type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "rows": 5,
+        "extra": "Using filesort"
+      },
+      {
+        "select_id": 1,
+        "select_type": "PRIMARY",
+        "table": "a",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY",
+        "key": "PRIMARY",
+        "rows": 1,
+        "extra": ""
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "cat",
+        "access_type": "const",
+        "possible_keys": "PRIMARY,uq_categories_name",
+        "key": "uq_categories_name",
+        "rows": 1,
+        "extra": "Using index"
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "chunks",
+        "access_type": "index",
+        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+        "key": "ix_chunks_embedding",
+        "rows": 3113,
+        "extra": ""
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "ac",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY,fk_article_categories_category",
+        "key": "fk_article_categories_category",
+        "rows": 1,
+        "extra": "Using index"
+      }
+    ],
+    "result_signature": [
+      [
+        3995,
+        241,
+        3
+      ],
+      [
+        2417,
+        122,
+        0
+      ],
+      [
+        3080,
+        170,
+        1
+      ],
+      [
+        588,
+        1,
+        30
+      ],
+      [
+        4397,
+        276,
+        0
+      ]
+    ]
+  },
+  "index_ignored": {
+    "latency": {
+      "runs": 50,
+      "mean_ms": 232.8175750200171,
+      "median_ms": 232.604666500265,
+      "p95_ms": 234.99495899886824,
+      "stddev_ms": 1.5947014008949298,
+      "minimum_ms": 230.47295799915446,
+      "maximum_ms": 240.34695899899816
+    },
+    "execution_plan": [
+      {
+        "select_id": 1,
+        "select_type": "PRIMARY",
+        "table": "<derived2>",
+        "access_type": "ALL",
+        "possible_keys": null,
+        "key": null,
+        "rows": 5,
+        "extra": "Using filesort"
+      },
+      {
+        "select_id": 1,
+        "select_type": "PRIMARY",
+        "table": "a",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY",
+        "key": "PRIMARY",
+        "rows": 1,
+        "extra": ""
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "cat",
+        "access_type": "const",
+        "possible_keys": "PRIMARY,uq_categories_name",
+        "key": "uq_categories_name",
+        "rows": 1,
+        "extra": "Using index"
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "chunks",
+        "access_type": "ALL",
+        "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+        "key": null,
+        "rows": 3330,
+        "extra": "Using filesort"
+      },
+      {
+        "select_id": 2,
+        "select_type": "DERIVED",
+        "table": "ac",
+        "access_type": "eq_ref",
+        "possible_keys": "PRIMARY,fk_article_categories_category",
+        "key": "fk_article_categories_category",
+        "rows": 1,
+        "extra": "Using index"
+      }
+    ],
+    "result_signature": [
+      [
+        3995,
+        241,
+        3
+      ],
+      [
+        2417,
+        122,
+        0
+      ],
+      [
+        3080,
+        170,
+        1
+      ],
+      [
+        588,
+        1,
+        30
+      ],
+      [
+        4397,
+        276,
+        0
+      ]
+    ]
+  },
+  "same_top_k": true,
+  "mean_speedup": 93.22351485035288
+}

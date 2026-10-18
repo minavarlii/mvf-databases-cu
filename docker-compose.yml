@@ -8,10 +8,10 @@ services:
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}_root
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
 
     ports:
-      - "${DB_PORT}:3306"
+      - "127.0.0.1:${DB_PORT}:3306"
 
     volumes:
       - mvf_mariadb_data:/var/lib/mysql
