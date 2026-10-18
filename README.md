@@ -658,13 +658,16 @@ make vector-lifecycle
 make multi-mode-latency
 make vector-concurrency
 make vector-scale
+make vector-cache-sweep
 ```
 
 `make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. `make ground-truth-latency` removes the single-query benchmark limitation by timing all **40 ground-truth questions across 5 measured passes (200 measured queries)** after a complete warm-up pass, preserving per-query timings and per-pass summaries. `make m-ground-truth` evaluates each `M` value with **3 complete measured ground-truth passes** rather than one. `make vector-lifecycle` checks second-session isolation before commit, ANN visibility after commit, and vector/index cleanup after cascade delete while recording insert/delete commit cost.
 
 `make vector-scale` isolates server/index scaling from retrieval quality. It builds a scratch table at **1×, 5×, 10× and 25×** the canonical corpus, rebuilds the production `M=8` cosine vector index at each size, records build time, query mean/P95, raw vector payload, and the server's configured `mhnsw_max_cache_size`, then drops the scratch table. MariaDB 11.8 does not expose a reliable per-index resident-memory figure through the metadata path used by this harness, so ordinary `information_schema.TABLES.INDEX_LENGTH` is deliberately **not** presented as HNSW memory. The command writes a timestamped JSON artifact plus `docs/vector-scale-results.md`; the repeated vectors make this a controlled index-cost probe rather than a new Recall/MRR claim.
 
-In the current macOS run, the scratch index scaled from **3,940** to **98,500 vectors**: index build time rose from **0.340 s** at 1× to **2.112 s** at 5×, **5.199 s** at 10× and **16.054 s** at 25×, while mean indexed top-5 query latency stayed between **0.586 ms and 0.624 ms**. This is an operational scaling result, not a recall claim.
+The current measured values are kept in [`docs/vector-scale-results.md`](docs/vector-scale-results.md), which is generated from the same run that writes the timestamped JSON artifact. The README deliberately does not duplicate those scale numbers so the prose cannot drift from the committed machine-readable result. This is an operational scaling result, not a recall claim.
+
+`make vector-cache-sweep` goes one step further by rebuilding the **25× / 98,500-vector** scratch index under multiple GLOBAL `mhnsw_max_cache_size` limits (4, 16 and 64 MiB by default), measuring build and query latency at each setting, checking top-5 stability, and restoring the original server value afterwards. It writes `docs/vector-cache-sweep-results.md` plus a timestamped JSON artifact. Because this variable is GLOBAL, the target requires the local `DB_ROOT_PASSWORD`; the password is supplied to the MariaDB client through the container environment rather than embedded in source.
 
 ---
 
@@ -698,7 +701,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 33 test cases**. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip and destructive-restore safeguards, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 33 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip and destructive-restore safeguards, and the guided demo.
 
 Frontend checks:
 

@@ -111,6 +111,57 @@ jobs:
             mvf \
             < tests/fixtures/ci_seed.sql
 
+      - name: Verify SQL prebuilt snapshot in scratch database
+        run: |
+          mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u root \
+            -pmvf_ci_root_password \
+            -e "DROP DATABASE IF EXISTS mvf_sql_restore_test; CREATE DATABASE mvf_sql_restore_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+          mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u root \
+            -pmvf_ci_root_password \
+            mvf_sql_restore_test \
+            < database/schema/001_schema.sql
+
+          mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u root \
+            -pmvf_ci_root_password \
+            mvf_sql_restore_test \
+            < database/schema/002_vector_index.sql
+
+          gzip -dc data/prebuilt/mvf_corpus.sql.gz | mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u root \
+            -pmvf_ci_root_password \
+            mvf_sql_restore_test
+
+          counts="$(mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u root \
+            -pmvf_ci_root_password \
+            -N \
+            -B \
+            mvf_sql_restore_test \
+            -e "SELECT (SELECT COUNT(*) FROM articles), (SELECT COUNT(*) FROM categories), (SELECT COUNT(*) FROM article_categories), (SELECT COUNT(*) FROM article_links), (SELECT COUNT(*) FROM chunks);")"
+
+          test "$counts" = $'285\t823\t2322\t2710\t3940'
+
+          mariadb \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -u root \
+            -pmvf_ci_root_password \
+            -e "DROP DATABASE mvf_sql_restore_test;"
+
       - name: Verify MariaDB
         run: python -m scripts.verify_database
 

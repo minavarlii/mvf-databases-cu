@@ -44,6 +44,7 @@ endif
 	multi-mode-latency \
 	vector-concurrency \
 	vector-scale \
+	vector-cache-sweep \
 	prebuilt-export \
 	prebuilt-sql-export \
 	prebuilt-restore \
@@ -266,6 +267,14 @@ vector-concurrency:
 vector-scale:
 	$(PYTHON) -m experiments.vector_scale \
 		--multipliers 1 5 10 25 \
+		--warmups 5 \
+		--runs 30
+
+
+vector-cache-sweep:
+	$(PYTHON) -m experiments.vector_cache_sweep \
+		--cache-mib 4 16 64 \
+		--multiplier 25 \
 		--warmups 5 \
 		--runs 30
 
