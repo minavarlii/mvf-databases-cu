@@ -8,6 +8,49 @@ It keeps **vector storage, cosine similarity, ANN indexing, relational filtering
 
 ![MVF semantic RAG interface](docs/screenshots/overview.png)
 
+## Learn MariaDB vector search in five statements
+
+The reusable core of MVF fits in five MariaDB statements. The full walkthrough is
+in [`sql/examples.sql`](sql/examples.sql); these are the pieces to learn first:
+
+```sql
+-- 1. Store embeddings as a native vector type.
+CREATE TABLE demo_chunks (
+    id BIGINT PRIMARY KEY,
+    category VARCHAR(64) NOT NULL,
+    embedding VECTOR(384) NOT NULL
+);
+
+-- 2. Build MariaDB's native HNSW index for cosine distance.
+CREATE VECTOR INDEX ix_demo_embedding
+ON demo_chunks (embedding) M = 8 DISTANCE = cosine;
+
+-- 3. Semantic ANN search.
+SELECT id
+FROM demo_chunks
+ORDER BY VEC_DISTANCE_COSINE(embedding, VEC_FromText(:query_vector))
+LIMIT 5;
+
+-- 4. Hybrid search: ordinary SQL predicate and ANN ranking in one statement.
+SELECT id, category
+FROM demo_chunks
+WHERE category = :category
+ORDER BY VEC_DISTANCE_COSINE(embedding, VEC_FromText(:query_vector))
+LIMIT 5;
+
+-- 5. Tune the HNSW candidate pool for the current session.
+SET SESSION mhnsw_ef_search = 200;
+```
+
+For a fresh checkout, **one command** restores the checked-in corpus, runs the
+SQL walkthrough, and runs the guided retrieval demo:
+
+```bash
+make quickstart
+```
+
+No MediaWiki request, embedding-model download, or OpenAI key is required.
+
 ## Results at a glance
 
 | Result | Current canonical measurement |
@@ -23,6 +66,14 @@ It keeps **vector storage, cosine similarity, ANN indexing, relational filtering
 
 For methodology, repeated passes, optimizer plans, variance and failure modes,
 see [Measured results](#measured-results).
+
+The **15.442 ms** ground-truth figure is intentionally a different workload from
+the roughly **1.3 ms** semantic microbenchmarks below. Ground-truth evaluation
+requests **200 candidate chunks per question** (`candidate_limit = 200`) so it can
+de-duplicate chunk hits into up to ten unique articles before computing Recall@10.
+The search-strategy and repeated multi-mode microbenchmarks request only
+**5 rows (`LIMIT 5`)**. The larger candidate set, not contradictory measurements,
+explains the order-of-magnitude latency difference.
 
 ### Contents
 
@@ -49,17 +100,15 @@ see [Measured results](#measured-results).
 For the shortest reproducible path to the native-vector feature, run exactly:
 
 ```bash
-make offline-bootstrap
-make sql-demo
-make demo
+make quickstart
 ```
 
-The first command restores the checked-in relational corpus and all 3,940 stored
-vectors. `make sql-demo` is also self-contained and will run the offline bootstrap
-again if needed before walking through native `VECTOR`, cosine ranking, hybrid
-filters, link joins and `EXPLAIN` with the MariaDB client. The third command runs
-the guided Python demo and prints ranked results, SQL, timings and optimizer plans.
-No OpenAI key is required for any of these commands.
+That single target restores the checked-in relational corpus and all 3,940 stored
+vectors, runs the pasteable MariaDB client walkthrough from `sql/examples.sql`,
+and then runs the guided Python demo with ranked results, SQL, timings and
+optimizer plans. No OpenAI key, MediaWiki call, or embedding-model download is
+required. The equivalent individual steps remain available as
+`make offline-bootstrap`, `make sql-demo`, and `make demo`.
 
 ### Why some development-run numbers changed
 
@@ -303,6 +352,8 @@ Benchmarks isolate **database retrieval**: query embedding is computed before ti
 | Hybrid   | **2.230 ms** | 2.173 ms | 2.607 ms | `ix_chunks_embedding` |
 | Linked   | **89.302 ms** | 89.154 ms | 91.032 ms | `ix_chunks_article_id` |
 
+Latency scope: all three strategy microbenchmarks use **`LIMIT 5`**.
+
 ### Native index vs brute force
 
 | Mode                      |               Mean |        P95 |
@@ -310,7 +361,7 @@ Benchmarks isolate **database retrieval**: query embedding is computed before ti
 | MariaDB `VECTOR INDEX` | **1.392 ms** | **1.836 ms** |
 | Brute-force cosine search | 235.715 ms | 237.491 ms |
 
-Observed mean speedup: **169.33×**.
+Observed mean speedup: **169.33×**. Both modes use the same **`LIMIT 5`** query.
 
 ![Vector index and strategy benchmarks](docs/screenshots/benchmarks.png)
 
@@ -334,7 +385,8 @@ MVF also runs an exhaustive article-level reference evaluation. In the current c
 ### Vector-index `M` study
 
 Each `M` value is rebuilt from scratch, warmed up over the full 40-question
-ground-truth set, and then measured for **3 complete passes**.
+ground-truth set, and then measured for **3 complete passes**. Every question
+requests **`candidate_limit = 200`** chunks before article-level de-duplication.
 
 | M | Build time | Mean query | Median query | P95 query | Between-pass stddev | Recall@10 | MRR |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -371,7 +423,7 @@ Artifacts:
 
 ### Filtered ANN probe
 
-MVF also measures the category-filtered hybrid query with the native vector index enabled and optimizer-ignored, using the same query, category and top-k in both cases.
+MVF also measures the category-filtered hybrid query with the native vector index enabled and optimizer-ignored, using the same query, category and top-k in both cases. Both modes use **`LIMIT 5`**.
 
 | Hybrid mode | Mean latency | Top-k |
 |---|---:|---|
@@ -388,11 +440,38 @@ Result artifact:
 experiments/results/hybrid_index_probe_20261018T111312Z.json
 ```
 
+### Highly selective filtered-ANN limit probe
+
+The broad `Machine learning` category above is the happy path, so MVF also has a
+separate failure-mode probe for **highly selective relational predicates**.
+`make selective-filter` discovers real Wikipedia categories with at least
+`LIMIT 10` eligible chunks but at most 50 matching chunks in the 3,940-vector
+corpus, then runs the same category predicate with MariaDB ANN at
+`mhnsw_ef_search = 20 / 200 / 800` and with `ix_chunks_embedding` optimizer-ignored
+as an exact filtered baseline. Because every chosen category has at least ten
+eligible chunks, an indexed result with fewer than ten rows is genuine ANN/filter
+underfill rather than a category that simply has too little data.
+
+The probe records returned-row count, predicate selectivity, repeated mean/P95
+latency, exact-top-k overlap, and `EXPLAIN` plans for each setting. It always
+restores the vector index in a `finally` block. The committed machine-generated
+report and JSON artifact are:
+
+- [`docs/selective-filter-results.md`](docs/selective-filter-results.md)
+- the timestamped `experiments/results/selective_filter_probe_*.json` named by that report
+
+This experiment is deliberately framed as a **limit/failure-mode test**, not as a
+claim that every selective predicate must underfill: the report states whether
+underfill was reproduced on this corpus and whether increasing the ANN candidate
+pool changed the result.
+
 ### Runtime HNSW `mhnsw_ef_search` study
 
 MVF also evaluates MariaDB's session-level `mhnsw_ef_search`, complementing
 the build-time `M` study. Each setting uses the complete 40-question
 ground-truth set with one warm-up round and **3 complete measured passes**.
+Every query requests **`candidate_limit = 200`** chunks, matching the full
+ground-truth latency workload.
 
 The table below is generated from the committed result artifact; aggregate
 P95 and between-pass standard deviation are therefore the exact values stored
@@ -418,7 +497,8 @@ Artifact:
 The single-query microbenchmarks are complemented by a workload that times the
 **entire 40-question ground-truth set**. Query embeddings are precomputed before
 timing. One complete warm-up pass is followed by **5 measured passes**, for
-**200 measured semantic-search queries** in total.
+**200 measured semantic-search queries** in total. Each query requests
+**`candidate_limit = 200`** chunks before article-level de-duplication.
 
 | Metric | Result |
 |---|---:|
@@ -469,7 +549,8 @@ Artifact:
 
 A separate workload runs **semantic, hybrid, and linked retrieval over all 40
 ground-truth questions**, with one warm-up pass and **5 measured passes** per
-mode (**200 measured queries per mode**).
+mode (**200 measured queries per mode**). These repeated mode comparisons use
+**`LIMIT 5`** for semantic, hybrid, and linked retrieval.
 
 | Environment | Mode | Mean | P95 | Between-pass stddev | Non-empty result rate |
 |---|---|---:|---:|---:|---:|
@@ -689,6 +770,7 @@ Open **Evaluation** to inspect committed Recall@K/MRR, indexed-vs-brute-force la
 make environment
 make ef-search
 make hybrid-index
+make selective-filter
 make ground-truth-latency
 make m-ground-truth
 make vector-lifecycle
@@ -698,7 +780,7 @@ make vector-scale
 make vector-cache-sweep
 ```
 
-`make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. `make ground-truth-latency` removes the single-query benchmark limitation by timing all **40 ground-truth questions across 5 measured passes (200 measured queries)** after a complete warm-up pass, preserving per-query timings and per-pass summaries. `make m-ground-truth` evaluates each `M` value with **3 complete measured ground-truth passes** rather than one. `make vector-lifecycle` checks second-session isolation before commit, ANN visibility after commit, and vector/index cleanup after cascade delete while recording insert/delete commit cost.
+`make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. `make selective-filter` deliberately searches rare real categories with enough eligible rows to satisfy `LIMIT 10`, then compares indexed ANN at several `mhnsw_ef_search` settings with an index-ignored exact baseline to detect filtered-ANN underfill and approximation under selective predicates. `make ground-truth-latency` removes the single-query benchmark limitation by timing all **40 ground-truth questions across 5 measured passes (200 measured queries)** after a complete warm-up pass, preserving per-query timings and per-pass summaries. `make m-ground-truth` evaluates each `M` value with **3 complete measured ground-truth passes** rather than one. `make vector-lifecycle` checks second-session isolation before commit, ANN visibility after commit, and vector/index cleanup after cascade delete while recording insert/delete commit cost.
 
 `make vector-scale` isolates server/index scaling from retrieval quality. It builds a scratch table at **1×, 5×, 10× and 25×** the canonical corpus, rebuilds the production `M=8` cosine vector index at each size, records build time, query mean/P95, raw vector payload, and the server's configured `mhnsw_max_cache_size`, then drops the scratch table. MariaDB 11.8 does not expose a reliable per-index resident-memory figure through the metadata path used by this harness, so ordinary `information_schema.TABLES.INDEX_LENGTH` is deliberately **not** presented as HNSW memory. The command writes a timestamped JSON artifact plus `docs/vector-scale-results.md`; the repeated vectors make this a controlled index-cost probe rather than a new Recall/MRR claim.
 
@@ -792,6 +874,7 @@ The repository keeps secrets out of source control through environment configura
 ├── docs/
 │   ├── API.md
 │   ├── sql-demo-output.txt    captured SQL walkthrough output
+│   ├── selective-filter-results.md generated selective-filter ANN report
 │   ├── vector-scale-results.md generated scale-probe summary after `make vector-scale`
 │   ├── vector-cache-sweep-results.md repeated cache-limit study summary
 │   └── screenshots/
@@ -824,6 +907,7 @@ These behaviors are part of the project result: MVF does not assume that every v
 
 - **Benchmark artifacts should carry provenance from the first run.** The first experiment files predated automatic host capture; current harnesses now persist OS, hardware, Python, MariaDB and run configuration.
 - **ANN parameters need workload-specific evidence.** Larger `M` and `mhnsw_ef_search` values did not automatically improve retrieval quality on this corpus, so MVF keeps conservative production settings instead of assuming that larger values are better.
+- **Selective relational predicates are tested separately from broad hybrid search.** The selective-filter probe only interprets underfill when at least `LIMIT` matching chunks exist, and compares ANN output with an index-ignored exact baseline instead of assuming that a short result set is an HNSW failure.
 - **Relational selectivity can beat vector-first planning.** Linked search is faster as a relational-first workload, while category-filtered search benefits strongly from HNSW; the correct plan depends on candidate-set shape.
 - **Future corpus versions should persist source revision timestamps.** The current corpus stores Wikipedia `revision_id` but not the source revision timestamp, so MVF does not represent `articles.updated_at` as source-edit time.
 - **A larger evaluation set would improve confidence.** The 40-question set is enough to expose ranking differences and parameter behavior, but a broader multi-domain corpus and more ground-truth questions would make conclusions more general.

@@ -45,6 +45,8 @@ endif
 	vector-concurrency \
 	vector-scale \
 	vector-cache-sweep \
+	selective-filter \
+	quickstart \
 	prebuilt-export \
 	prebuilt-sql-export \
 	prebuilt-restore \
@@ -236,6 +238,17 @@ hybrid-index:
 		--runs 50
 
 
+selective-filter:
+	$(PYTHON) -m experiments.selective_filter_probe \
+		--query "neural network training" \
+		--limit 10 \
+		--max-eligible-chunks 50 \
+		--category-count 12 \
+		--warmups 1 \
+		--runs 5 \
+		--ef-search 20 200 800
+
+
 ground-truth-latency:
 	$(PYTHON) -m experiments.ground_truth_latency \
 		--passes 5 \
@@ -345,6 +358,17 @@ sql-demo:
 		-p"$(DB_PASSWORD)" \
 		"$(DB_NAME)" \
 		< sql/examples.sql
+
+
+quickstart:
+	$(MAKE) offline-bootstrap
+	docker compose exec -T mariadb \
+		mariadb \
+		-u"$(DB_USER)" \
+		-p"$(DB_PASSWORD)" \
+		"$(DB_NAME)" \
+		< sql/examples.sql
+	$(MAKE) demo
 
 
 clean:

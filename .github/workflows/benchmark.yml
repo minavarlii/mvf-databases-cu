@@ -86,6 +86,7 @@ jobs:
         run: |
           rm -f experiments/results/multi_mode_latency_*.json
           rm -f experiments/results/vector_concurrency_*.json
+          rm -f experiments/results/selective_filter_probe_*.json
           rm -f experiments/results/vector_cache_sweep_*.json
 
       - name: Capture runner environment
@@ -96,6 +97,17 @@ jobs:
 
       - name: Run concurrency stress
         run: python -m experiments.vector_concurrency --writers 2 --rows-per-writer 25 --queries 50
+
+      - name: Run selective filtered-ANN probe
+        run: >-
+          python -m experiments.selective_filter_probe
+          --query "neural network training"
+          --limit 10
+          --max-eligible-chunks 50
+          --category-count 12
+          --warmups 1
+          --runs 5
+          --ef-search 20 200 800
 
       - name: Run repeated HNSW cache sweep
         run: >-
@@ -115,6 +127,8 @@ jobs:
             experiments/results/ubuntu_environment.json
             experiments/results/multi_mode_latency_*.json
             experiments/results/vector_concurrency_*.json
+            experiments/results/selective_filter_probe_*.json
+            docs/selective-filter-results.md
             experiments/results/vector_cache_sweep_*.json
             experiments/results/ubuntu/vector-cache-sweep-results.md
           if-no-files-found: error

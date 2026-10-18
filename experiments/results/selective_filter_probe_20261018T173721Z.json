@@ -1,0 +1,2980 @@
+{
+  "executed_at": "2026-10-18T17:37:21.501513+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "query": "neural network training",
+  "limit": 10,
+  "total_chunks": 3940,
+  "category_count": 12,
+  "minimum_eligible_chunks": 10,
+  "maximum_eligible_chunks": 50,
+  "warmups": 1,
+  "runs": 5,
+  "ef_values": [
+    20,
+    200,
+    800
+  ],
+  "results": [
+    {
+      "category": "1960s neologisms",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.8725750007433817,
+      "exact_p95_ms": 2.1968421977362595,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.891725002496969,
+          "p95_ms": 2.0139502055826597,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.6750417998991907,
+          "p95_ms": 1.8547835963545367,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.391741599421948,
+          "p95_ms": 2.5947003974579275,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "All articles with topics of unclear notability",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 2.1862581983441487,
+      "exact_p95_ms": 2.664958000241313,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 2,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.175783400889486,
+          "p95_ms": 2.5950248033041134,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 2,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.5939580000122078,
+          "p95_ms": 1.7338409990770742,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 2,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.5817333997110836,
+          "p95_ms": 2.653324994025752,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 2,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Arguments",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.794191800581757,
+      "exact_p95_ms": 2.227341802790761,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.1590418022242375,
+          "p95_ms": 2.3153922011260875,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.5826749993721023,
+          "p95_ms": 1.7276418002438731,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.6980750015354715,
+          "p95_ms": 2.951516800385434,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Articles needing additional references from January 2026",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.6889002014067955,
+      "exact_p95_ms": 1.8282836012076586,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 2,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.8573499997728504,
+          "p95_ms": 1.8990581971593201,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 2,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.5250500029651448,
+          "p95_ms": 1.6146163994562812,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 2,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.189975000510458,
+          "p95_ms": 2.580191200831905,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 2,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Articles that may contain original research from February 2026",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.6608917983830906,
+      "exact_p95_ms": 1.7477170011261478,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.7762086004950106,
+          "p95_ms": 1.919475402974058,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.7202917995746247,
+          "p95_ms": 1.8372503967839293,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.414983201015275,
+          "p95_ms": 3.5107994044665247,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Articles with unsourced statements from March 2011",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.7124750011134893,
+      "exact_p95_ms": 1.8143500012229197,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.6955331971985288,
+          "p95_ms": 1.7774251973605715,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.5355002004071139,
+          "p95_ms": 1.6170253991731443,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.076608399511315,
+          "p95_ms": 2.2343413991620764,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Artificial intelligence stubs",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.5544000008958392,
+      "exact_p95_ms": 1.6753414005506784,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 8,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "ix_chunks_article_id",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.76214999955846,
+          "p95_ms": 1.9385166029678658,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 8,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "ix_chunks_article_id",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.8877081995015033,
+          "p95_ms": 2.1451913999044336,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 8,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "ix_chunks_article_id",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.6282838021870703,
+          "p95_ms": 2.865459004533477,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 8,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "ix_chunks_article_id",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Computer algebra",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.5426249985466711,
+      "exact_p95_ms": 1.5697251990786754,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.8114415986929089,
+          "p95_ms": 1.938299798348453,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.8910083992523141,
+          "p95_ms": 1.9707335959537886,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.6666583988117054,
+          "p95_ms": 2.85569179977756,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "CS1 errors: archive-url",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.490516598278191,
+      "exact_p95_ms": 1.5149583981838077,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.7257668005186133,
+          "p95_ms": 1.9171912033925764,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.0284416008507833,
+          "p95_ms": 2.2395164007321,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.5694836003822275,
+          "p95_ms": 2.739375601231586,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Decision trees",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.5178503992501646,
+      "exact_p95_ms": 1.6121585998916999,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.6211664013098925,
+          "p95_ms": 1.6617828019661829,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.293808400281705,
+          "p95_ms": 2.5648078037193045,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.5286250020144507,
+          "p95_ms": 2.7352920005796477,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Formal languages",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.5236750012263656,
+      "exact_p95_ms": 1.5706332007539459,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.716458199371118,
+          "p95_ms": 1.9901249965187162,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.730150002753362,
+          "p95_ms": 3.967541603196878,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.60404979926534,
+          "p95_ms": 3.61817439988954,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Futures studies",
+      "eligible_chunks": 10,
+      "selectivity": 0.0025380710659898475,
+      "exact_returned_rows": 10,
+      "exact_mean_ms": 1.5771997976116836,
+      "exact_p95_ms": 1.730033197964076,
+      "exact_execution_plan": [
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "<derived2>",
+          "access_type": "ALL",
+          "possible_keys": null,
+          "key": null,
+          "rows": 10,
+          "extra": "Using filesort"
+        },
+        {
+          "select_id": 1,
+          "select_type": "PRIMARY",
+          "table": "a",
+          "access_type": "eq_ref",
+          "possible_keys": "PRIMARY",
+          "key": "PRIMARY",
+          "rows": 1,
+          "extra": ""
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "cat",
+          "access_type": "const",
+          "possible_keys": "PRIMARY,uq_categories_name",
+          "key": "uq_categories_name",
+          "rows": 1,
+          "extra": "Using index; Using temporary; Using filesort"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "ac",
+          "access_type": "ref",
+          "possible_keys": "PRIMARY,fk_article_categories_category",
+          "key": "fk_article_categories_category",
+          "rows": 1,
+          "extra": "Using index"
+        },
+        {
+          "select_id": 2,
+          "select_type": "DERIVED",
+          "table": "chunks",
+          "access_type": "ref",
+          "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+          "key": "uq_chunks_article_chunk_index",
+          "rows": 11,
+          "extra": ""
+        }
+      ],
+      "indexed": [
+        {
+          "ef_search": 20,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 1.551074998860713,
+          "p95_ms": 1.606824598275125,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 200,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.2137665990157984,
+          "p95_ms": 2.41940799751319,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "ef_search": 800,
+          "returned_rows": 10,
+          "underfilled": false,
+          "exact_top_k_overlap": 1.0,
+          "same_top_k": true,
+          "mean_ms": 2.4197249993449077,
+          "p95_ms": 2.603558804548811,
+          "execution_plan": [
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "access_type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "rows": 10,
+              "extra": "Using filesort"
+            },
+            {
+              "select_id": 1,
+              "select_type": "PRIMARY",
+              "table": "a",
+              "access_type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "rows": 1,
+              "extra": ""
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "cat",
+              "access_type": "const",
+              "possible_keys": "PRIMARY,uq_categories_name",
+              "key": "uq_categories_name",
+              "rows": 1,
+              "extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "ac",
+              "access_type": "ref",
+              "possible_keys": "PRIMARY,fk_article_categories_category",
+              "key": "fk_article_categories_category",
+              "rows": 1,
+              "extra": "Using index"
+            },
+            {
+              "select_id": 2,
+              "select_type": "DERIVED",
+              "table": "chunks",
+              "access_type": "ref",
+              "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
+              "key": "uq_chunks_article_chunk_index",
+              "rows": 11,
+              "extra": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "underfilled_categories_by_ef": {
+    "20": 0,
+    "200": 0,
+    "800": 0
+  },
+  "mean_exact_top_k_overlap_by_ef": {
+    "20": 1.0,
+    "200": 1.0,
+    "800": 1.0
+  }
+}
