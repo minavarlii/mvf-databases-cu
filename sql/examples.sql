@@ -81,6 +81,10 @@ LIMIT 5;
 
 -- 4) Inspect whether MariaDB chooses the native vector index for semantic
 -- retrieval.
+-- What to look for in EXPLAIN:
+-- - `ix_chunks_embedding` in the `key` column means MariaDB selected the
+--   native VECTOR INDEX for candidate retrieval.
+-- - the final article lookup normally uses PRIMARY.
 EXPLAIN
 SELECT
     c.id,
@@ -93,6 +97,10 @@ ORDER BY distance ASC
 LIMIT 5;
 
 -- 5) Inspect the mixed relational/vector hybrid plan.
+-- What to look for in EXPLAIN:
+-- - `ix_chunks_embedding` should remain visible on the vector side;
+-- - `uq_categories_name` / category relationship indexes should appear on the
+--   relational side; this demonstrates filtering and ANN in one SQL plan.
 EXPLAIN
 SELECT
     c.id,
@@ -184,3 +192,8 @@ LIMIT 5;
 -- Restore the production/default session setting used by MVF.
 SET SESSION mhnsw_ef_search = 20;
 
+
+-- Plan-reading note for linked retrieval:
+-- Linked search may legitimately prefer `ix_chunks_article_id` instead of the
+-- vector index because the graph join can reduce the candidate set first. MVF
+-- treats that optimizer choice as a result, not as an error.

@@ -8,6 +8,32 @@ It keeps **vector storage, cosine similarity, ANN indexing, relational filtering
 
 ![MVF semantic RAG interface](docs/screenshots/overview.png)
 
+## Results at a glance
+
+| Result | Current canonical measurement |
+| --- | ---: |
+| Corpus | **285 articles / 3,940 vectors** |
+| Recall@10 | **92.5%** |
+| MRR | **0.782** |
+| 40-question semantic mean | **15.442 ms** |
+| Native VECTOR INDEX vs brute force | **169.33×** |
+| Filtered ANN speedup | **93.22×** |
+| Backend pytest cases | **29 passed** |
+| Frontend Vitest cases | **60 passed** |
+
+For methodology, repeated passes, optimizer plans, variance and failure modes,
+see [Measured results](#measured-results).
+
+### Why some development-run numbers changed
+
+Earlier development snapshots reported different ANN measurements, including a
+95% Recall@10 run and a lower single-query top-5 overlap for one rebuilt index.
+Those values came from earlier index builds and experiment states. The repository
+now keeps one current canonical result set, regenerated with the final harnesses
+on the documented environment. ANN ordering near rank cutoffs can change after
+index rebuilds, so committed JSON artifacts are treated as the source of truth
+rather than assuming any one historical ANN run is invariant.
+
 ## What the project demonstrates
 
 MVF directly exercises the Area 4 capability rather than treating MariaDB as a passive metadata store:
@@ -480,6 +506,28 @@ make bootstrap
 
 This creates missing backend/frontend environment files from the checked-in examples, installs Python and frontend development dependencies, starts and waits for MariaDB, applies the schema, ingests the Wikipedia corpus, and builds the vector index. It intentionally does not start long-running API/frontend processes; run `make api` and `make frontend` in separate terminals afterwards.
 
+### Offline full-corpus restore
+
+The repository supports a portable prebuilt corpus snapshot that contains the
+relational rows, link graph and all 3,940 stored vectors. After generating and
+checking in `data/prebuilt/mvf_corpus.json.gz`, a newcomer can restore the full
+corpus **without calling MediaWiki and without downloading the embedding model**:
+
+```bash
+make offline-bootstrap
+```
+
+The snapshot is produced from the canonical local database with:
+
+```bash
+make prebuilt-export
+```
+
+`make sql-demo` restores that same snapshot and executes the complete
+`sql/examples.sql` walkthrough, including `VECTOR`, `VECTOR INDEX`, hybrid and
+graph predicates, `EXPLAIN`, and `mhnsw_ef_search`. Docker itself must of course
+already be available locally.
+
 ### Standalone SQL examples
 
 [`sql/examples.sql`](sql/examples.sql) is a MariaDB-client walkthrough independent of the Python API. It uses an existing stored chunk as the query vector so the semantic, category-filtered, linked-article, relational-predicate, `EXPLAIN`, and `mhnsw_ef_search` examples can be pasted directly into a prepared MVF database. The temporal example explicitly uses MVF row-maintenance time (`articles.updated_at`) and does not claim that this is a Wikipedia revision timestamp.
@@ -523,6 +571,25 @@ make vector-lifecycle
 `make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. `make ground-truth-latency` removes the single-query benchmark limitation by timing all **40 ground-truth questions across 5 measured passes (200 measured queries)** after a complete warm-up pass, preserving per-query timings and per-pass summaries. `make m-ground-truth` evaluates each `M` value with **3 complete measured ground-truth passes** rather than one. `make vector-lifecycle` checks second-session isolation before commit, ANN visibility after commit, and vector/index cleanup after cascade delete while recording insert/delete commit cost.
 
 ---
+
+## Concurrency, multi-mode and cross-machine verification
+
+Two additional harnesses target the remaining operational limits of native
+vector retrieval:
+
+- `make multi-mode-latency` runs **semantic, hybrid and linked retrieval** across
+  all 40 ground-truth questions for 5 measured passes after warm-up. This avoids
+  using one query as the only latency workload for any retrieval mode.
+- `make vector-concurrency` uses **two concurrent writer sessions** while a third
+  session performs semantic reads, then compares Recall@10 before inserts, after
+  inserts, and after cleanup. It records write/query failures, commit-latency
+  distribution and verifies that cascade cleanup leaves no orphan chunks.
+
+The manually dispatched `.github/workflows/benchmark.yml` workflow restores the
+checked-in prebuilt corpus on an **Ubuntu GitHub Actions runner**, executes the
+same multi-mode and concurrency harnesses, and uploads the JSON artifacts. This
+provides a second-machine result set that can be committed beside the macOS /
+Apple M4 Pro measurements instead of treating one laptop as universal.
 
 ## Testing and CI
 

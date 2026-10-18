@@ -1,0 +1,94 @@
+name: Cross-machine benchmark
+
+on:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Ubuntu vector benchmark
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_DATABASE: mvf
+          MARIADB_USER: mvf
+          MARIADB_PASSWORD: mvf_benchmark_password
+          MARIADB_ROOT_PASSWORD: mvf_benchmark_root_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      APP_NAME: MVF
+      APP_ENV: benchmark
+      DEBUG: "false"
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: mvf
+      DB_USER: mvf
+      DB_PASSWORD: mvf_benchmark_password
+      OPENAI_API_KEY: ""
+      FRONTEND_ORIGIN: http://localhost:5173
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install MariaDB client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mariadb-client
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Wait for MariaDB
+        run: |
+          for attempt in {1..30}; do
+            if mariadb-admin ping -h 127.0.0.1 -P 3306 -u mvf -pmvf_benchmark_password --silent; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Apply schema
+        run: |
+          mariadb -h 127.0.0.1 -P 3306 -u mvf -pmvf_benchmark_password mvf < database/schema/001_schema.sql
+          mariadb -h 127.0.0.1 -P 3306 -u mvf -pmvf_benchmark_password mvf < database/schema/002_vector_index.sql
+
+      - name: Restore checked-in prebuilt corpus
+        run: python -m scripts.restore_prebuilt --input data/prebuilt/mvf_corpus.json.gz
+
+      - name: Capture runner environment
+        run: python -m experiments.environment | tee experiments/results/ubuntu_environment.json
+
+      - name: Run multi-mode benchmark
+        run: python -m experiments.multi_mode_latency --passes 5 --warmup-passes 1
+
+      - name: Run concurrency stress
+        run: python -m experiments.vector_concurrency --writers 2 --rows-per-writer 25 --queries 50
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvf-ubuntu-benchmarks
+          path: |
+            experiments/results/ubuntu_environment.json
+            experiments/results/multi_mode_latency_*.json
+            experiments/results/vector_concurrency_*.json
+          if-no-files-found: error

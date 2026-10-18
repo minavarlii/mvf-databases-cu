@@ -1,0 +1,174 @@
+{
+  "executed_at": "2026-10-18T11:54:13.217106+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "questions": 40,
+  "warmup_passes": 1,
+  "measured_passes": 5,
+  "limit": 5,
+  "category": "Machine learning",
+  "source_title": "Machine learning",
+  "semantic": {
+    "mode": "semantic",
+    "measured_queries": 200,
+    "aggregate_mean_ms": 1.2919581054302398,
+    "aggregate_median_ms": 1.2533458022517152,
+    "aggregate_p95_ms": 1.4900933002354573,
+    "between_pass_mean_stddev_ms": 0.14624143996296346,
+    "nonempty_result_rate": 1.0,
+    "passes": [
+      {
+        "pass_number": 1,
+        "mean_ms": 1.3572593503340613,
+        "median_ms": 1.3319165045686532,
+        "p95_ms": 1.520057701418409,
+        "stddev_ms": 0.10945996922544966,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 2,
+        "mean_ms": 1.4931364506992395,
+        "median_ms": 1.3932290021330118,
+        "p95_ms": 1.827101453818612,
+        "stddev_ms": 0.3144064412472058,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 3,
+        "mean_ms": 1.3079676999041112,
+        "median_ms": 1.2958125007571653,
+        "p95_ms": 1.4574704986443971,
+        "stddev_ms": 0.13254971604029336,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 4,
+        "mean_ms": 1.1687811502270051,
+        "median_ms": 1.1401039992051665,
+        "p95_ms": 1.332491648281575,
+        "stddev_ms": 0.11217198805926061,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 5,
+        "mean_ms": 1.132645875986782,
+        "median_ms": 1.1056670045945793,
+        "p95_ms": 1.313345199014293,
+        "stddev_ms": 0.10390822452431371,
+        "nonempty_results": 40
+      }
+    ]
+  },
+  "hybrid": {
+    "mode": "hybrid",
+    "measured_queries": 200,
+    "aggregate_mean_ms": 2.610097344877431,
+    "aggregate_median_ms": 2.5190000982547645,
+    "aggregate_p95_ms": 3.164483580112573,
+    "between_pass_mean_stddev_ms": 0.45922248276076255,
+    "nonempty_result_rate": 1.0,
+    "passes": [
+      {
+        "pass_number": 1,
+        "mean_ms": 3.1564614990202244,
+        "median_ms": 3.1262919983419124,
+        "p95_ms": 3.358924699568888,
+        "stddev_ms": 0.3650974339015226,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 2,
+        "mean_ms": 2.2885573245730484,
+        "median_ms": 2.3249579971889034,
+        "p95_ms": 2.6501857057155576,
+        "stddev_ms": 0.23217236340762681,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 3,
+        "mean_ms": 2.2913115499250125,
+        "median_ms": 2.1518124995054677,
+        "p95_ms": 2.9021062477113446,
+        "stddev_ms": 0.2837615810896663,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 4,
+        "mean_ms": 2.2474438255812856,
+        "median_ms": 2.117750496836379,
+        "p95_ms": 2.8147339482529783,
+        "stddev_ms": 0.3082416926819266,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 5,
+        "mean_ms": 3.066712525287585,
+        "median_ms": 2.8741874994011596,
+        "p95_ms": 4.096467299314095,
+        "stddev_ms": 0.9306980120984037,
+        "nonempty_results": 40
+      }
+    ]
+  },
+  "linked": {
+    "mode": "linked",
+    "measured_queries": 200,
+    "aggregate_mean_ms": 86.94919497527735,
+    "aggregate_median_ms": 86.81844990060199,
+    "aggregate_p95_ms": 88.7779156583565,
+    "between_pass_mean_stddev_ms": 0.40788116179601375,
+    "nonempty_result_rate": 1.0,
+    "passes": [
+      {
+        "pass_number": 1,
+        "mean_ms": 87.31965420029155,
+        "median_ms": 86.76164549979148,
+        "p95_ms": 88.97689229997923,
+        "stddev_ms": 4.191418688998314,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 2,
+        "mean_ms": 86.45579367530445,
+        "median_ms": 86.5783539993572,
+        "p95_ms": 88.11837144967285,
+        "stddev_ms": 1.1286966540319663,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 3,
+        "mean_ms": 86.57162807558052,
+        "median_ms": 86.65977100099553,
+        "p95_ms": 88.60833539984014,
+        "stddev_ms": 1.153792416387609,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 4,
+        "mean_ms": 87.29156869994767,
+        "median_ms": 87.05293700040784,
+        "p95_ms": 89.50334344553994,
+        "stddev_ms": 1.3470904959540535,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 5,
+        "mean_ms": 87.10733022526256,
+        "median_ms": 87.03954200245789,
+        "p95_ms": 88.68263569675037,
+        "stddev_ms": 1.154552666729657,
+        "nonempty_results": 40
+      }
+    ]
+  }
+}

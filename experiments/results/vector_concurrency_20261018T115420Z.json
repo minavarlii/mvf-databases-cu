@@ -1,0 +1,42 @@
+{
+  "executed_at": "2026-10-18T11:54:20.310040+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "writers": 2,
+  "rows_per_writer": 25,
+  "rows_inserted": 50,
+  "concurrent_queries": 50,
+  "write_failures": 0,
+  "query_failures": 0,
+  "commit_mean_ms": 0.9341841391869821,
+  "commit_p95_ms": 1.2791750017640877,
+  "baseline_quality": {
+    "recall_at_10": 0.925,
+    "mrr": 0.7819444444444444,
+    "misses_at_10": 3
+  },
+  "post_insert_quality": {
+    "recall_at_10": 0.925,
+    "mrr": 0.7819444444444444,
+    "misses_at_10": 3
+  },
+  "post_delete_quality": {
+    "recall_at_10": 0.925,
+    "mrr": 0.7819444444444444,
+    "misses_at_10": 3
+  },
+  "recall_at_10_delta_after_insert": 0.0,
+  "recall_at_10_delta_after_delete": 0.0,
+  "probe_rows_after_cleanup": 0,
+  "orphan_chunks_after_cleanup": 0
+}

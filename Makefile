@@ -41,6 +41,12 @@ endif
 	ground-truth-latency \
 	m-ground-truth \
 	vector-lifecycle \
+	multi-mode-latency \
+	vector-concurrency \
+	prebuilt-export \
+	prebuilt-restore \
+	offline-bootstrap \
+	sql-demo \
 	clean
 
 install:
@@ -69,7 +75,12 @@ bootstrap:
 
 
 db-up:
-	docker compose up -d mariadb
+	@if docker ps -a --format '{{.Names}}' | grep -qx 'mvf-mariadb'; then \
+		echo "Reusing existing mvf-mariadb container"; \
+		docker start mvf-mariadb >/dev/null 2>&1 || true; \
+	else \
+		docker compose up -d mariadb; \
+	fi
 
 
 db-wait:
@@ -234,6 +245,51 @@ m-ground-truth:
 
 vector-lifecycle:
 	$(PYTHON) -m experiments.vector_lifecycle
+
+
+multi-mode-latency:
+	$(PYTHON) -m experiments.multi_mode_latency \
+		--passes 5 \
+		--warmup-passes 1
+
+
+vector-concurrency:
+	$(PYTHON) -m experiments.vector_concurrency \
+		--writers 2 \
+		--rows-per-writer 25 \
+		--queries 50
+
+
+prebuilt-export:
+	$(PYTHON) -m scripts.export_prebuilt \
+		--output data/prebuilt/mvf_corpus.json.gz
+
+
+prebuilt-restore:
+	@test -f data/prebuilt/mvf_corpus.json.gz || \
+		(echo "Missing data/prebuilt/mvf_corpus.json.gz; run make prebuilt-export first." >&2; exit 1)
+	$(PYTHON) -m scripts.restore_prebuilt \
+		--input data/prebuilt/mvf_corpus.json.gz
+
+
+offline-bootstrap:
+	@test -f .env || cp .env.example .env
+	$(MAKE) install-dev
+	$(MAKE) db-up
+	$(MAKE) db-wait
+	$(MAKE) db-init
+	$(MAKE) prebuilt-restore
+	$(MAKE) db-verify
+
+
+sql-demo:
+	$(MAKE) offline-bootstrap
+	docker compose exec -T mariadb \
+		mariadb \
+		-u"$(DB_USER)" \
+		-p"$(DB_PASSWORD)" \
+		"$(DB_NAME)" \
+		< sql/examples.sql
 
 
 clean:
