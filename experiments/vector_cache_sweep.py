@@ -30,6 +30,9 @@ from experiments.vector_scale import (
 
 RESULTS_DIRECTORY = Path("experiments/results")
 SUMMARY_PATH = Path("docs/vector-cache-sweep-results.md")
+DEFAULT_GENERATED_SUMMARY_PATH = Path(
+    "experiments/results/vector-cache-sweep-latest.md"
+)
 DEFAULT_CACHE_MIB = (4, 16, 64)
 DEFAULT_MULTIPLIER = 25
 DEFAULT_REBUILDS = 3
@@ -780,7 +783,18 @@ async def async_main() -> None:
         "results": [asdict(item) for item in results],
     }
     artifact_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    SUMMARY_PATH.write_text(
+    summary_path = Path(
+        os.environ.get(
+            "MVF_CACHE_SUMMARY_PATH",
+            (
+                "experiments/results/ubuntu/vector-cache-sweep-results.md"
+                if os.environ.get("GITHUB_ACTIONS") == "true"
+                else str(DEFAULT_GENERATED_SUMMARY_PATH)
+            ),
+        )
+    )
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text(
         render_markdown(
             original_cache_bytes=original_cache_bytes,
             multiplier=args.multiplier,
@@ -793,7 +807,7 @@ async def async_main() -> None:
         encoding="utf-8",
     )
     print(f"Saved results to {artifact_path}")
-    print(f"Saved readable summary to {SUMMARY_PATH}")
+    print(f"Saved readable summary to {summary_path}")
     await database_manager.dispose()
 
 
