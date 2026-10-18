@@ -18,7 +18,7 @@ It keeps **vector storage, cosine similarity, ANN indexing, relational filtering
 | 40-question semantic mean | **15.442 ms** |
 | Native VECTOR INDEX vs brute force | **169.33×** |
 | Filtered ANN speedup | **93.22×** |
-| Backend pytest cases | **38 passed** |
+| Backend pytest cases | **41 passed** |
 | Frontend Vitest cases | **60 passed** |
 
 For methodology, repeated passes, optimizer plans, variance and failure modes,
@@ -476,7 +476,7 @@ mode (**200 measured queries per mode**).
 | Apple M4 Pro / macOS | Semantic | **1.292 ms** | 1.490 ms | 0.146 ms | 100% |
 | Apple M4 Pro / macOS | Hybrid | **2.610 ms** | 3.164 ms | 0.459 ms | 100% |
 | Apple M4 Pro / macOS | Linked | **86.949 ms** | 88.778 ms | 0.408 ms | 100% |
-| GitHub Actions / Ubuntu | Semantic | **2.751 ms** | 1.977 ms | 2.930 ms | 100% |
+| GitHub Actions / Ubuntu | Semantic | **2.751 ms** | 1.976 ms | 2.930 ms | 100% |
 | GitHub Actions / Ubuntu | Hybrid | **3.319 ms** | 5.593 ms | 0.714 ms | 100% |
 | GitHub Actions / Ubuntu | Linked | **122.693 ms** | 127.200 ms | 1.185 ms | 100% |
 
@@ -749,7 +749,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 38 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, an explicit committed `VECTOR(384)` UPDATE probe **before and after HNSW rebuild**, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 41 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, an explicit committed `VECTOR(384)` UPDATE probe **before and after HNSW rebuild**, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
 
 Frontend checks:
 
@@ -760,7 +760,7 @@ npm test
 npm run build
 ```
 
-The verified local frontend gate passed **60 Vitest cases**, ESLint, and the production Vite build; the captured output is checked in at [`docs/frontend-test-output.txt`](docs/frontend-test-output.txt). GitHub Actions starts a clean MariaDB 11.8 service, applies the schema and native vector index, loads a deterministic fixture, and runs backend quality checks. The frontend CI path installs Node dependencies and validates lint/tests/production build.
+The verified local frontend gate passed **60 Vitest cases**, ESLint, and the production Vite build; the captured output is checked in at [`docs/frontend-test-output.txt`](docs/frontend-test-output.txt). The backend and frontend quality gates are also recorded in this [successful GitHub Actions CI run](https://github.com/vasifism/mvf-databases-cu/actions/runs/39146599766). GitHub Actions starts a clean MariaDB 11.8 service, applies the schema and native vector index, loads a deterministic fixture, and runs backend quality checks. The frontend CI path installs Node dependencies and validates lint/tests/production build.
 
 The repository keeps secrets out of source control through environment configuration; `.env.example` contains placeholders only.
 
