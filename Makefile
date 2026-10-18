@@ -275,8 +275,10 @@ vector-cache-sweep:
 	$(PYTHON) -m experiments.vector_cache_sweep \
 		--cache-mib 4 16 64 \
 		--multiplier 25 \
-		--warmups 5 \
-		--runs 30
+		--rebuilds 3 \
+		--queries 20 \
+		--warmups 2 \
+		--runs 5
 
 
 prebuilt-export:

@@ -1,12 +1,15 @@
-"""Measure HNSW cache-size interaction on a large scratch vector index."""
+"""Measure HNSW cache-size interaction with repeated large-index rebuilds."""
 
 from __future__ import annotations
 
 import argparse
 import asyncio
 import json
+import math
 import os
+import statistics
 import subprocess
+import time
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,32 +18,151 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.db import database_manager
+from backend.app.services import EmbeddingService
 from experiments.environment import collect_environment
+from experiments.recall import GROUND_TRUTH_PATH, load_ground_truth
 from experiments.vector_scale import (
+    CREATE_VECTOR_INDEX_SQL,
     SEARCH_SQL,
-    drop_probe_if_present,
-    measure_multiplier,
     mib,
+    percentile,
 )
 
 RESULTS_DIRECTORY = Path("experiments/results")
 SUMMARY_PATH = Path("docs/vector-cache-sweep-results.md")
 DEFAULT_CACHE_MIB = (4, 16, 64)
 DEFAULT_MULTIPLIER = 25
+DEFAULT_REBUILDS = 3
+DEFAULT_QUERY_COUNT = 20
+VECTOR_DIMENSIONS = 384
+PERTURBATION_RADIANS = 0.0005
+INSERT_BATCH_SIZE = 200
+CACHE_SET_SQL = {
+    1 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 1048576; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    2 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 2097152; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    4 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 4194304; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    8 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 8388608; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    16 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 16777216; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    32 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 33554432; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    64 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 67108864; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    128 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 134217728; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    256 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 268435456; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+    512 * 1024 * 1024: (
+        "SET GLOBAL mhnsw_max_cache_size = 536870912; "
+        "SELECT @@GLOBAL.mhnsw_max_cache_size;"
+    ),
+}
+
+CREATE_PROBE_SQL = """
+CREATE TABLE vector_scale_probe (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    source_chunk_id BIGINT UNSIGNED NOT NULL,
+    copy_number INT UNSIGNED NOT NULL,
+    embedding VECTOR(384) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_vector_scale_source_copy (source_chunk_id, copy_number)
+) ENGINE=InnoDB
+"""
+INSERT_PROBE_SQL = """
+INSERT INTO vector_scale_probe (
+    source_chunk_id,
+    copy_number,
+    embedding
+)
+VALUES (
+    :source_chunk_id,
+    :copy_number,
+    VEC_FromText(:embedding)
+)
+"""
+SOURCE_EMBEDDINGS_SQL = """
+SELECT id, VEC_ToText(embedding)
+FROM chunks
+ORDER BY id
+"""
+INDEX_EXISTS_SQL = """
+SELECT COUNT(*)
+FROM information_schema.STATISTICS
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME = 'vector_scale_probe'
+  AND INDEX_NAME = 'ix_vector_scale_embedding'
+"""
+DROP_VECTOR_INDEX_SQL = """
+DROP INDEX ix_vector_scale_embedding
+ON vector_scale_probe
+"""
+DROP_PROBE_SQL = "DROP TABLE IF EXISTS vector_scale_probe"
+ANALYZE_PROBE_SQL = "ANALYZE TABLE vector_scale_probe"
 
 
 @dataclass(frozen=True, slots=True)
-class CacheSweepResult:
-    """One cache setting measured against a freshly rebuilt scratch index."""
+class QueryMeasurement:
+    """One measured ground-truth query against one rebuilt index."""
 
-    cache_mib: int
-    cache_bytes: int
-    rows: int
+    question_id: str
+    mean_ms: float
+    median_ms: float
+    p95_ms: float
+    samples_ms: tuple[float, ...]
+    top5_ids: tuple[int, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class RebuildMeasurement:
+    """One complete index rebuild and multi-query measurement."""
+
+    rebuild_number: int
     index_build_time_ms: float
     query_mean_ms: float
     query_median_ms: float
     query_p95_ms: float
-    top5_ids: list[int]
+    top5_overlap_with_reference: float
+    queries: tuple[QueryMeasurement, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class CacheSweepResult:
+    """Aggregate measurements for one cache setting."""
+
+    cache_mib: int
+    cache_bytes: int
+    rows: int
+    rebuilds: tuple[RebuildMeasurement, ...]
+    build_mean_ms: float
+    build_stddev_ms: float
+    build_min_ms: float
+    build_max_ms: float
+    query_mean_ms: float
+    query_median_ms: float
+    query_p95_ms: float
+    mean_top5_overlap_with_reference: float
 
 
 def parse_args() -> argparse.Namespace:
@@ -54,8 +176,10 @@ def parse_args() -> argparse.Namespace:
         help="Global mhnsw_max_cache_size values in MiB.",
     )
     parser.add_argument("--multiplier", type=int, default=DEFAULT_MULTIPLIER)
-    parser.add_argument("--warmups", type=int, default=5)
-    parser.add_argument("--runs", type=int, default=30)
+    parser.add_argument("--rebuilds", type=int, default=DEFAULT_REBUILDS)
+    parser.add_argument("--queries", type=int, default=DEFAULT_QUERY_COUNT)
+    parser.add_argument("--warmups", type=int, default=2)
+    parser.add_argument("--runs", type=int, default=5)
     return parser.parse_args()
 
 
@@ -66,6 +190,16 @@ def set_global_cache_size(cache_bytes: int) -> int:
         raise RuntimeError(
             "DB_ROOT_PASSWORD is required for the cache sweep because "
             "mhnsw_max_cache_size is a GLOBAL server variable."
+        )
+
+    sql = CACHE_SET_SQL.get(cache_bytes)
+    if sql is None:
+        supported = ", ".join(
+            str(value // (1024 * 1024)) for value in sorted(CACHE_SET_SQL)
+        )
+        raise ValueError(
+            "Unsupported cache size for the static SQL allowlist: "
+            f"{cache_bytes} bytes. Supported MiB values: {supported}."
         )
 
     command = [
@@ -80,10 +214,7 @@ def set_global_cache_size(cache_bytes: int) -> int:
         "-uroot",
         "-N",
         "-e",
-        (
-            f"SET GLOBAL mhnsw_max_cache_size = {cache_bytes}; "
-            "SELECT @@GLOBAL.mhnsw_max_cache_size;"
-        ),
+        sql,
     ]
     completed = subprocess.run(
         command,
@@ -99,54 +230,347 @@ def set_global_cache_size(cache_bytes: int) -> int:
     return int(lines[-1])
 
 
-async def fetch_top5_ids(session: AsyncSession, embedding: str) -> list[int]:
-    """Return the current indexed top-5 ids for stability comparison."""
-    result = await session.execute(
-        text(SEARCH_SQL),
-        {"embedding": embedding},
+def perturb_embedding(
+    embedding: list[float],
+    *,
+    source_chunk_id: int,
+    copy_number: int,
+) -> list[float]:
+    """Create a deterministic distinct copy while preserving L2 norm.
+
+    A tiny 2-D rotation changes two coordinates. Rotation preserves vector norm,
+    avoids exact duplicate vectors, and is deterministic for reproducible rebuilds.
+    """
+    if copy_number == 0:
+        return embedding
+
+    pivot = max(range(len(embedding)), key=lambda index: abs(embedding[index]))
+    second = (pivot + 1 + (source_chunk_id + copy_number * 31) % 383) % 384
+    if second == pivot:
+        second = (second + 1) % 384
+
+    angle = PERTURBATION_RADIANS * copy_number
+    cosine = math.cos(angle)
+    sine = math.sin(angle)
+    first_value = embedding[pivot]
+    second_value = embedding[second]
+
+    result = embedding.copy()
+    result[pivot] = first_value * cosine - second_value * sine
+    result[second] = first_value * sine + second_value * cosine
+    return result
+
+
+async def drop_index_if_present(session: AsyncSession) -> None:
+    """Drop the scratch vector index if it exists."""
+    exists = int(await session.scalar(text(INDEX_EXISTS_SQL)) or 0)
+    if exists:
+        await session.execute(text(DROP_VECTOR_INDEX_SQL))
+        await session.commit()
+
+
+def parse_vector_text(raw_value: object) -> list[float]:
+    """Parse VEC_ToText output into a typed floating-point vector."""
+    payload = json.loads(str(raw_value))
+    if not isinstance(payload, list):
+        raise ValueError("VEC_ToText did not return a JSON array")
+    return [float(value) for value in payload]
+
+
+async def prepare_distinct_probe(
+    session: AsyncSession,
+    *,
+    multiplier: int,
+) -> tuple[int, int]:
+    """Load a deterministic 25x-style scratch corpus with distinct vectors."""
+    await session.execute(text(DROP_PROBE_SQL))
+    await session.commit()
+    await session.execute(text(CREATE_PROBE_SQL))
+    await session.commit()
+
+    source_result = await session.execute(text(SOURCE_EMBEDDINGS_SQL))
+    source_rows = [
+        (int(row[0]), parse_vector_text(row[1])) for row in source_result.all()
+    ]
+    if not source_rows:
+        raise RuntimeError("chunks is empty; restore or ingest the corpus first")
+
+    expected_dimensions = {len(values) for _, values in source_rows}
+    if expected_dimensions != {VECTOR_DIMENSIONS}:
+        raise RuntimeError(
+            f"Unexpected source embedding dimensions: {sorted(expected_dimensions)}"
+        )
+
+    batch: list[dict[str, int | str]] = []
+    inserted = 0
+    for copy_number in range(multiplier):
+        for source_chunk_id, source_embedding in source_rows:
+            vector = perturb_embedding(
+                source_embedding,
+                source_chunk_id=source_chunk_id,
+                copy_number=copy_number,
+            )
+            batch.append(
+                {
+                    "source_chunk_id": source_chunk_id,
+                    "copy_number": copy_number,
+                    "embedding": json.dumps(vector, separators=(",", ":")),
+                }
+            )
+            if len(batch) >= INSERT_BATCH_SIZE:
+                await session.execute(text(INSERT_PROBE_SQL), batch)
+                inserted += len(batch)
+                batch.clear()
+
+        print(
+            f"loaded distinct copy {copy_number + 1}/{multiplier} "
+            f"({inserted + len(batch):,} rows prepared)"
+        )
+
+    if batch:
+        await session.execute(text(INSERT_PROBE_SQL), batch)
+        inserted += len(batch)
+    await session.commit()
+
+    expected_rows = len(source_rows) * multiplier
+    if inserted != expected_rows:
+        raise RuntimeError(
+            f"Scratch corpus row mismatch: expected {expected_rows}, "
+            f"inserted {inserted}"
+        )
+
+    actual_rows = int(
+        await session.scalar(text("SELECT COUNT(*) FROM vector_scale_probe")) or 0
     )
-    return [int(row[0]) for row in result.all()]
+    if actual_rows != expected_rows:
+        raise RuntimeError(
+            f"Scratch corpus count mismatch: expected {expected_rows}, "
+            f"got {actual_rows}"
+        )
+
+    return len(source_rows), actual_rows
+
+
+async def prepare_query_embeddings(query_count: int) -> list[tuple[str, str]]:
+    """Embed real ground-truth questions outside database timing."""
+    questions = load_ground_truth(GROUND_TRUTH_PATH)[:query_count]
+    if len(questions) < query_count:
+        raise ValueError(
+            f"Requested {query_count} queries, but ground truth has {len(questions)}"
+        )
+
+    embedding_service = EmbeddingService()
+    embeddings = await embedding_service.embed_many(
+        [question.question for question in questions]
+    )
+    return [
+        (
+            question.question_id,
+            json.dumps(embedding, separators=(",", ":")),
+        )
+        for question, embedding in zip(questions, embeddings, strict=True)
+    ]
+
+
+async def measure_query(
+    session: AsyncSession,
+    *,
+    question_id: str,
+    embedding: str,
+    warmups: int,
+    runs: int,
+) -> QueryMeasurement:
+    """Measure one real query repeatedly and capture its current top-5."""
+    params = {"embedding": embedding}
+    for _ in range(warmups):
+        await session.execute(text(SEARCH_SQL), params)
+
+    samples: list[float] = []
+    top5_ids: tuple[int, ...] = ()
+    for _ in range(runs):
+        started = time.perf_counter()
+        result = await session.execute(text(SEARCH_SQL), params)
+        samples.append((time.perf_counter() - started) * 1000)
+        top5_ids = tuple(int(row[0]) for row in result.all())
+
+    return QueryMeasurement(
+        question_id=question_id,
+        mean_ms=statistics.mean(samples),
+        median_ms=statistics.median(samples),
+        p95_ms=percentile(samples, 0.95),
+        samples_ms=tuple(samples),
+        top5_ids=top5_ids,
+    )
+
+
+def mean_top5_overlap(
+    current: tuple[QueryMeasurement, ...],
+    reference: dict[str, set[int]],
+) -> float:
+    """Return mean set overlap with the first rebuild across all queries."""
+    if not reference:
+        return 1.0
+    overlaps = []
+    for measurement in current:
+        expected = reference[measurement.question_id]
+        observed = set(measurement.top5_ids)
+        overlaps.append(len(expected & observed) / 5)
+    return statistics.mean(overlaps)
+
+
+async def measure_rebuild(
+    session: AsyncSession,
+    *,
+    rebuild_number: int,
+    queries: list[tuple[str, str]],
+    warmups: int,
+    runs: int,
+    reference: dict[str, set[int]],
+) -> RebuildMeasurement:
+    """Build one fresh HNSW index and measure all prepared queries."""
+    await drop_index_if_present(session)
+
+    started = time.perf_counter()
+    await session.execute(text(CREATE_VECTOR_INDEX_SQL))
+    await session.commit()
+    build_time_ms = (time.perf_counter() - started) * 1000
+
+    await session.execute(text(ANALYZE_PROBE_SQL))
+    await session.commit()
+
+    query_results = tuple(
+        [
+            await measure_query(
+                session,
+                question_id=question_id,
+                embedding=embedding,
+                warmups=warmups,
+                runs=runs,
+            )
+            for question_id, embedding in queries
+        ]
+    )
+    all_query_samples = [sample for item in query_results for sample in item.samples_ms]
+
+    if not reference:
+        reference.update(
+            {item.question_id: set(item.top5_ids) for item in query_results}
+        )
+
+    return RebuildMeasurement(
+        rebuild_number=rebuild_number,
+        index_build_time_ms=build_time_ms,
+        query_mean_ms=statistics.mean(all_query_samples),
+        query_median_ms=statistics.median(all_query_samples),
+        query_p95_ms=percentile(all_query_samples, 0.95),
+        top5_overlap_with_reference=mean_top5_overlap(query_results, reference),
+        queries=query_results,
+    )
+
+
+def summarize_cache_setting(
+    *,
+    cache_mib: int,
+    cache_bytes: int,
+    rows: int,
+    rebuilds: list[RebuildMeasurement],
+) -> CacheSweepResult:
+    """Aggregate repeated rebuilds for one cache size."""
+    build_times = [item.index_build_time_ms for item in rebuilds]
+    all_query_samples = [
+        sample
+        for rebuild in rebuilds
+        for query in rebuild.queries
+        for sample in query.samples_ms
+    ]
+    overlaps = [item.top5_overlap_with_reference for item in rebuilds]
+    return CacheSweepResult(
+        cache_mib=cache_mib,
+        cache_bytes=cache_bytes,
+        rows=rows,
+        rebuilds=tuple(rebuilds),
+        build_mean_ms=statistics.mean(build_times),
+        build_stddev_ms=(
+            statistics.stdev(build_times) if len(build_times) > 1 else 0.0
+        ),
+        build_min_ms=min(build_times),
+        build_max_ms=max(build_times),
+        query_mean_ms=statistics.mean(all_query_samples),
+        query_median_ms=statistics.median(all_query_samples),
+        query_p95_ms=percentile(all_query_samples, 0.95),
+        mean_top5_overlap_with_reference=statistics.mean(overlaps),
+    )
 
 
 def render_markdown(
     *,
     original_cache_bytes: int,
     multiplier: int,
+    source_rows: int,
+    query_count: int,
+    rebuild_count: int,
     results: list[CacheSweepResult],
     artifact_name: str,
 ) -> str:
-    """Render the cache-sweep report without copying values into the README."""
-    baseline = results[0].top5_ids if results else []
+    """Render a human-readable repeated cache-sweep report."""
     lines = [
-        "# MariaDB `mhnsw_max_cache_size` sweep",
+        "# MariaDB `mhnsw_max_cache_size` repeated-build sweep",
         "",
         (
-            "This experiment rebuilds the same large scratch `M=8` cosine vector "
-            "index once per cache setting. It changes the MariaDB GLOBAL "
-            "`mhnsw_max_cache_size`, measures build/search latency, checks top-5 "
-            "stability, then restores the original server value."
+            "This experiment uses a deterministic perturbed scratch corpus: each "
+            "copy is a tiny norm-preserving rotation of a real stored vector, so the "
+            "98,500-row workload does not contain exact duplicated vectors."
         ),
         "",
+        f"- Source vectors: **{source_rows:,}**",
         f"- Scratch corpus multiplier: **{multiplier}×**",
+        f"- Ground-truth query vectors: **{query_count}**",
+        f"- Independent index rebuilds per cache setting: **{rebuild_count}**",
         f"- Original cache setting: **{mib(original_cache_bytes):.1f} MiB**",
         "",
-        "| Cache | Rows | Index build | Mean query | P95 query | Top-5 stable |",
-        "|---:|---:|---:|---:|---:|:---:|",
+        (
+            "| Cache | Rows | Build mean | Build stddev | Build min–max | "
+            "Query mean | Query P95 | Mean top-5 overlap |"
+        ),
+        "|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for item in results:
         lines.append(
             f"| {item.cache_mib} MiB | {item.rows:,} | "
-            f"{item.index_build_time_ms / 1000:.3f} s | "
+            f"{item.build_mean_ms / 1000:.3f} s | "
+            f"{item.build_stddev_ms / 1000:.3f} s | "
+            f"{item.build_min_ms / 1000:.3f}–{item.build_max_ms / 1000:.3f} s | "
             f"{item.query_mean_ms:.3f} ms | {item.query_p95_ms:.3f} ms | "
-            f"{'yes' if item.top5_ids == baseline else 'no'} |"
+            f"{item.mean_top5_overlap_with_reference * 100:.1f}% |"
         )
+
+    if results:
+        fastest = min(results, key=lambda item: item.build_mean_ms)
+        slowest = max(results, key=lambda item: item.build_mean_ms)
+        build_ratio = slowest.build_mean_ms / fastest.build_mean_ms
+        query_values = [item.query_mean_ms for item in results]
+        query_spread = max(query_values) - min(query_values)
+        minimum_overlap = min(item.mean_top5_overlap_with_reference for item in results)
+        interpretation = (
+            f"Across repeated rebuilds, the fastest mean build occurred at "
+            f"{fastest.cache_mib} MiB and the slowest at {slowest.cache_mib} MiB "
+            f"({build_ratio:.2f}× apart). Mean query latency varied by only "
+            f"{query_spread:.3f} ms across cache settings. The minimum mean top-5 "
+            f"overlap with the first rebuild was {minimum_overlap * 100:.1f}%. "
+            "Because exact duplicate vectors were removed, any remaining ordering "
+            "differences are treated as ANN rebuild variability rather than duplicate "
+            "ties; this experiment does not claim that cache size deterministically "
+            "changes retrieval quality."
+        )
+        lines.extend(["", "## Interpretation", "", interpretation])
+
     lines.extend(
         [
             "",
             (
                 "The cache setting is a server-level limit, not an estimate of "
-                "resident index memory. Results therefore report only the configured "
-                "limit and observed build/search behavior."
+                "resident index memory. Build conclusions use repeated rebuilds and "
+                "their variance rather than one build per setting."
             ),
             "",
             f"Machine-readable artifact: `experiments/results/{artifact_name}`",
@@ -157,31 +581,35 @@ def render_markdown(
 
 
 async def async_main() -> None:
-    """Run the cache sweep and restore the original global setting."""
+    """Run the repeated cache sweep and restore the original server setting."""
     args = parse_args()
-    if args.multiplier < 1 or args.warmups < 0 or args.runs < 1:
-        raise ValueError("multiplier/runs must be positive and warmups must be >= 0")
+    if args.multiplier < 1 or args.rebuilds < 2 or args.queries < 2:
+        raise ValueError("multiplier must be positive; rebuilds/queries must be >= 2")
+    if args.warmups < 0 or args.runs < 1:
+        raise ValueError("warmups must be >= 0 and runs must be >= 1")
     if not args.cache_mib or any(value < 1 for value in args.cache_mib):
         raise ValueError("cache sizes must be positive MiB values")
 
     environment = await collect_environment()
+    queries = await prepare_query_embeddings(args.queries)
     results: list[CacheSweepResult] = []
+    reference_rankings: dict[str, set[int]] = {}
 
     async with database_manager.session() as session:
-        source_count = await session.scalar(text("SELECT COUNT(*) FROM chunks"))
-        source_rows = int(source_count or 0)
-        if source_rows == 0:
-            raise RuntimeError("chunks is empty; restore or ingest the corpus first")
-        embedding = str(
-            await session.scalar(
-                text("SELECT VEC_ToText(embedding) FROM chunks ORDER BY id LIMIT 1")
-            )
-        )
         original_cache_bytes = int(
             await session.scalar(text("SELECT @@GLOBAL.mhnsw_max_cache_size")) or 0
         )
 
         try:
+            source_rows, scratch_rows = await prepare_distinct_probe(
+                session,
+                multiplier=args.multiplier,
+            )
+            print(
+                f"Prepared {scratch_rows:,} deterministic distinct scratch vectors "
+                f"from {source_rows:,} source vectors."
+            )
+
             for cache_mib in args.cache_mib:
                 requested_bytes = cache_mib * 1024 * 1024
                 applied_bytes = set_global_cache_size(requested_bytes)
@@ -191,34 +619,42 @@ async def async_main() -> None:
                         f"requested {requested_bytes}, got {applied_bytes}"
                     )
 
-                scale = await measure_multiplier(
-                    session,
-                    multiplier=args.multiplier,
-                    source_rows=source_rows,
-                    embedding=embedding,
-                    warmups=args.warmups,
-                    runs=args.runs,
-                )
-                top5_ids = await fetch_top5_ids(session, embedding)
-                result = CacheSweepResult(
+                rebuilds: list[RebuildMeasurement] = []
+                for rebuild_number in range(1, args.rebuilds + 1):
+                    rebuild = await measure_rebuild(
+                        session,
+                        rebuild_number=rebuild_number,
+                        queries=queries,
+                        warmups=args.warmups,
+                        runs=args.runs,
+                        reference=reference_rankings,
+                    )
+                    rebuilds.append(rebuild)
+                    print(
+                        f"cache={cache_mib}MiB rebuild={rebuild_number}/"
+                        f"{args.rebuilds}: build="
+                        f"{rebuild.index_build_time_ms / 1000:.3f}s, "
+                        f"query_mean={rebuild.query_mean_ms:.3f}ms, "
+                        f"overlap={rebuild.top5_overlap_with_reference * 100:.1f}%"
+                    )
+
+                summary = summarize_cache_setting(
                     cache_mib=cache_mib,
                     cache_bytes=applied_bytes,
-                    rows=scale.rows,
-                    index_build_time_ms=scale.index_build_time_ms,
-                    query_mean_ms=scale.query_mean_ms,
-                    query_median_ms=scale.query_median_ms,
-                    query_p95_ms=scale.query_p95_ms,
-                    top5_ids=top5_ids,
+                    rows=scratch_rows,
+                    rebuilds=rebuilds,
                 )
-                results.append(result)
+                results.append(summary)
                 print(
-                    f"cache={cache_mib}MiB: rows={result.rows:,}, "
-                    f"build={result.index_build_time_ms / 1000:.3f}s, "
-                    f"mean={result.query_mean_ms:.3f}ms, "
-                    f"p95={result.query_p95_ms:.3f}ms"
+                    f"cache={cache_mib}MiB summary: build="
+                    f"{summary.build_mean_ms / 1000:.3f}s ± "
+                    f"{summary.build_stddev_ms / 1000:.3f}s, "
+                    f"query_mean={summary.query_mean_ms:.3f}ms, "
+                    f"p95={summary.query_p95_ms:.3f}ms"
                 )
         finally:
-            await drop_probe_if_present(session)
+            await session.execute(text(DROP_PROBE_SQL))
+            await session.commit()
             if original_cache_bytes > 0:
                 set_global_cache_size(original_cache_bytes)
 
@@ -231,8 +667,15 @@ async def async_main() -> None:
         "environment": asdict(environment),
         "multiplier": args.multiplier,
         "source_rows": source_rows,
-        "warmups": args.warmups,
-        "runs": args.runs,
+        "scratch_rows": scratch_rows,
+        "distinct_vector_method": (
+            "tiny deterministic 2-D rotations of source vectors; L2 norm preserved"
+        ),
+        "perturbation_radians_per_copy": PERTURBATION_RADIANS,
+        "ground_truth_queries": args.queries,
+        "rebuilds_per_cache_setting": args.rebuilds,
+        "warmups_per_query": args.warmups,
+        "runs_per_query": args.runs,
         "original_mhnsw_max_cache_size_bytes": original_cache_bytes,
         "results": [asdict(item) for item in results],
     }
@@ -241,6 +684,9 @@ async def async_main() -> None:
         render_markdown(
             original_cache_bytes=original_cache_bytes,
             multiplier=args.multiplier,
+            source_rows=source_rows,
+            query_count=args.queries,
+            rebuild_count=args.rebuilds,
             results=results,
             artifact_name=artifact_name,
         ),
