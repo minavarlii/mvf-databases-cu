@@ -29,7 +29,6 @@ from experiments.vector_scale import (
 )
 
 RESULTS_DIRECTORY = Path("experiments/results")
-SUMMARY_PATH = Path("docs/vector-cache-sweep-results.md")
 DEFAULT_GENERATED_SUMMARY_PATH = Path(
     "experiments/results/vector-cache-sweep-latest.md"
 )

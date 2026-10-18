@@ -116,5 +116,5 @@ jobs:
             experiments/results/multi_mode_latency_*.json
             experiments/results/vector_concurrency_*.json
             experiments/results/vector_cache_sweep_*.json
-            docs/vector-cache-sweep-results.md
+            experiments/results/ubuntu/vector-cache-sweep-results.md
           if-no-files-found: error

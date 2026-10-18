@@ -18,7 +18,7 @@ It keeps **vector storage, cosine similarity, ANN indexing, relational filtering
 | 40-question semantic mean | **15.442 ms** |
 | Native VECTOR INDEX vs brute force | **169.33×** |
 | Filtered ANN speedup | **93.22×** |
-| Backend pytest cases | **37 passed** |
+| Backend pytest cases | **38 passed** |
 | Frontend Vitest cases | **60 passed** |
 
 For methodology, repeated passes, optimizer plans, variance and failure modes,
@@ -706,6 +706,8 @@ The current measured values are kept in [`docs/vector-scale-results.md`](docs/ve
 
 `make vector-cache-sweep` goes one step further with a **25× / 98,500-vector** scratch workload under multiple GLOBAL `mhnsw_max_cache_size` limits (4, 16 and 64 MiB by default). Unlike the simpler scale probe, the cache study removes exact duplicates: every copied vector receives a tiny deterministic two-coordinate rotation that preserves its L2 norm. It embeds **20 real ground-truth questions**, performs **3 independent HNSW rebuilds per cache setting**, and reports build mean/stddev/min/max plus multi-query mean/P95 latency. ANN variability is now summarized with a **within-setting pairwise top-5 overlap** that compares only distinct rebuild pairs, so no rebuild is ever compared with itself. A separate across-cache table compares the first rebuild from each setting against the first setting's first rebuild and is explicitly kept separate from the within-setting statistic. The original server cache value is restored in a `finally` block.
 
+The curated cross-machine comparison is kept in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md). Each new `make vector-cache-sweep` run also writes a generated single-run summary to `experiments/results/vector-cache-sweep-latest.md` locally, or `experiments/results/ubuntu/vector-cache-sweep-results.md` in GitHub Actions; the generated file is intentionally separate so CI cannot overwrite the curated two-machine document.
+
 The committed repeated-build study is interpreted as a **server-limit experiment, not a relevance claim**: cache size is compared primarily through repeated index-build cost and variance, while query latency is measured over the same 20 real questions. Exact duplicate ties have been removed, so residual top-5 differences are treated as ANN rebuild variability rather than evidence that a larger cache deterministically changes retrieval quality. Across-cache overlap is descriptive only because changing the cache setting also requires a fresh ANN rebuild. The curated two-machine comparison lives in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md); machine-readable source data remains in the timestamped JSON artifacts.
 
 The same repeated cache-sweep workload was executed on **GitHub Actions Ubuntu/x86_64**. The current committed second-machine artifact is [`experiments/results/ubuntu/vector_cache_sweep_20261018T163108Z.json`](experiments/results/ubuntu/vector_cache_sweep_20261018T163108Z.json). In that run, mean build time decreased from **37.023 s** at 4 MiB to **29.556 s** at 16 MiB and **19.550 s** at 64 MiB. Mean query latency was **0.523 / 0.377 / 0.373 ms**, and within-setting pairwise top-5 overlap was **59.0% / 61.3% / 66.3%** for 4 / 16 / 64 MiB. The macOS overlap was **75.0% / 67.7% / 71.3%**, so ranking variation does not follow one cache-dependent pattern across machines and is treated as ANN rebuild variability.
@@ -747,7 +749,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 37 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, an explicit committed `VECTOR(384)` UPDATE probe **before and after HNSW rebuild**, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 38 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, an explicit committed `VECTOR(384)` UPDATE probe **before and after HNSW rebuild**, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
 
 Frontend checks:
 
