@@ -34,6 +34,29 @@ on the documented environment. ANN ordering near rank cutoffs can change after
 index rebuilds, so committed JSON artifacts are treated as the source of truth
 rather than assuming any one historical ANN run is invariant.
 
+### Cross-machine validation
+
+The final benchmark suite was also executed on a second environment through
+GitHub Actions to check that the observed behavior is not specific to the local
+Apple Silicon development machine.
+
+| Environment | Semantic mean | Hybrid mean | Linked mean | Recall@10 under concurrent writes |
+|---|---:|---:|---:|---:|
+| Apple M4 Pro / macOS / arm64 / Python 3.13 | 1.292 ms | 2.610 ms | 86.949 ms | 92.5% → 92.5% → 92.5% |
+| GitHub Actions / Ubuntu / x86_64 / Python 3.12.15 | 1.394 ms | 2.947 ms | 119.867 ms | 92.5% → 92.5% → 92.5% |
+
+Both environments used **MariaDB 11.8.9**. Absolute latency differs across the
+machines, especially for linked search, but retrieval behavior is stable:
+all three workloads returned non-empty results for every measured query, and
+the concurrent-writer stress test produced **zero write failures, zero query
+failures, no Recall@10 degradation after inserts or cleanup, and zero orphan
+chunks after cleanup**.
+
+The Ubuntu benchmark artifacts are committed under
+`experiments/results/ubuntu/` and include their own execution-environment
+metadata. This provides an independent OS/architecture execution of the same
+MariaDB-native vector workloads rather than relying on one developer laptop.
+
 ## What the project demonstrates
 
 MVF directly exercises the Area 4 capability rather than treating MariaDB as a passive metadata store:
@@ -405,9 +428,54 @@ Artifact:
 
 `experiments/results/vector_lifecycle_20261018T112923Z.json`
 
+### Repeated multi-mode workload
+
+A separate workload runs **semantic, hybrid, and linked retrieval over all 40
+ground-truth questions**, with one warm-up pass and **5 measured passes** per
+mode (**200 measured queries per mode**).
+
+| Environment | Mode | Mean | P95 | Between-pass stddev | Non-empty result rate |
+|---|---|---:|---:|---:|---:|
+| Apple M4 Pro / macOS | Semantic | **1.292 ms** | 1.490 ms | 0.146 ms | 100% |
+| Apple M4 Pro / macOS | Hybrid | **2.610 ms** | 3.164 ms | 0.459 ms | 100% |
+| Apple M4 Pro / macOS | Linked | **86.949 ms** | 88.778 ms | 0.408 ms | 100% |
+| GitHub Actions / Ubuntu | Semantic | **1.394 ms** | 1.440 ms | 0.010 ms | 100% |
+| GitHub Actions / Ubuntu | Hybrid | **2.947 ms** | 3.040 ms | 0.019 ms | 100% |
+| GitHub Actions / Ubuntu | Linked | **119.867 ms** | 126.828 ms | 0.625 ms | 100% |
+
+This removes the earlier single-query limitation for all three retrieval modes
+and also shows how absolute latency changes across different hardware/OS
+environments while the query behavior remains consistent.
+
+Artifacts:
+
+- `experiments/results/multi_mode_latency_20261018T115413Z.json`
+- `experiments/results/ubuntu/multi_mode_latency_20261018T120340Z.json`
+
+### Concurrent writers and ANN stability
+
+The concurrency harness uses **2 independent writer sessions** inserting
+**50 vector-bearing rows total** while a third session executes **50 semantic
+queries**. Retrieval quality is measured before inserts, after inserts, and
+after deleting the probe rows.
+
+| Environment | Write failures | Query failures | Commit mean | Commit P95 | Recall@10 baseline → insert → cleanup | Orphan chunks |
+|---|---:|---:|---:|---:|---:|---:|
+| Apple M4 Pro / macOS | **0** | **0** | 0.934 ms | 1.279 ms | **92.5% → 92.5% → 92.5%** | **0** |
+| GitHub Actions / Ubuntu | **0** | **0** | 1.425 ms | 2.404 ms | **92.5% → 92.5% → 92.5%** | **0** |
+
+MRR remained **0.782** on the Ubuntu baseline, post-insert, and post-delete
+checks, with **3 misses@10** in each state. The measured Recall@10 delta after
+both insert and cleanup was exactly **0.0**.
+
+Artifacts:
+
+- `experiments/results/vector_concurrency_20261018T115420Z.json`
+- `experiments/results/ubuntu/vector_concurrency_20261018T120348Z.json`
+
 Machine-readable results live in `experiments/results/`.
 
-> **Benchmark provenance:** the older committed benchmark JSON predates environment capture, so its absolute latency should be treated as hardware-dependent. New experiment artifacts record the execution environment automatically. The current reproduced studies were run on **Darwin 24.5.0 / arm64**, **Python 3.13.0**, with **MariaDB 11.8.9-MariaDB-ubu2404** in Docker. The harness fixes corpus size, query set, warm-ups, measured passes, distance metric and index configuration.
+> **Benchmark provenance:** older development benchmark JSON predates environment capture, so those historical absolute latencies should be treated as hardware-dependent. Current experiment artifacts record the execution environment automatically. The canonical local studies were run on **Darwin 24.5.0 / arm64**, **Python 3.13.0**, with **MariaDB 11.8.9-MariaDB-ubu2404** in Docker; the final multi-mode and concurrency studies were also repeated on **Linux 6.17 / x86_64**, **Python 3.12.15**, with the same MariaDB 11.8.9 server version in GitHub Actions. The harness fixes corpus size, query set, warm-ups, measured passes, distance metric and index configuration.
 
 `make environment` records OS, architecture, processor, Python and MariaDB version, and on macOS also records machine model, chip and memory when available.
 
@@ -509,8 +577,7 @@ This creates missing backend/frontend environment files from the checked-in exam
 ### Offline full-corpus restore
 
 The repository supports a portable prebuilt corpus snapshot that contains the
-relational rows, link graph and all 3,940 stored vectors. After generating and
-checking in `data/prebuilt/mvf_corpus.json.gz`, a newcomer can restore the full
+relational rows, link graph and all 3,940 stored vectors. The checked-in `data/prebuilt/mvf_corpus.json.gz` lets a newcomer restore the full
 corpus **without calling MediaWiki and without downloading the embedding model**:
 
 ```bash
@@ -531,6 +598,8 @@ already be available locally.
 ### Standalone SQL examples
 
 [`sql/examples.sql`](sql/examples.sql) is a MariaDB-client walkthrough independent of the Python API. It uses an existing stored chunk as the query vector so the semantic, category-filtered, linked-article, relational-predicate, `EXPLAIN`, and `mhnsw_ef_search` examples can be pasted directly into a prepared MVF database. The temporal example explicitly uses MVF row-maintenance time (`articles.updated_at`) and does not claim that this is a Wikipedia revision timestamp.
+
+When reading the included `EXPLAIN` output, look for `ix_chunks_embedding` on the `chunks` row for semantic/hybrid ANN retrieval, `uq_categories_name` on the category side of the hybrid plan, and `ix_chunks_article_id` in linked search, where the relational-first plan is intentionally cheaper than forcing HNSW.
 
 ### Transactional consistency
 
@@ -566,6 +635,8 @@ make hybrid-index
 make ground-truth-latency
 make m-ground-truth
 make vector-lifecycle
+make multi-mode-latency
+make vector-concurrency
 ```
 
 `make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. `make ground-truth-latency` removes the single-query benchmark limitation by timing all **40 ground-truth questions across 5 measured passes (200 measured queries)** after a complete warm-up pass, preserving per-query timings and per-pass summaries. `make m-ground-truth` evaluates each `M` value with **3 complete measured ground-truth passes** rather than one. `make vector-lifecycle` checks second-session isolation before commit, ANN visibility after commit, and vector/index cleanup after cascade delete while recording insert/delete commit cost.
@@ -587,9 +658,11 @@ vector retrieval:
 
 The manually dispatched `.github/workflows/benchmark.yml` workflow restores the
 checked-in prebuilt corpus on an **Ubuntu GitHub Actions runner**, executes the
-same multi-mode and concurrency harnesses, and uploads the JSON artifacts. This
-provides a second-machine result set that can be committed beside the macOS /
-Apple M4 Pro measurements instead of treating one laptop as universal.
+same multi-mode and concurrency harnesses, and uploads the JSON artifacts. The
+current repository includes the resulting Ubuntu artifacts under
+`experiments/results/ubuntu/`, giving a second OS/architecture result set beside
+the macOS / Apple M4 Pro measurements rather than treating one laptop as
+universal.
 
 ## Testing and CI
 
@@ -631,9 +704,10 @@ The repository keeps secrets out of source control through environment configura
 ├── data/
 │   ├── raw/                  reproducible Wikipedia snapshots
 │   ├── ground_truth/         40-question retrieval ground truth
+│   ├── prebuilt/             portable full-corpus snapshot with vectors
 │   └── manifest.json         corpus/index configuration
 ├── experiments/              benchmark/evaluation harnesses
-│   └── results/              machine-readable result JSON
+│   └── results/              machine-readable result JSON + Ubuntu cross-machine runs
 ├── scripts/                  ingest/index/demo/search utilities
 ├── sql/
 │   └── examples.sql          pasteable MariaDB vector-search walkthrough
@@ -651,12 +725,12 @@ The repository keeps secrets out of source control through environment configura
 
 ## Important findings and limitations
 
-- Native MariaDB vector indexing is already ~**178× faster** than brute-force cosine ranking at 3,940 vectors for the benchmark query.
+- Native MariaDB vector indexing is **169.33× faster** than brute-force cosine ranking at 3,940 vectors for the current canonical benchmark query.
 - Semantic and benchmark hybrid search use the vector index; graph-constrained linked search intentionally does not because the relational-first plan is cheaper for that candidate set.
 - ANN results near a rank cutoff can change across retrieval paths/index rebuilds; MVF reports production ANN, exhaustive reference, and rebuilt-index studies separately instead of hiding the difference.
 - Higher `M` values substantially increased index-build cost without improving the full 40-question article-level Recall@10. In the current single-query exact-top-5 probe, overlap improved from 80% at `M=4/8` to 100% at `M=16/32`, showing that chunk-level agreement and article-level retrieval quality can respond differently to index parameters.
 - The corpus is intentionally focused on the Wikipedia machine-learning neighborhood rather than general web search.
-- Absolute latency depends on host hardware/cache state; the historical benchmark artifact did not record host machine metadata.
+- Absolute latency depends on host hardware/cache state; current canonical artifacts record environment metadata, and the final multi-mode/concurrency workloads were repeated on both macOS/arm64 and Ubuntu/x86_64.
 - OpenAI is an optional generation dependency. MariaDB retrieval, diagnostics, experiments, and the guided demo do not require it.
 
 These behaviors are part of the project result: MVF does not assume that every vector query should force the same index or that one ANN measurement is universally stable.

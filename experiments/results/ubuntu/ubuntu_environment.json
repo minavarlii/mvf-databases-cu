@@ -1,0 +1,12 @@
+{
+  "os": "Linux",
+  "os_release": "6.17.0-1022-azure",
+  "architecture": "x86_64",
+  "processor": "x86_64",
+  "python_version": "3.12.15",
+  "mariadb_version": "11.8.9-MariaDB-ubu2404",
+  "machine_model": null,
+  "machine_identifier": null,
+  "chip": null,
+  "memory": null
+}
