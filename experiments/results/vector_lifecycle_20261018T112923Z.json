@@ -1,0 +1,24 @@
+{
+  "executed_at": "2026-10-18T11:29:23.902850+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "probe": {
+    "uncommitted_row_visible_to_second_session": false,
+    "row_visible_after_commit": true,
+    "vector_search_finds_row_after_commit": true,
+    "article_rows_after_delete": 0,
+    "chunk_rows_after_cascade_delete": 0,
+    "insert_and_index_commit_ms": 0.9554999996908009,
+    "delete_and_index_commit_ms": 2.918792000855319
+  }
+}

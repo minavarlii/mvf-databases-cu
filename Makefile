@@ -38,6 +38,9 @@ endif
 	environment \
 	ef-search \
 	hybrid-index \
+	ground-truth-latency \
+	m-ground-truth \
+	vector-lifecycle \
 	clean
 
 install:
@@ -216,6 +219,21 @@ hybrid-index:
 		--limit 5 \
 		--warmups 5 \
 		--runs 50
+
+
+ground-truth-latency:
+	$(PYTHON) -m experiments.ground_truth_latency \
+		--passes 5 \
+		--warmup-passes 1
+
+
+m-ground-truth:
+	$(PYTHON) -m experiments.vector_index_m_ground_truth \
+		--measured-passes 3
+
+
+vector-lifecycle:
+	$(PYTHON) -m experiments.vector_lifecycle
 
 
 clean:

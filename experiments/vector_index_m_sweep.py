@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.db import database_manager
 from backend.app.services import EmbeddingService
+from experiments.environment import collect_environment
 
 INDEX_NAME = "ix_chunks_embedding"
 
@@ -332,6 +333,7 @@ async def run(
     embedding = await embedding_service.embed_text(QUERY)
 
     embedding_json = serialize_embedding(embedding)
+    environment = await collect_environment()
 
     results: list[SweepResult] = []
 
@@ -375,6 +377,7 @@ async def run(
     output_path = RESULTS_DIRECTORY / (f"vector_index_m_sweep_{timestamp}.json")
 
     payload = {
+        "environment": asdict(environment),
         "mariadb_vector_index": {
             "index_name": INDEX_NAME,
             "distance": "cosine",

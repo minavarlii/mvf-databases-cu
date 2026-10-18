@@ -1,7 +1,20 @@
 {
-  "evaluated_at": "2026-10-09T23:12:12.219725+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "evaluated_at": "2026-10-18T11:29:58.276594+00:00",
   "questions": 40,
   "max_k": 10,
+  "candidate_limit": 200,
   "corpus_articles": 285,
   "corpus_vectors": 3940,
   "recall_at_1": 0.675,
@@ -27,10 +40,12 @@
         "Active learning (machine learning)",
         "Weak supervision",
         "Glossary of artificial intelligence",
-        "Meta-learning (computer science)"
+        "Labeled data"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Machine learning"
+      "matched_title": "Machine learning",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 64
     },
     {
       "question_id": "q002",
@@ -51,7 +66,9 @@
         "Machine learning in earth sciences"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Adversarial machine learning"
+      "matched_title": "Adversarial machine learning",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 51
     },
     {
       "question_id": "q003",
@@ -72,7 +89,9 @@
         "Multiple instance learning"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Active learning (machine learning)"
+      "matched_title": "Active learning (machine learning)",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 69
     },
     {
       "question_id": "q004",
@@ -93,7 +112,9 @@
         "Neural modeling fields"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Anomaly detection"
+      "matched_title": "Anomaly detection",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 58
     },
     {
       "question_id": "q005",
@@ -114,7 +135,9 @@
         "Machine unlearning"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Bias\u2013variance tradeoff"
+      "matched_title": "Bias\u2013variance tradeoff",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 67
     },
     {
       "question_id": "q006",
@@ -135,7 +158,9 @@
         "Surrogate model"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Cross-validation (statistics)"
+      "matched_title": "Cross-validation (statistics)",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 61
     },
     {
       "question_id": "q007",
@@ -156,7 +181,9 @@
         "Fine-tuning (deep learning)"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Federated learning"
+      "matched_title": "Federated learning",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 78
     },
     {
       "question_id": "q008",
@@ -177,7 +204,9 @@
         "Automated machine learning"
       ],
       "first_relevant_rank": null,
-      "matched_title": null
+      "matched_title": null,
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 82
     },
     {
       "question_id": "q009",
@@ -198,7 +227,9 @@
         "Overfitting"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Concept drift"
+      "matched_title": "Concept drift",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 59
     },
     {
       "question_id": "q010",
@@ -220,7 +251,9 @@
         "Automated machine learning"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Fairness (machine learning)"
+      "matched_title": "Fairness (machine learning)",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 57
     },
     {
       "question_id": "q011",
@@ -241,7 +274,9 @@
         "Bias\u2013variance tradeoff"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Feature scaling"
+      "matched_title": "Feature scaling",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 65
     },
     {
       "question_id": "q012",
@@ -262,7 +297,9 @@
         "Curse of dimensionality"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Feature hashing"
+      "matched_title": "Feature hashing",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 59
     },
     {
       "question_id": "q013",
@@ -277,13 +314,15 @@
         "Quantum machine learning",
         "Granular computing",
         "Structured sparsity regularization",
-        "Manifold regularization",
         "Hierarchical navigable small world",
         "Model compression",
-        "Matrix regularization"
+        "Matrix regularization",
+        "Feature hashing"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Curse of dimensionality"
+      "matched_title": "Curse of dimensionality",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 66
     },
     {
       "question_id": "q014",
@@ -304,7 +343,9 @@
         "Concept drift"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Data augmentation"
+      "matched_title": "Data augmentation",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 77
     },
     {
       "question_id": "q015",
@@ -325,7 +366,9 @@
         "Pattern recognition"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Data preprocessing"
+      "matched_title": "Data preprocessing",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 76
     },
     {
       "question_id": "q016",
@@ -346,7 +389,9 @@
         "Fine-tuning (deep learning)"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Bayesian optimization"
+      "matched_title": "Bayesian optimization",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 69
     },
     {
       "question_id": "q017",
@@ -367,7 +412,9 @@
         "Learning automaton"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Energy-based model"
+      "matched_title": "Energy-based model",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 75
     },
     {
       "question_id": "q018",
@@ -388,7 +435,9 @@
         "Rademacher complexity"
       ],
       "first_relevant_rank": null,
-      "matched_title": null
+      "matched_title": null,
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 78
     },
     {
       "question_id": "q019",
@@ -409,7 +458,9 @@
         "Relational data mining"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Confusion matrix"
+      "matched_title": "Confusion matrix",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 67
     },
     {
       "question_id": "q020",
@@ -430,7 +481,9 @@
         "Machine learning"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Domain adaptation"
+      "matched_title": "Domain adaptation",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 66
     },
     {
       "question_id": "q021",
@@ -451,7 +504,9 @@
         "Machine learning in earth sciences"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Double descent"
+      "matched_title": "Double descent",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 58
     },
     {
       "question_id": "q022",
@@ -472,7 +527,9 @@
         "Machine learning"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Differentially private stochastic gradient descent"
+      "matched_title": "Differentially private stochastic gradient descent",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 53
     },
     {
       "question_id": "q023",
@@ -493,7 +550,9 @@
         "Energy-based model"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Contrastive Language\u2013Image Pre-training"
+      "matched_title": "Contrastive Language\u2013Image Pre-training",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 76
     },
     {
       "question_id": "q024",
@@ -514,7 +573,9 @@
         "Machine Learning (journal)"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Automated machine learning"
+      "matched_title": "Automated machine learning",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 71
     },
     {
       "question_id": "q025",
@@ -535,7 +596,9 @@
         "Multi-task learning"
       ],
       "first_relevant_rank": null,
-      "matched_title": null
+      "matched_title": null,
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 75
     },
     {
       "question_id": "q026",
@@ -556,7 +619,9 @@
         "Machine learning in video games"
       ],
       "first_relevant_rank": 6,
-      "matched_title": "Few-shot learning"
+      "matched_title": "Few-shot learning",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 76
     },
     {
       "question_id": "q027",
@@ -577,7 +642,9 @@
         "Multiple instance learning"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Feature store"
+      "matched_title": "Feature store",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 82
     },
     {
       "question_id": "q028",
@@ -598,7 +665,9 @@
         "Algorithmic bias"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Feature Importance"
+      "matched_title": "Feature Importance",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 64
     },
     {
       "question_id": "q029",
@@ -619,7 +688,9 @@
         "Weak supervision"
       ],
       "first_relevant_rank": 9,
-      "matched_title": "Dataset shift"
+      "matched_title": "Dataset shift",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 67
     },
     {
       "question_id": "q030",
@@ -640,7 +711,9 @@
         "Automated decision-making"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "AI alignment"
+      "matched_title": "AI alignment",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 44
     },
     {
       "question_id": "q031",
@@ -662,7 +735,9 @@
         "Overfitting"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Algorithmic bias"
+      "matched_title": "Algorithmic bias",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 50
     },
     {
       "question_id": "q032",
@@ -683,7 +758,9 @@
         "Offline learning"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Eager learning"
+      "matched_title": "Eager learning",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 69
     },
     {
       "question_id": "q033",
@@ -704,7 +781,9 @@
         "Decision list"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Decision tree pruning"
+      "matched_title": "Decision tree pruning",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 71
     },
     {
       "question_id": "q034",
@@ -725,7 +804,9 @@
         "Generative model"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Deep tomographic reconstruction"
+      "matched_title": "Deep tomographic reconstruction",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 68
     },
     {
       "question_id": "q035",
@@ -746,7 +827,9 @@
         "Inductive programming"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Developmental robotics"
+      "matched_title": "Developmental robotics",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 50
     },
     {
       "question_id": "q036",
@@ -767,7 +850,9 @@
         "Proactive learning"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Exploration\u2013exploitation dilemma"
+      "matched_title": "Exploration\u2013exploitation dilemma",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 44
     },
     {
       "question_id": "q037",
@@ -788,7 +873,9 @@
         "Inception score"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Conditional random field"
+      "matched_title": "Conditional random field",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 66
     },
     {
       "question_id": "q038",
@@ -809,7 +896,9 @@
         "Semantic folding"
       ],
       "first_relevant_rank": 1,
-      "matched_title": "Bag-of-words model"
+      "matched_title": "Bag-of-words model",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 63
     },
     {
       "question_id": "q039",
@@ -830,7 +919,9 @@
         "Machine learning in biology"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Ball tree"
+      "matched_title": "Ball tree",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 59
     },
     {
       "question_id": "q040",
@@ -851,7 +942,9 @@
         "Machine-learned interatomic potential"
       ],
       "first_relevant_rank": 2,
-      "matched_title": "Attention (machine learning)"
+      "matched_title": "Attention (machine learning)",
+      "candidate_chunks_examined": 200,
+      "unique_articles_found": 62
     }
   ]
 }

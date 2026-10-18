@@ -1,0 +1,1085 @@
+{
+  "executed_at": "2026-10-18T11:28:57.318528+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "questions": 40,
+  "corpus_articles": 285,
+  "corpus_vectors": 3940,
+  "candidate_limit": 200,
+  "warmup_passes": 1,
+  "measured_passes": 5,
+  "total_measured_queries": 200,
+  "aggregate_mean_query_ms": 15.441720180206175,
+  "aggregate_median_query_ms": 15.365957999165403,
+  "aggregate_p95_query_ms": 17.454362803619006,
+  "between_pass_mean_stddev_ms": 0.20498967809605914,
+  "mean_recall_at_10": 0.925,
+  "mean_mrr": 0.7819444444444444,
+  "passes": [
+    {
+      "pass_number": 1,
+      "mean_query_ms": 15.559290575401974,
+      "median_query_ms": 15.27954149787547,
+      "p95_query_ms": 17.805554801088874,
+      "stddev_query_ms": 0.9241035847254478,
+      "recall_at_10": 0.925,
+      "mrr": 0.7819444444444444,
+      "timings": [
+        {
+          "question_id": "q001",
+          "latency_ms": 14.326958000310697,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q002",
+          "latency_ms": 17.7970840013586,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q003",
+          "latency_ms": 15.004458000476006,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q004",
+          "latency_ms": 15.143041004193947,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q005",
+          "latency_ms": 14.927416006685235,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q006",
+          "latency_ms": 14.89712500188034,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q007",
+          "latency_ms": 16.739499995310325,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q008",
+          "latency_ms": 16.47841699741548,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q009",
+          "latency_ms": 14.987333997851238,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q010",
+          "latency_ms": 15.721417003078386,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q011",
+          "latency_ms": 16.34212499629939,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q012",
+          "latency_ms": 14.95045799674699,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q013",
+          "latency_ms": 16.030624996346887,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q014",
+          "latency_ms": 16.20454100338975,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q015",
+          "latency_ms": 15.575165998598095,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q016",
+          "latency_ms": 14.603834002627991,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q017",
+          "latency_ms": 17.966499995964114,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q018",
+          "latency_ms": 15.033625000796746,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q019",
+          "latency_ms": 14.806625003984664,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q020",
+          "latency_ms": 15.208790995529853,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q021",
+          "latency_ms": 14.853374996164348,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q022",
+          "latency_ms": 14.818667004874442,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q023",
+          "latency_ms": 15.951000001223292,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q024",
+          "latency_ms": 15.629082998202648,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q025",
+          "latency_ms": 16.037832996516954,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q026",
+          "latency_ms": 15.717084002972115,
+          "first_relevant_rank": 6
+        },
+        {
+          "question_id": "q027",
+          "latency_ms": 16.132584001752548,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q028",
+          "latency_ms": 15.0664999964647,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q029",
+          "latency_ms": 15.85625000006985,
+          "first_relevant_rank": 9
+        },
+        {
+          "question_id": "q030",
+          "latency_ms": 15.778666005644482,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q031",
+          "latency_ms": 16.222624995862134,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q032",
+          "latency_ms": 18.178332997194957,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q033",
+          "latency_ms": 15.453958003490698,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q034",
+          "latency_ms": 14.67791700270027,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q035",
+          "latency_ms": 15.350292000221089,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q036",
+          "latency_ms": 14.757083001313731,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q037",
+          "latency_ms": 14.618583001720253,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q038",
+          "latency_ms": 14.767375003430061,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q039",
+          "latency_ms": 15.192541002761573,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q040",
+          "latency_ms": 14.566834004654083,
+          "first_relevant_rank": 2
+        }
+      ]
+    },
+    {
+      "pass_number": 2,
+      "mean_query_ms": 15.213047949691827,
+      "median_query_ms": 15.171500002907123,
+      "p95_query_ms": 16.675720504281344,
+      "stddev_query_ms": 0.8347032219018019,
+      "recall_at_10": 0.925,
+      "mrr": 0.7819444444444444,
+      "timings": [
+        {
+          "question_id": "q001",
+          "latency_ms": 15.115333000721876,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q002",
+          "latency_ms": 14.472834001935553,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q003",
+          "latency_ms": 15.00491699698614,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q004",
+          "latency_ms": 14.776374999200925,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q005",
+          "latency_ms": 16.119082996738143,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q006",
+          "latency_ms": 14.754457995877601,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q007",
+          "latency_ms": 17.4510420038132,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q008",
+          "latency_ms": 14.535417001752649,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q009",
+          "latency_ms": 14.687000002595596,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q010",
+          "latency_ms": 15.329624999139924,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q011",
+          "latency_ms": 15.300415994715877,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q012",
+          "latency_ms": 14.960207998228725,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q013",
+          "latency_ms": 15.804333001142368,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q014",
+          "latency_ms": 15.343958999437746,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q015",
+          "latency_ms": 14.637250002124347,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q016",
+          "latency_ms": 15.133125001739245,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q017",
+          "latency_ms": 15.313875002902932,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q018",
+          "latency_ms": 15.048374996695202,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q019",
+          "latency_ms": 14.305958997283597,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q020",
+          "latency_ms": 14.679790998343378,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q021",
+          "latency_ms": 14.026083001226652,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q022",
+          "latency_ms": 14.477791999524925,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q023",
+          "latency_ms": 13.74766699882457,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q024",
+          "latency_ms": 13.940666998678353,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q025",
+          "latency_ms": 13.644750004459638,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q026",
+          "latency_ms": 14.65562499652151,
+          "first_relevant_rank": 6
+        },
+        {
+          "question_id": "q027",
+          "latency_ms": 14.976874997955747,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q028",
+          "latency_ms": 15.968959000019822,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q029",
+          "latency_ms": 15.6637089967262,
+          "first_relevant_rank": 9
+        },
+        {
+          "question_id": "q030",
+          "latency_ms": 15.486541997233871,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q031",
+          "latency_ms": 15.96520800376311,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q032",
+          "latency_ms": 15.323375002481043,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q033",
+          "latency_ms": 16.096624996862374,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q034",
+          "latency_ms": 16.329082995071076,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q035",
+          "latency_ms": 15.36599999963073,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q036",
+          "latency_ms": 15.92266700026812,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q037",
+          "latency_ms": 16.66095800464973,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q038",
+          "latency_ms": 15.209875004075002,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q039",
+          "latency_ms": 15.329875001043547,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q040",
+          "latency_ms": 16.956207997282036,
+          "first_relevant_rank": 2
+        }
+      ]
+    },
+    {
+      "pass_number": 3,
+      "mean_query_ms": 15.369878050114494,
+      "median_query_ms": 15.378104002593318,
+      "p95_query_ms": 16.2593705485051,
+      "stddev_query_ms": 0.8580783727291681,
+      "recall_at_10": 0.925,
+      "mrr": 0.7819444444444444,
+      "timings": [
+        {
+          "question_id": "q001",
+          "latency_ms": 14.852000000246335,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q002",
+          "latency_ms": 14.87237499532057,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q003",
+          "latency_ms": 15.121874996111728,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q004",
+          "latency_ms": 17.395333998138085,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q005",
+          "latency_ms": 15.430792002007365,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q006",
+          "latency_ms": 14.845042001979891,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q007",
+          "latency_ms": 15.351707996160258,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q008",
+          "latency_ms": 15.976875001797453,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q009",
+          "latency_ms": 15.379958000266925,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q010",
+          "latency_ms": 15.399791001982521,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q011",
+          "latency_ms": 14.719750004587695,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q012",
+          "latency_ms": 14.494415998342447,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q013",
+          "latency_ms": 13.821790998918004,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q014",
+          "latency_ms": 13.713540996832307,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q015",
+          "latency_ms": 14.097792001848575,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q016",
+          "latency_ms": 14.255250003770925,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q017",
+          "latency_ms": 14.51541599817574,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q018",
+          "latency_ms": 15.947791005601175,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q019",
+          "latency_ms": 16.1273749981774,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q020",
+          "latency_ms": 15.274624995072372,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q021",
+          "latency_ms": 16.038458001276013,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q022",
+          "latency_ms": 15.851500000280794,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q023",
+          "latency_ms": 15.479707995837089,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q024",
+          "latency_ms": 15.917125005216803,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q025",
+          "latency_ms": 15.34670899854973,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q026",
+          "latency_ms": 15.686334001657087,
+          "first_relevant_rank": 6
+        },
+        {
+          "question_id": "q027",
+          "latency_ms": 18.31608300562948,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q028",
+          "latency_ms": 15.050249996420462,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q029",
+          "latency_ms": 16.19958299852442,
+          "first_relevant_rank": 9
+        },
+        {
+          "question_id": "q030",
+          "latency_ms": 15.909916997770779,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q031",
+          "latency_ms": 15.435875000548549,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q032",
+          "latency_ms": 14.952541998354718,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q033",
+          "latency_ms": 15.54687500174623,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q034",
+          "latency_ms": 15.007791997049935,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q035",
+          "latency_ms": 15.80070800264366,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q036",
+          "latency_ms": 14.572874999430496,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q037",
+          "latency_ms": 15.376250004919712,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q038",
+          "latency_ms": 15.05979200010188,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q039",
+          "latency_ms": 15.930540997942444,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q040",
+          "latency_ms": 15.722708005341701,
+          "first_relevant_rank": 2
+        }
+      ]
+    },
+    {
+      "pass_number": 4,
+      "mean_query_ms": 15.73328432514245,
+      "median_query_ms": 15.547604503808543,
+      "p95_query_ms": 17.618918749212753,
+      "stddev_query_ms": 0.9804130327588614,
+      "recall_at_10": 0.925,
+      "mrr": 0.7819444444444444,
+      "timings": [
+        {
+          "question_id": "q001",
+          "latency_ms": 15.60270900517935,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q002",
+          "latency_ms": 17.59899999888148,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q003",
+          "latency_ms": 15.797457999724429,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q004",
+          "latency_ms": 14.901124995958526,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q005",
+          "latency_ms": 15.596833000017796,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q006",
+          "latency_ms": 15.48029099649284,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q007",
+          "latency_ms": 16.122916000313126,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q008",
+          "latency_ms": 14.762375001737382,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q009",
+          "latency_ms": 15.052375005325302,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q010",
+          "latency_ms": 15.367625004728325,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q011",
+          "latency_ms": 15.072624999447726,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q012",
+          "latency_ms": 16.363834001822397,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q013",
+          "latency_ms": 16.00170799792977,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q014",
+          "latency_ms": 15.274999997927807,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q015",
+          "latency_ms": 17.51745799992932,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q016",
+          "latency_ms": 15.3323329941486,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q017",
+          "latency_ms": 17.99737500550691,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q018",
+          "latency_ms": 15.132583997910842,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q019",
+          "latency_ms": 15.731999999843538,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q020",
+          "latency_ms": 15.254833000653889,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q021",
+          "latency_ms": 16.173042000446003,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q022",
+          "latency_ms": 16.022874995542224,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q023",
+          "latency_ms": 14.916166001057718,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q024",
+          "latency_ms": 15.631499998562504,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q025",
+          "latency_ms": 14.676041006168816,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q026",
+          "latency_ms": 15.546084003290161,
+          "first_relevant_rank": 6
+        },
+        {
+          "question_id": "q027",
+          "latency_ms": 16.599624999798834,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q028",
+          "latency_ms": 15.847791997657623,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q029",
+          "latency_ms": 14.933124999515712,
+          "first_relevant_rank": 9
+        },
+        {
+          "question_id": "q030",
+          "latency_ms": 15.465041004063096,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q031",
+          "latency_ms": 15.365915998700075,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q032",
+          "latency_ms": 19.58941699558636,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q033",
+          "latency_ms": 15.076666997629218,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q034",
+          "latency_ms": 14.993250006227754,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q035",
+          "latency_ms": 14.519207994453609,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q036",
+          "latency_ms": 15.235457998642232,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q037",
+          "latency_ms": 15.686792001361027,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q038",
+          "latency_ms": 15.85437500034459,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q039",
+          "latency_ms": 15.687416998844128,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q040",
+          "latency_ms": 15.549125004326925,
+          "first_relevant_rank": 2
+        }
+      ]
+    },
+    {
+      "pass_number": 5,
+      "mean_query_ms": 15.333100000680133,
+      "median_query_ms": 15.500458004680695,
+      "p95_query_ms": 16.790797949579424,
+      "stddev_query_ms": 1.0396169407121285,
+      "recall_at_10": 0.925,
+      "mrr": 0.7819444444444444,
+      "timings": [
+        {
+          "question_id": "q001",
+          "latency_ms": 14.702250002301298,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q002",
+          "latency_ms": 15.57804099866189,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q003",
+          "latency_ms": 15.389249994768761,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q004",
+          "latency_ms": 15.677041999879293,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q005",
+          "latency_ms": 15.699916002631653,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q006",
+          "latency_ms": 15.796749998116866,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q007",
+          "latency_ms": 18.152167001971975,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q008",
+          "latency_ms": 15.826542003196664,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q009",
+          "latency_ms": 16.738124999392312,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q010",
+          "latency_ms": 16.065582996816374,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q011",
+          "latency_ms": 15.290041999833193,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q012",
+          "latency_ms": 15.477749999263324,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q013",
+          "latency_ms": 16.582458003540523,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q014",
+          "latency_ms": 15.587458001391497,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q015",
+          "latency_ms": 15.892292001808528,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q016",
+          "latency_ms": 15.587125002639368,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q017",
+          "latency_ms": 15.481416005059145,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q018",
+          "latency_ms": 14.967957999033388,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q019",
+          "latency_ms": 15.213332997518592,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q020",
+          "latency_ms": 14.139749997411855,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q021",
+          "latency_ms": 14.293041997007094,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q022",
+          "latency_ms": 14.40487500076415,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q023",
+          "latency_ms": 13.926249994256068,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q024",
+          "latency_ms": 14.023625000845641,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q025",
+          "latency_ms": 14.38741700258106,
+          "first_relevant_rank": null
+        },
+        {
+          "question_id": "q026",
+          "latency_ms": 13.7959999992745,
+          "first_relevant_rank": 6
+        },
+        {
+          "question_id": "q027",
+          "latency_ms": 13.966666003398132,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q028",
+          "latency_ms": 13.97187499969732,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q029",
+          "latency_ms": 14.018665999174118,
+          "first_relevant_rank": 9
+        },
+        {
+          "question_id": "q030",
+          "latency_ms": 13.649792002979666,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q031",
+          "latency_ms": 16.345959003956523,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q032",
+          "latency_ms": 14.986209003836848,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q033",
+          "latency_ms": 16.138250000949483,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q034",
+          "latency_ms": 16.07187499757856,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q035",
+          "latency_ms": 15.762249997351319,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q036",
+          "latency_ms": 14.721958999871276,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q037",
+          "latency_ms": 17.79158400313463,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q038",
+          "latency_ms": 15.5259580060374,
+          "first_relevant_rank": 1
+        },
+        {
+          "question_id": "q039",
+          "latency_ms": 15.519500004302245,
+          "first_relevant_rank": 2
+        },
+        {
+          "question_id": "q040",
+          "latency_ms": 16.177000004972797,
+          "first_relevant_rank": 2
+        }
+      ]
+    }
+  ]
+}

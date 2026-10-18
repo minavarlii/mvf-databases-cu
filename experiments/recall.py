@@ -15,6 +15,7 @@ from backend.app.db import database_manager
 from backend.app.db.models import Article, Chunk
 from backend.app.db.queries import VectorQueries
 from backend.app.services import EmbeddingService
+from experiments.environment import collect_environment
 
 GROUND_TRUTH_PATH = Path("data/ground_truth/questions.jsonl")
 
@@ -332,6 +333,7 @@ async def run(
     await validate_ground_truth_titles(questions=questions)
 
     article_count, vector_count = await load_corpus_statistics()
+    environment = await collect_environment()
 
     candidate_limit = min(
         vector_count,
@@ -422,7 +424,7 @@ async def run(
 
     output_path.write_text(
         json.dumps(
-            asdict(result),
+            {"environment": asdict(environment), **asdict(result)},
             indent=2,
         ),
         encoding="utf-8",

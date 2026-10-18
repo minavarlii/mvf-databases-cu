@@ -1,5 +1,17 @@
 {
-  "evaluated_at": "2026-10-13T15:51:10.033494+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "evaluated_at": "2026-10-18T11:30:13.721241+00:00",
   "questions": 40,
   "max_k": 10,
   "corpus_articles": 285,

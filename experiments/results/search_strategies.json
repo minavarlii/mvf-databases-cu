@@ -10,16 +10,28 @@
     "vector_count": 3940,
     "article_link_count": 2710
   },
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
   "semantic": {
     "latency": {
       "runs": 50,
-      "mean_ms": 1.3930474999688158,
-      "median_ms": 1.3618960001622327,
-      "p50_ms": 1.3618960001622327,
-      "p95_ms": 1.781433150108569,
-      "min_ms": 1.134666999860201,
-      "max_ms": 1.9970829998783302,
-      "stddev_ms": 0.1928812723879332
+      "mean_ms": 1.385301680129487,
+      "median_ms": 1.3160834969312418,
+      "p50_ms": 1.3160834969312418,
+      "p95_ms": 1.7653146529482908,
+      "min_ms": 1.065875003405381,
+      "max_ms": 2.6910000015050173,
+      "stddev_ms": 0.254998664262823
     },
     "execution_plan": [
       {
@@ -49,7 +61,7 @@
         "access_type": "index",
         "possible_keys": null,
         "key": "ix_chunks_embedding",
-        "rows": 3113,
+        "rows": 3258,
         "extra": ""
       }
     ]
@@ -57,13 +69,13 @@
   "hybrid": {
     "latency": {
       "runs": 50,
-      "mean_ms": 2.270226679975167,
-      "median_ms": 2.235416499843268,
-      "p50_ms": 2.235416499843268,
-      "p95_ms": 2.7201582998714,
-      "min_ms": 1.854875000390166,
-      "max_ms": 2.794874999381136,
-      "stddev_ms": 0.26167641386462137
+      "mean_ms": 2.230117459257599,
+      "median_ms": 2.1729580003011506,
+      "p50_ms": 2.1729580003011506,
+      "p95_ms": 2.606572548756958,
+      "min_ms": 1.9591669988585636,
+      "max_ms": 2.66883299627807,
+      "stddev_ms": 0.20708379053283607
     },
     "execution_plan": [
       {
@@ -103,7 +115,7 @@
         "access_type": "index",
         "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
         "key": "ix_chunks_embedding",
-        "rows": 3113,
+        "rows": 3258,
         "extra": ""
       },
       {
@@ -121,13 +133,13 @@
   "linked": {
     "latency": {
       "runs": 50,
-      "mean_ms": 86.19963169996481,
-      "median_ms": 85.60525050006618,
-      "p50_ms": 85.60525050006618,
-      "p95_ms": 90.72697530009464,
-      "min_ms": 83.08354099972348,
-      "max_ms": 94.3833330002235,
-      "stddev_ms": 2.2116620166395897
+      "mean_ms": 89.30196076064021,
+      "median_ms": 89.15397899909294,
+      "p50_ms": 89.15397899909294,
+      "p95_ms": 91.03166890672583,
+      "min_ms": 87.7682080026716,
+      "max_ms": 94.4835830014199,
+      "stddev_ms": 1.0993116760813644
     },
     "execution_plan": [
       {
@@ -167,7 +179,7 @@
         "access_type": "ref",
         "possible_keys": "uq_chunks_article_chunk_index,ix_chunks_article_id",
         "key": "ix_chunks_article_id",
-        "rows": 10,
+        "rows": 11,
         "extra": ""
       }
     ]

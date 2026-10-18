@@ -213,52 +213,75 @@ Benchmarks isolate **database retrieval**: query embedding is computed before ti
 
 | Strategy |               Mean |    Median |       P95 | Main retrieval index     |
 | -------- | -----------------: | --------: | --------: | ------------------------ |
-| Semantic | **1.393 ms** |  1.362 ms |  1.781 ms | `ix_chunks_embedding`  |
-| Hybrid   | **2.270 ms** |  2.235 ms |  2.720 ms | `ix_chunks_embedding`  |
-| Linked   |          86.200 ms | 85.605 ms | 90.727 ms | `ix_chunks_article_id` |
+| Semantic | **1.385 ms** | 1.316 ms | 1.765 ms | `ix_chunks_embedding` |
+| Hybrid   | **2.230 ms** | 2.173 ms | 2.607 ms | `ix_chunks_embedding` |
+| Linked   | **89.302 ms** | 89.154 ms | 91.032 ms | `ix_chunks_article_id` |
 
 ### Native index vs brute force
 
 | Mode                      |               Mean |        P95 |
 | ------------------------- | -----------------: | ---------: |
-| MariaDB `VECTOR INDEX`  | **1.302 ms** |   1.688 ms |
-| Brute-force cosine search |         231.728 ms | 236.068 ms |
+| MariaDB `VECTOR INDEX` | **1.392 ms** | **1.836 ms** |
+| Brute-force cosine search | 235.715 ms | 237.491 ms |
 
-Observed mean speedup: **177.92×**.
+Observed mean speedup: **169.33×**.
 
 ![Vector index and strategy benchmarks](docs/screenshots/benchmarks.png)
 
 ### Retrieval quality
 
-Production ANN evaluation over 40 manually prepared questions:
+Current ANN evaluation over 40 manually prepared questions:
 
 | Metric    |           Result |
 | --------- | ---------------: |
 | Recall@1  |  **67.5%** |
 | Recall@3  |  **87.5%** |
 | Recall@5  |  **87.5%** |
-| Recall@10 |  **95.0%** |
-| MRR       |  **0.784** |
-| Misses@10 | **2 / 40** |
+| Recall@10 |  **92.5%** |
+| MRR       |  **0.782** |
+| Misses@10 | **3 / 40** |
 
 Ground truth is stored in `data/ground_truth/questions.jsonl`.
 
-MVF also runs an exhaustive article-level reference evaluation. That path measured **92.5% Recall@10 / 0.782 MRR / 3 misses**. The two numbers are intentionally reported separately: they are different retrieval paths and can differ at the rank cutoff. In the committed run, one relevant article appears at rank 10 in the production ANN result and rank 11 in the exhaustive article-level ranking.
-
-A later rebuilt-index `M` study also measured **92.5% Recall@10** for all tested `M` values. The takeaway is that the 95% production run should not be treated as an invariant of every ANN rebuild.
+MVF also runs an exhaustive article-level reference evaluation. In the current canonical run, both the ANN evaluation and the exhaustive article-level evaluation measured **92.5% Recall@10 / 0.782 MRR / 3 misses**. They remain separate harnesses because ANN and exact ranking are different retrieval paths and may diverge near rank cutoffs after future index rebuilds or corpus changes.
 
 ### Vector-index `M` study
 
-|           M |       Build time |        Median query | P95 query |       Recall@10 |             MRR |
-| ----------: | ---------------: | ------------------: | --------: | --------------: | --------------: |
-|           4 |           156 ms |           16.074 ms | 16.785 ms |           92.5% |           0.782 |
-| **8** | **309 ms** | **14.854 ms** | 17.062 ms | **92.5%** | **0.782** |
-|          16 |           1.01 s |           15.456 ms | 17.177 ms |           92.5% |           0.782 |
-|          32 |           3.74 s |           14.882 ms | 16.147 ms |           92.5% |           0.782 |
+Each `M` value is rebuilt from scratch, warmed up over the full 40-question
+ground-truth set, and then measured for **3 complete passes**.
 
-`M=8` remains the production choice because larger values did not improve article-level retrieval quality on this corpus while index construction became substantially more expensive.
+| M | Build time | Mean query | Median query | P95 query | Between-pass stddev | Recall@10 | MRR |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 168.898 ms | 15.429 ms | 15.417 ms | 16.675 ms | 0.110 ms | 92.5% | 0.782 |
+| **8** | **341.078 ms** | **15.686 ms** | **15.534 ms** | **17.669 ms** | **0.012 ms** | **92.5%** | **0.782** |
+| 16 | 1.035 s | 15.736 ms | 15.681 ms | 17.079 ms | 0.113 ms | 92.5% | 0.782 |
+| 32 | 3.850 s | 16.706 ms | 15.827 ms | 18.525 ms | 1.327 ms | 92.5% | 0.782 |
 
-A separate single-query exact-top-5 probe found chunk-level overlap of **0.8** for `M=4/8/16` but **0.4** for `M=32`. That result is kept as a documented ANN approximation/failure-mode observation even though the full 40-question article-level Recall@10 did not change.
+`M=8` remains the production choice. All tested values produced the same
+article-level Recall@10 and MRR, while higher values substantially increased
+index-build cost. The three-pass measurements also expose run-to-run latency
+variation instead of relying on one measured ground-truth pass.
+
+A separate single-query exact-top-5 probe gives another view of approximation
+behavior:
+
+| M | Build time | Mean query | P95 query | Exact top-5 overlap |
+|---:|---:|---:|---:|---:|
+| 4 | 162.753 ms | 1.047 ms | 1.276 ms | 80% |
+| 8 | 332.477 ms | 1.099 ms | 1.349 ms | 80% |
+| 16 | 1.039 s | 1.227 ms | 1.435 ms | 100% |
+| 32 | 3.883 s | 1.215 ms | 1.478 ms | 100% |
+
+For this query, larger `M` improved exact top-k agreement, but at a much larger
+index-build cost and with no improvement in the full 40-question article-level
+Recall@10. The project therefore reports both the single-query chunk-level
+probe and the full ground-truth evaluation instead of treating either one as
+universally representative.
+
+Artifacts:
+
+- `experiments/results/vector_index_m_ground_truth_20261018T112918Z.json`
+- `experiments/results/vector_index_m_sweep_20261018T113131Z.json`
 
 ### Filtered ANN probe
 
@@ -281,22 +304,80 @@ experiments/results/hybrid_index_probe_20261018T111312Z.json
 
 ### Runtime HNSW `mhnsw_ef_search` study
 
-Build-time `M` is not the only ANN tuning surface. MVF therefore evaluates MariaDB's session-level `mhnsw_ef_search` across the complete 40-question ground-truth set. Each setting is measured in **3 complete passes** after a warm-up round, so both retrieval quality and between-pass latency variance are recorded.
+MVF also evaluates MariaDB's session-level `mhnsw_ef_search`, complementing
+the build-time `M` study. Each setting uses the complete 40-question
+ground-truth set with one warm-up round and **3 complete measured passes**.
+
+The table below is generated from the committed result artifact; aggregate
+P95 and between-pass standard deviation are therefore the exact values stored
+in the JSON rather than manually copied measurements.
 
 | `mhnsw_ef_search` | Aggregate mean | Aggregate P95 | Between-pass stddev | Recall@10 | MRR |
 |---:|---:|---:|---:|---:|---:|
-| **200** | **15.523 ms** | 16.889 ms | 0.348 ms | **92.5%** | **0.782** |
-| 400 | 16.088 ms | 17.614 ms | 0.228 ms | 92.5% | 0.782 |
-| 800 | 15.834 ms | 17.933 ms | 0.277 ms | 92.5% | 0.782 |
-| 1600 | 16.993 ms | 18.420 ms | 1.415 ms | 92.5% | 0.782 |
+| 200 | 15.523 ms | 17.069 ms | 0.363 ms | 92.5% | 0.782 |
+| 400 | 16.088 ms | 17.483 ms | 0.123 ms | 92.5% | 0.782 |
+| 800 | 15.834 ms | 17.257 ms | 0.228 ms | 92.5% | 0.782 |
+| 1600 | 16.993 ms | 18.117 ms | 1.383 ms | 92.5% | 0.782 |
 
-On this 3,940-vector corpus, raising `mhnsw_ef_search` above 200 did **not** improve Recall@10 or MRR. Query latency instead increased slightly, and the 1600 setting showed noticeably more run-to-run noise because one pass contained an outlier. This is reported rather than discarded because the experiment is intended to expose real ANN/runtime behavior, not only the cleanest run.
+On this 3,940-vector corpus, raising `mhnsw_ef_search` above 200 did not improve
+Recall@10 or MRR. The higher settings therefore increased search effort without
+a quality benefit on this workload.
 
-Result artifact:
+Artifact:
 
-```text
-experiments/results/vector_ef_search_20261018T111327Z.json
-```
+`experiments/results/vector_ef_search_20261018T111327Z.json`
+
+### Multi-query ground-truth latency
+
+The single-query microbenchmarks are complemented by a workload that times the
+**entire 40-question ground-truth set**. Query embeddings are precomputed before
+timing. One complete warm-up pass is followed by **5 measured passes**, for
+**200 measured semantic-search queries** in total.
+
+| Metric | Result |
+|---|---:|
+| Mean | **15.442 ms** |
+| Median | **15.366 ms** |
+| P95 | **17.454 ms** |
+| Between-pass mean stddev | **0.205 ms** |
+| Recall@10 | **92.5%** |
+| MRR | **0.782** |
+
+This workload provides query diversity and repeated whole-workload measurements
+rather than using one query as the only latency evidence.
+
+Artifact:
+
+`experiments/results/ground_truth_latency_20261018T112857Z.json`
+
+### Transaction and vector-index lifecycle
+
+A controlled MariaDB lifecycle probe exercises a real relational row and its
+`VECTOR(384)` chunk across transaction boundaries:
+
+- a second session cannot observe the uncommitted row;
+- after commit, a fresh session sees the relational row;
+- native vector search finds the newly committed vector;
+- deleting the parent article removes the chunk through the relational cascade;
+- a fresh session confirms that neither row remains.
+
+| Check | Current result |
+|---|---:|
+| Uncommitted row visible to second session | **No** |
+| Row visible after commit | **Yes** |
+| Vector search finds row after commit | **Yes** |
+| Article rows after delete | **0** |
+| Chunk rows after cascade delete | **0** |
+| Insert + index commit | **0.955 ms** |
+| Delete + index commit | **2.919 ms** |
+
+This complements the rollback integration test with commit visibility, isolation,
+ANN visibility of a newly committed vector, delete behavior, and index-maintenance
+cost.
+
+Artifact:
+
+`experiments/results/vector_lifecycle_20261018T112923Z.json`
 
 Machine-readable results live in `experiments/results/`.
 
@@ -401,7 +482,7 @@ This creates missing backend/frontend environment files from the checked-in exam
 
 ### Standalone SQL examples
 
-[`sql/examples.sql`](sql/examples.sql) is a MariaDB-client walkthrough independent of the Python API. It uses an existing stored chunk as the query vector so the semantic, category-filtered, linked-article and `EXPLAIN` examples can be pasted directly into a prepared MVF database.
+[`sql/examples.sql`](sql/examples.sql) is a MariaDB-client walkthrough independent of the Python API. It uses an existing stored chunk as the query vector so the semantic, category-filtered, linked-article, relational-predicate, `EXPLAIN`, and `mhnsw_ef_search` examples can be pasted directly into a prepared MVF database. The temporal example explicitly uses MVF row-maintenance time (`articles.updated_at`) and does not claim that this is a Wikipedia revision timestamp.
 
 ### Transactional consistency
 
@@ -434,9 +515,12 @@ Open **Evaluation** to inspect committed Recall@K/MRR, indexed-vs-brute-force la
 make environment
 make ef-search
 make hybrid-index
+make ground-truth-latency
+make m-ground-truth
+make vector-lifecycle
 ```
 
-`make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. These probes directly measure runtime HNSW tuning and filtered-ANN behavior rather than inferring them from a single plan row.
+`make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. `make ground-truth-latency` removes the single-query benchmark limitation by timing all **40 ground-truth questions across 5 measured passes (200 measured queries)** after a complete warm-up pass, preserving per-query timings and per-pass summaries. `make m-ground-truth` evaluates each `M` value with **3 complete measured ground-truth passes** rather than one. `make vector-lifecycle` checks second-session isolation before commit, ANN visibility after commit, and vector/index cleanup after cascade delete while recording insert/delete commit cost.
 
 ---
 
@@ -448,7 +532,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. With the transactional-vector regression test included, the backend suite collects **29 automated tests**, covering API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 29 test cases**. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, and the guided demo.
 
 Frontend checks:
 
@@ -503,12 +587,22 @@ The repository keeps secrets out of source control through environment configura
 - Native MariaDB vector indexing is already ~**178× faster** than brute-force cosine ranking at 3,940 vectors for the benchmark query.
 - Semantic and benchmark hybrid search use the vector index; graph-constrained linked search intentionally does not because the relational-first plan is cheaper for that candidate set.
 - ANN results near a rank cutoff can change across retrieval paths/index rebuilds; MVF reports production ANN, exhaustive reference, and rebuilt-index studies separately instead of hiding the difference.
-- `M=32` increased build cost substantially and reduced single-query exact top-5 chunk overlap without improving full-set article Recall@10.
+- Higher `M` values substantially increased index-build cost without improving the full 40-question article-level Recall@10. In the current single-query exact-top-5 probe, overlap improved from 80% at `M=4/8` to 100% at `M=16/32`, showing that chunk-level agreement and article-level retrieval quality can respond differently to index parameters.
 - The corpus is intentionally focused on the Wikipedia machine-learning neighborhood rather than general web search.
 - Absolute latency depends on host hardware/cache state; the historical benchmark artifact did not record host machine metadata.
 - OpenAI is an optional generation dependency. MariaDB retrieval, diagnostics, experiments, and the guided demo do not require it.
 
 These behaviors are part of the project result: MVF does not assume that every vector query should force the same index or that one ANN measurement is universally stable.
+
+---
+
+## Lessons and what we would change
+
+- **Benchmark artifacts should carry provenance from the first run.** The first experiment files predated automatic host capture; current harnesses now persist OS, hardware, Python, MariaDB and run configuration.
+- **ANN parameters need workload-specific evidence.** Larger `M` and `mhnsw_ef_search` values did not automatically improve retrieval quality on this corpus, so MVF keeps conservative production settings instead of assuming that larger values are better.
+- **Relational selectivity can beat vector-first planning.** Linked search is faster as a relational-first workload, while category-filtered search benefits strongly from HNSW; the correct plan depends on candidate-set shape.
+- **Future corpus versions should persist source revision timestamps.** The current corpus stores Wikipedia `revision_id` but not the source revision timestamp, so MVF does not represent `articles.updated_at` as source-edit time.
+- **A larger evaluation set would improve confidence.** The 40-question set is enough to expose ranking differences and parameter behavior, but a broader multi-domain corpus and more ground-truth questions would make conclusions more general.
 
 ---
 

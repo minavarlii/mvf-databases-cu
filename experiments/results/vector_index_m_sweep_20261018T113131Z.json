@@ -1,0 +1,123 @@
+{
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "mariadb_vector_index": {
+    "index_name": "ix_chunks_embedding",
+    "distance": "cosine",
+    "production_m": 8
+  },
+  "benchmark": {
+    "query": "neural network training",
+    "limit": 5,
+    "warmup_runs": 5,
+    "measured_runs": 50
+  },
+  "results": [
+    {
+      "m": 4,
+      "build_time_ms": 162.75258299720008,
+      "mean_ms": 1.0474966597394086,
+      "median_ms": 1.0378750012023374,
+      "p95_ms": 1.2763749982696027,
+      "minimum_ms": 0.7710830032010563,
+      "maximum_ms": 1.7698750016279519,
+      "exact_overlap_at_k": 0.8,
+      "indexed_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        2448
+      ],
+      "exact_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        4397
+      ]
+    },
+    {
+      "m": 8,
+      "build_time_ms": 332.4765839934116,
+      "mean_ms": 1.0990783607121557,
+      "median_ms": 1.0872500024561305,
+      "p95_ms": 1.3493329970515333,
+      "minimum_ms": 0.8153749949997291,
+      "maximum_ms": 1.8468750058673322,
+      "exact_overlap_at_k": 0.8,
+      "indexed_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        2448
+      ],
+      "exact_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        4397
+      ]
+    },
+    {
+      "m": 16,
+      "build_time_ms": 1039.1821660014102,
+      "mean_ms": 1.2270216800970957,
+      "median_ms": 1.079937497706851,
+      "p95_ms": 1.4348749973578379,
+      "minimum_ms": 0.854709003760945,
+      "maximum_ms": 6.422124999517109,
+      "exact_overlap_at_k": 1.0,
+      "indexed_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        4397
+      ],
+      "exact_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        4397
+      ]
+    },
+    {
+      "m": 32,
+      "build_time_ms": 3883.138583994878,
+      "mean_ms": 1.2148266997246537,
+      "median_ms": 1.1204584989172872,
+      "p95_ms": 1.4780420024180785,
+      "minimum_ms": 0.9422500006621704,
+      "maximum_ms": 3.0401249969145283,
+      "exact_overlap_at_k": 1.0,
+      "indexed_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        4397
+      ],
+      "exact_chunk_ids": [
+        3995,
+        2417,
+        3080,
+        588,
+        4397
+      ]
+    }
+  ]
+}

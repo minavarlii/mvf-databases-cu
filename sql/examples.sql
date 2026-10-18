@@ -131,9 +131,11 @@ WHERE a.word_count >= @min_word_count
 ORDER BY distance ASC
 LIMIT 5;
 
--- 7) Ordinary temporal predicate: rank vectors only from rows edited since a
--- chosen timestamp.
-SET @edited_since = '2026-01-01 00:00:00';
+-- 7) Ordinary temporal predicate over MVF database-row maintenance time.
+-- articles.updated_at is the local row update timestamp, not the Wikipedia
+-- revision timestamp. This example deliberately demonstrates SQL composability
+-- without claiming source-edit chronology.
+SET @row_updated_since = '2026-01-01 00:00:00';
 
 SELECT
     c.id AS chunk_id,
@@ -147,7 +149,38 @@ SELECT
 FROM chunks AS c
 INNER JOIN articles AS a
     ON a.id = c.article_id
-WHERE a.updated_at >= @edited_since
+WHERE a.updated_at >= @row_updated_since
 ORDER BY distance ASC
 LIMIT 5;
+
+-- 8) Runtime HNSW tuning. MariaDB exposes mhnsw_ef_search per session.
+-- The project evaluates 200/400/800/1600 against the full ground-truth set.
+SET SESSION mhnsw_ef_search = 200;
+
+EXPLAIN
+SELECT
+    c.id,
+    VEC_DISTANCE_COSINE(
+        c.embedding,
+        VEC_FromText(@query_embedding)
+    ) AS distance
+FROM chunks AS c
+ORDER BY distance ASC
+LIMIT 5;
+
+SELECT
+    c.id AS chunk_id,
+    a.title AS article_title,
+    VEC_DISTANCE_COSINE(
+        c.embedding,
+        VEC_FromText(@query_embedding)
+    ) AS distance
+FROM chunks AS c
+INNER JOIN articles AS a
+    ON a.id = c.article_id
+ORDER BY distance ASC
+LIMIT 5;
+
+-- Restore the production/default session setting used by MVF.
+SET SESSION mhnsw_ef_search = 20;
 

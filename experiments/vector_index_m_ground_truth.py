@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.db import database_manager
 from backend.app.db.queries import VectorQueries
 from backend.app.services import EmbeddingService
+from experiments.environment import collect_environment
 from experiments.recall import (
     DEFAULT_CANDIDATE_MULTIPLIER,
     DEFAULT_K_VALUES,
@@ -38,6 +39,7 @@ DEFAULT_M_VALUES = (4, 8, 16, 32)
 PRODUCTION_M = 8
 DEFAULT_MAX_K = max(DEFAULT_K_VALUES)
 RESULTS_DIRECTORY = Path("experiments/results")
+DEFAULT_MEASURED_PASSES = 3
 
 DROP_INDEX_SQL = """
 DROP INDEX IF EXISTS ix_chunks_embedding
@@ -54,23 +56,39 @@ class PreparedQuestion:
 
 
 @dataclass(frozen=True, slots=True)
+class MMeasuredPass:
+    """Metrics for one complete measured pass at a fixed M value."""
+
+    pass_number: int
+    mean_query_ms: float
+    median_query_ms: float
+    p95_query_ms: float
+    stddev_query_ms: float
+    recall_at_10: float
+    mrr: float
+    misses_at_10: int
+
+
+@dataclass(frozen=True, slots=True)
 class MSweepResult:
-    """Metrics collected for one MariaDB VECTOR INDEX M value."""
+    """Repeated metrics collected for one MariaDB VECTOR INDEX M value."""
 
     m: int
     build_time_ms: float
+    measured_passes: int
     mean_query_ms: float
     median_query_ms: float
     p95_query_ms: float
     min_query_ms: float
     max_query_ms: float
+    between_pass_mean_stddev_ms: float
     recall_at_1: float | None
     recall_at_3: float | None
     recall_at_5: float | None
     recall_at_10: float | None
     mrr: float
     misses_at_10: int
-    evaluations: tuple[QuestionEvaluation, ...]
+    passes: tuple[MMeasuredPass, ...]
 
 
 CREATE_INDEX_SQL_BY_M = {
@@ -232,8 +250,9 @@ async def evaluate_m(
     prepared_questions: list[PreparedQuestion],
     max_k: int,
     candidate_limit: int,
+    measured_passes: int,
 ) -> MSweepResult:
-    """Rebuild one M value and evaluate all ground-truth questions."""
+    """Rebuild one M value and evaluate repeated full ground-truth passes."""
     print()
     print("=" * 78)
     print(f"M = {m_value}")
@@ -244,7 +263,6 @@ async def evaluate_m(
     print(f"Build time: {build_time_ms:.3f} ms")
 
     vector_queries = VectorQueries(session)
-
     print("Warming up all ground-truth queries...")
     await warm_up(
         vector_queries,
@@ -252,73 +270,86 @@ async def evaluate_m(
         candidate_limit=candidate_limit,
     )
 
-    evaluations: list[QuestionEvaluation] = []
-    latency_samples: list[float] = []
+    all_latencies: list[float] = []
+    pass_summaries: list[MMeasuredPass] = []
+    first_pass_evaluations: list[QuestionEvaluation] = []
 
-    print("Running measured ground-truth evaluation...")
+    for pass_number in range(1, measured_passes + 1):
+        evaluations: list[QuestionEvaluation] = []
+        latency_samples: list[float] = []
+        print(f"Running measured pass {pass_number}/{measured_passes}...")
 
-    for index, prepared_question in enumerate(prepared_questions, start=1):
-        evaluation, query_ms = await run_search(
-            vector_queries,
-            prepared_question=prepared_question,
-            max_k=max_k,
-            candidate_limit=candidate_limit,
+        for prepared_question in prepared_questions:
+            evaluation, query_ms = await run_search(
+                vector_queries,
+                prepared_question=prepared_question,
+                max_k=max_k,
+                candidate_limit=candidate_limit,
+            )
+            evaluations.append(evaluation)
+            latency_samples.append(query_ms)
+
+        if pass_number == 1:
+            first_pass_evaluations = evaluations
+
+        all_latencies.extend(latency_samples)
+        pass_summary = MMeasuredPass(
+            pass_number=pass_number,
+            mean_query_ms=statistics.mean(latency_samples),
+            median_query_ms=statistics.median(latency_samples),
+            p95_query_ms=percentile(latency_samples, 0.95),
+            stddev_query_ms=(
+                statistics.stdev(latency_samples) if len(latency_samples) > 1 else 0.0
+            ),
+            recall_at_10=calculate_recall_at_k(evaluations, 10),
+            mrr=calculate_mrr(evaluations),
+            misses_at_10=sum(
+                1
+                for evaluation in evaluations
+                if evaluation.first_relevant_rank is None
+                or evaluation.first_relevant_rank > 10
+            ),
         )
-
-        evaluations.append(evaluation)
-        latency_samples.append(query_ms)
-
-        status = (
-            (f"rank={evaluation.first_relevant_rank} ({evaluation.matched_title})")
-            if evaluation.first_relevant_rank is not None
-            else "MISS"
-        )
-
+        pass_summaries.append(pass_summary)
         print(
-            f"[{index}/{len(prepared_questions)}] "
-            f"{evaluation.question_id}: {status} "
-            f"[{query_ms:.3f} ms]"
+            f"  pass {pass_number}: mean={pass_summary.mean_query_ms:.3f} ms, "
+            f"p95={pass_summary.p95_query_ms:.3f} ms, "
+            f"R@10={pass_summary.recall_at_10:.3f}"
         )
 
+    pass_means = [item.mean_query_ms for item in pass_summaries]
     result = MSweepResult(
         m=m_value,
         build_time_ms=build_time_ms,
-        mean_query_ms=statistics.mean(latency_samples),
-        median_query_ms=statistics.median(latency_samples),
-        p95_query_ms=percentile(latency_samples, 0.95),
-        min_query_ms=min(latency_samples),
-        max_query_ms=max(latency_samples),
-        recall_at_1=recall_for_k(evaluations, k=1, max_k=max_k),
-        recall_at_3=recall_for_k(evaluations, k=3, max_k=max_k),
-        recall_at_5=recall_for_k(evaluations, k=5, max_k=max_k),
-        recall_at_10=recall_for_k(evaluations, k=10, max_k=max_k),
-        mrr=calculate_mrr(evaluations),
-        misses_at_10=sum(
-            1
-            for evaluation in evaluations
-            if (
-                evaluation.first_relevant_rank is None
-                or evaluation.first_relevant_rank > 10
-            )
+        measured_passes=measured_passes,
+        mean_query_ms=statistics.mean(all_latencies),
+        median_query_ms=statistics.median(all_latencies),
+        p95_query_ms=percentile(all_latencies, 0.95),
+        min_query_ms=min(all_latencies),
+        max_query_ms=max(all_latencies),
+        between_pass_mean_stddev_ms=(
+            statistics.stdev(pass_means) if len(pass_means) > 1 else 0.0
         ),
-        evaluations=tuple(evaluations),
+        recall_at_1=recall_for_k(first_pass_evaluations, k=1, max_k=max_k),
+        recall_at_3=recall_for_k(first_pass_evaluations, k=3, max_k=max_k),
+        recall_at_5=recall_for_k(first_pass_evaluations, k=5, max_k=max_k),
+        recall_at_10=statistics.mean(item.recall_at_10 for item in pass_summaries),
+        mrr=statistics.mean(item.mrr for item in pass_summaries),
+        misses_at_10=round(
+            statistics.mean(item.misses_at_10 for item in pass_summaries)
+        ),
+        passes=tuple(pass_summaries),
     )
 
-    print()
     print(
         f"M={result.m}: mean={result.mean_query_ms:.3f} ms, "
         f"median={result.median_query_ms:.3f} ms, "
-        f"p95={result.p95_query_ms:.3f} ms"
+        f"p95={result.p95_query_ms:.3f} ms, "
+        f"between-pass stddev={result.between_pass_mean_stddev_ms:.3f} ms"
     )
-
-    for k in DEFAULT_K_VALUES:
-        value = getattr(result, f"recall_at_{k}")
-        if value is not None:
-            print(f"Recall@{k}: {value:.3f} ({value * 100:.1f}%)")
-
+    print(f"Recall@10: {result.recall_at_10:.3f}")
     print(f"MRR:       {result.mrr:.3f}")
     print(f"Misses@10: {result.misses_at_10}")
-
     return result
 
 
@@ -328,6 +359,7 @@ async def run(
     max_k: int,
     candidate_multiplier: int,
     m_values: tuple[int, ...],
+    measured_passes: int,
 ) -> None:
     """Run the complete full-ground-truth M sweep."""
     if max_k < 10:
@@ -335,6 +367,9 @@ async def run(
 
     if candidate_multiplier <= 0:
         raise ValueError("candidate-multiplier must be greater than zero.")
+
+    if measured_passes <= 0:
+        raise ValueError("measured-passes must be greater than zero.")
 
     questions = load_ground_truth(ground_truth_path)
     await validate_ground_truth_titles(questions=questions)
@@ -349,6 +384,7 @@ async def run(
     )
 
     prepared_questions = await prepare_questions(questions)
+    environment = await collect_environment()
 
     print()
     print("MariaDB VECTOR INDEX full ground-truth M sweep")
@@ -360,6 +396,7 @@ async def run(
     print(f"Candidate pool:       {candidate_limit} chunks")
     print(f"M values:             {', '.join(map(str, m_values))}")
     print(f"Production M restore: {PRODUCTION_M}")
+    print(f"Measured passes/M:    {measured_passes}")
 
     results: list[MSweepResult] = []
 
@@ -372,6 +409,7 @@ async def run(
                     prepared_questions=prepared_questions,
                     max_k=max_k,
                     candidate_limit=candidate_limit,
+                    measured_passes=measured_passes,
                 )
                 results.append(result)
 
@@ -397,6 +435,7 @@ async def run(
 
     payload = {
         "evaluated_at": datetime.now(UTC).isoformat(),
+        "environment": asdict(environment),
         "corpus": {
             "articles": article_count,
             "vectors": vector_count,
@@ -409,7 +448,7 @@ async def run(
             "candidate_limit": candidate_limit,
             "query_embeddings_precomputed_once": True,
             "warmup_passes_per_m": 1,
-            "measured_passes_per_m": 1,
+            "measured_passes_per_m": measured_passes,
             "latency_scope": "MariaDB semantic_search only",
         },
         "vector_index": {
@@ -487,6 +526,12 @@ def parse_arguments() -> argparse.Namespace:
         help="Chunk candidate pool multiplier relative to max-k.",
     )
     parser.add_argument(
+        "--measured-passes",
+        type=int,
+        default=DEFAULT_MEASURED_PASSES,
+        help="Complete measured ground-truth passes per M value.",
+    )
+    parser.add_argument(
         "--m-values",
         type=int,
         nargs="+",
@@ -511,6 +556,7 @@ async def main() -> None:
         max_k=arguments.max_k,
         candidate_multiplier=arguments.candidate_multiplier,
         m_values=m_values,
+        measured_passes=arguments.measured_passes,
     )
 
 
