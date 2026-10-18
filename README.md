@@ -706,7 +706,9 @@ The current measured values are kept in [`docs/vector-scale-results.md`](docs/ve
 
 `make vector-cache-sweep` goes one step further with a **25× / 98,500-vector** scratch workload under multiple GLOBAL `mhnsw_max_cache_size` limits (4, 16 and 64 MiB by default). Unlike the simpler scale probe, the cache study removes exact duplicates: every copied vector receives a tiny deterministic two-coordinate rotation that preserves its L2 norm. It embeds **20 real ground-truth questions**, performs **3 independent HNSW rebuilds per cache setting**, and reports build mean/stddev/min/max plus multi-query mean/P95 latency. ANN variability is now summarized with a **within-setting pairwise top-5 overlap** that compares only distinct rebuild pairs, so no rebuild is ever compared with itself. A separate across-cache table compares the first rebuild from each setting against the first setting's first rebuild and is explicitly kept separate from the within-setting statistic. The original server cache value is restored in a `finally` block.
 
-The committed repeated-build study is interpreted as a **server-limit experiment, not a relevance claim**: cache size is compared primarily through repeated index-build cost and variance, while query latency is measured over the same 20 real questions. Exact duplicate ties have been removed, so any residual top-5 differences are treated as ANN rebuild variability rather than evidence that a larger cache deterministically changes retrieval quality. Across-cache overlap is descriptive only because changing the cache setting also requires a fresh ANN rebuild. The canonical macOS measurements and their automatically generated interpretation live in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md), with the full per-rebuild/per-query data in the timestamped JSON artifact. The weekly GitHub benchmark is **configured** to run the same cache sweep on Ubuntu, but this snapshot does not claim a committed Ubuntu cache-sweep result until that workflow output has actually been collected and checked in. Because `mhnsw_max_cache_size` is GLOBAL, the local target requires `DB_ROOT_PASSWORD`; the password is supplied through the environment rather than embedded in source.
+The committed repeated-build study is interpreted as a **server-limit experiment, not a relevance claim**: cache size is compared primarily through repeated index-build cost and variance, while query latency is measured over the same 20 real questions. Exact duplicate ties have been removed, so any residual top-5 differences are treated as ANN rebuild variability rather than evidence that a larger cache deterministically changes retrieval quality. Across-cache overlap is descriptive only because changing the cache setting also requires a fresh ANN rebuild. The canonical macOS measurements and their automatically generated interpretation live in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md), with the full per-rebuild/per-query data in the timestamped JSON artifact.
+
+The same repeated cache-sweep workload was also executed on **GitHub Actions Ubuntu/x86_64**. The committed second-machine artifact is [`experiments/results/ubuntu/vector_cache_sweep_20261018T153626Z.json`](experiments/results/ubuntu/vector_cache_sweep_20261018T153626Z.json). It reproduced the same qualitative result: increasing `mhnsw_max_cache_size` substantially reduced repeated HNSW index-build time while mean query latency remained nearly flat. On Ubuntu, mean build time decreased from **45.851 s** at 4 MiB to **33.544 s** at 16 MiB and **19.999 s** at 64 MiB, while mean query latency remained between **0.712 ms and 0.724 ms**. Because `mhnsw_max_cache_size` is GLOBAL, the local target requires `DB_ROOT_PASSWORD`; the password is supplied through the environment rather than embedded in source.
 
 ---
 
@@ -724,13 +726,15 @@ vector retrieval:
   distribution and verifies that cascade cleanup leaves no orphan chunks.
 
 The `.github/workflows/benchmark.yml` workflow restores the checked-in prebuilt
-corpus on an **Ubuntu GitHub Actions runner**, executes the same multi-mode and
-concurrency harnesses, and uploads only artifacts generated in that runner. It can
-be dispatched manually and also runs weekly, so benchmark regressions are checked
-continuously rather than only on demand. The current repository includes the
-resulting Ubuntu artifacts under `experiments/results/ubuntu/`, giving a second
-OS/architecture result set beside the macOS / Apple M4 Pro measurements rather
-than treating one laptop as universal.
+corpus on an **Ubuntu GitHub Actions runner**, executes the multi-mode,
+concurrency, and repeated cache-sweep harnesses, and uploads only artifacts
+generated in that runner. It can be dispatched manually and also runs weekly, so
+benchmark regressions are checked continuously rather than only on demand. The
+current repository includes the resulting Ubuntu artifacts under
+`experiments/results/ubuntu/`, including
+`vector_cache_sweep_20261018T153626Z.json`, giving a second OS/architecture
+result set beside the macOS / Apple M4 Pro measurements rather than treating one
+laptop as universal.
 
 ## Testing and CI
 
@@ -801,7 +805,7 @@ The repository keeps secrets out of source control through environment configura
 - ANN results near a rank cutoff can change across retrieval paths/index rebuilds; MVF reports production ANN, exhaustive reference, and rebuilt-index studies separately instead of hiding the difference.
 - Higher `M` values substantially increased index-build cost without improving the full 40-question article-level Recall@10. In the current single-query exact-top-5 probe, overlap improved from 80% at `M=4/8` to 100% at `M=16/32`, showing that chunk-level agreement and article-level retrieval quality can respond differently to index parameters.
 - The corpus is intentionally focused on the Wikipedia machine-learning neighborhood rather than general web search.
-- Absolute latency depends on host hardware/cache state; current canonical artifacts record environment metadata, and the final multi-mode/concurrency workloads were repeated on both macOS/arm64 and Ubuntu/x86_64.
+- Absolute latency depends on host hardware/cache state; current canonical artifacts record environment metadata, and the final multi-mode, concurrency, and repeated cache-sweep workloads were executed on both macOS/arm64 and Ubuntu/x86_64.
 - A dedicated scratch-table scale probe now measures vector-index build time and query latency from 1× through 25× corpus size while recording raw vector payload and `mhnsw_max_cache_size`. It deliberately avoids presenting ordinary table `INDEX_LENGTH` as HNSW resident memory and separates index-scaling evidence from the real-corpus Recall/MRR harnesses.
 - The cache-limit study uses 98,500 deterministically distinct vectors, 20 real questions and three independent index rebuilds per cache setting. It reports build variance and top-5 overlap explicitly, so cache effects are not inferred from one build or from exact duplicated vectors.
 - A dedicated scratch-table probe measures an in-place committed `VECTOR(384)` `UPDATE` **both before and after rebuilding the existing HNSW index**. On the verified MariaDB 11.8.9 environment, ordinary SQL immediately sees the new stored vector (`new-distance ≈ 0`, old-distance > 0.9), and ANN search through the already-built index also returns that updated row **before any rebuild**. The test then performs `DROP INDEX` / `CREATE VECTOR INDEX` and confirms that the updated vector remains searchable afterwards. This records the observed index-on-UPDATE behavior explicitly instead of assuming it.
