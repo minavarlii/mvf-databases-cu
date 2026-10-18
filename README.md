@@ -514,7 +514,7 @@ Machine-readable results live in `experiments/results/`.
 
 > **Benchmark provenance:** older development benchmark JSON predates environment capture, so those historical absolute latencies should be treated as hardware-dependent. Current experiment artifacts record the execution environment automatically. The canonical local studies were run on **Darwin 24.5.0 / arm64**, **Python 3.13.0**, with **MariaDB 11.8.9-MariaDB-ubu2404** in Docker; the final multi-mode and concurrency studies were also repeated on **Linux 6.17 / x86_64**, **Python 3.12.15**, with the same MariaDB 11.8.9 server version in GitHub Actions. The harness fixes corpus size, query set, warm-ups, measured passes, distance metric and index configuration.
 
-`make environment` records OS, architecture, processor, Python and MariaDB version, and on macOS also records machine model, chip and memory when available.
+`make environment` records OS, architecture, processor, Python and MariaDB version and, when available, machine/VM model, CPU/chip and memory on both macOS and Linux. The GitHub Actions cache-sweep artifact therefore carries runner hardware metadata instead of leaving those fields null.
 
 The exact timestamp of the original Wikipedia crawl was not recorded, so `data/manifest.json` intentionally keeps `retrieved_at: null` instead of inventing a date. Future ingestion runs should record the timestamp at collection time.
 
@@ -708,7 +708,7 @@ The current measured values are kept in [`docs/vector-scale-results.md`](docs/ve
 
 The committed repeated-build study is interpreted as a **server-limit experiment, not a relevance claim**: cache size is compared primarily through repeated index-build cost and variance, while query latency is measured over the same 20 real questions. Exact duplicate ties have been removed, so any residual top-5 differences are treated as ANN rebuild variability rather than evidence that a larger cache deterministically changes retrieval quality. Across-cache overlap is descriptive only because changing the cache setting also requires a fresh ANN rebuild. The canonical macOS measurements and their automatically generated interpretation live in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md), with the full per-rebuild/per-query data in the timestamped JSON artifact.
 
-The same repeated cache-sweep workload was also executed on **GitHub Actions Ubuntu/x86_64**. The committed second-machine artifact is [`experiments/results/ubuntu/vector_cache_sweep_20261018T153626Z.json`](experiments/results/ubuntu/vector_cache_sweep_20261018T153626Z.json). It reproduced the same qualitative result: increasing `mhnsw_max_cache_size` substantially reduced repeated HNSW index-build time while mean query latency remained nearly flat. On Ubuntu, mean build time decreased from **45.851 s** at 4 MiB to **33.544 s** at 16 MiB and **19.999 s** at 64 MiB, while mean query latency remained between **0.712 ms and 0.724 ms**. Because `mhnsw_max_cache_size` is GLOBAL, the local target requires `DB_ROOT_PASSWORD`; the password is supplied through the environment rather than embedded in source.
+The same repeated cache-sweep workload was also executed on **GitHub Actions Ubuntu/x86_64**. The committed second-machine artifact is [`experiments/results/ubuntu/vector_cache_sweep_20261018T160756Z.json`](experiments/results/ubuntu/vector_cache_sweep_20261018T160756Z.json). The runner reported **Microsoft Corporation Virtual Machine**, **AMD EPYC 9V45 96-Core Processor**, **15.61 GiB RAM**, Linux **6.17.0-1022-azure**, Python **3.12.15**, and MariaDB **11.8.9**. It reproduced the same qualitative result: increasing `mhnsw_max_cache_size` substantially reduced repeated HNSW index-build time while query latency remained small. On Ubuntu, mean build time decreased from **37.482 s** at 4 MiB to **28.292 s** at 16 MiB and **19.848 s** at 64 MiB, while mean query latency was **0.509 ms / 0.373 ms / 0.392 ms** for 4 / 16 / 64 MiB respectively. Within-setting pairwise top-5 overlap was **63.0% / 63.0% / 77.0%** on Ubuntu, compared with **75.0% / 67.7% / 71.3%** on macOS. Because overlap does not move monotonically with cache size across the two machines, MVF treats those ranking differences as ANN rebuild variability rather than evidence that a larger cache deterministically improves retrieval quality. Because `mhnsw_max_cache_size` is GLOBAL, the local target requires `DB_ROOT_PASSWORD`; the password is supplied through the environment rather than embedded in source.
 
 ---
 
@@ -732,9 +732,10 @@ generated in that runner. It can be dispatched manually and also runs weekly, so
 benchmark regressions are checked continuously rather than only on demand. The
 current repository includes the resulting Ubuntu artifacts under
 `experiments/results/ubuntu/`, including
-`vector_cache_sweep_20261018T153626Z.json`, giving a second OS/architecture
-result set beside the macOS / Apple M4 Pro measurements rather than treating one
-laptop as universal.
+`vector_cache_sweep_20261018T160756Z.json`, whose environment metadata records
+the runner VM, AMD EPYC CPU and 15.61 GiB RAM. This gives a second
+OS/architecture result set beside the macOS / Apple M4 Pro measurements rather
+than treating one laptop as universal.
 
 ## Testing and CI
 
