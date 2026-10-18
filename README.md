@@ -266,17 +266,17 @@ MVF also measures the category-filtered hybrid query with the native vector inde
 
 | Hybrid mode | Mean latency | Top-k |
 |---|---:|---|
-| `ix_chunks_embedding` enabled | **2.528 ms** | reference |
-| Vector index optimizer-ignored | 231.508 ms | identical |
+| `ix_chunks_embedding` enabled | **2.497 ms** | reference |
+| Vector index optimizer-ignored | 232.818 ms | identical |
 
-Observed mean speedup: **91.56×**, with the **same top-k** in both runs.
+Observed mean speedup: **93.22×**, with the **same top-k** in both runs.
 
 This directly verifies that the relational category predicate can coexist with native ANN retrieval in the same SQL statement and that the vector index is materially responsible for the measured hybrid-search speedup.
 
 Result artifact:
 
 ```text
-experiments/results/hybrid_index_probe_20261018T110523Z.json
+experiments/results/hybrid_index_probe_20261018T111312Z.json
 ```
 
 ### Runtime HNSW `mhnsw_ef_search` study
@@ -285,17 +285,17 @@ Build-time `M` is not the only ANN tuning surface. MVF therefore evaluates Maria
 
 | `mhnsw_ef_search` | Aggregate mean | Aggregate P95 | Between-pass stddev | Recall@10 | MRR |
 |---:|---:|---:|---:|---:|---:|
-| **200** | **15.449 ms** | 16.889 ms | 0.348 ms | **92.5%** | **0.782** |
-| 400 | 16.170 ms | 17.614 ms | 0.228 ms | 92.5% | 0.782 |
-| 800 | 16.247 ms | 17.933 ms | 0.277 ms | 92.5% | 0.782 |
-| 1600 | 17.326 ms | 18.420 ms | 1.415 ms | 92.5% | 0.782 |
+| **200** | **15.523 ms** | 16.889 ms | 0.348 ms | **92.5%** | **0.782** |
+| 400 | 16.088 ms | 17.614 ms | 0.228 ms | 92.5% | 0.782 |
+| 800 | 15.834 ms | 17.933 ms | 0.277 ms | 92.5% | 0.782 |
+| 1600 | 16.993 ms | 18.420 ms | 1.415 ms | 92.5% | 0.782 |
 
 On this 3,940-vector corpus, raising `mhnsw_ef_search` above 200 did **not** improve Recall@10 or MRR. Query latency instead increased slightly, and the 1600 setting showed noticeably more run-to-run noise because one pass contained an outlier. This is reported rather than discarded because the experiment is intended to expose real ANN/runtime behavior, not only the cleanest run.
 
 Result artifact:
 
 ```text
-experiments/results/vector_ef_search_20261018T110906Z.json
+experiments/results/vector_ef_search_20261018T111327Z.json
 ```
 
 Machine-readable results live in `experiments/results/`.
@@ -436,7 +436,7 @@ make ef-search
 make hybrid-index
 ```
 
-`make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.449 ms** at 200 to **17.326 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.528 ms vs 231.508 ms (91.56×)** with identical top-k. These probes directly measure runtime HNSW tuning and filtered-ANN behavior rather than inferring them from a single plan row.
+`make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. These probes directly measure runtime HNSW tuning and filtered-ANN behavior rather than inferring them from a single plan row.
 
 ---
 
