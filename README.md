@@ -941,3 +941,10 @@ relational metadata
 ```
 
 That is the core Area 4 result: **MariaDB is not merely storing application data; it is the retrieval engine.**
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
