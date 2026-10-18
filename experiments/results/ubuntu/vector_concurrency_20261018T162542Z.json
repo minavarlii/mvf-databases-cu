@@ -1,5 +1,5 @@
 {
-  "executed_at": "2026-10-18T12:03:48.745853+00:00",
+  "executed_at": "2026-10-18T16:25:42.007202+00:00",
   "environment": {
     "os": "Linux",
     "os_release": "6.17.0-1022-azure",
@@ -7,10 +7,10 @@
     "processor": "x86_64",
     "python_version": "3.12.15",
     "mariadb_version": "11.8.9-MariaDB-ubu2404",
-    "machine_model": null,
+    "machine_model": "Microsoft Corporation Virtual Machine",
     "machine_identifier": null,
-    "chip": null,
-    "memory": null
+    "chip": "AMD EPYC 9V45 96-Core Processor",
+    "memory": "15.61 GiB (16373444 KiB)"
   },
   "writers": 2,
   "rows_per_writer": 25,
@@ -18,8 +18,8 @@
   "concurrent_queries": 50,
   "write_failures": 0,
   "query_failures": 0,
-  "commit_mean_ms": 1.4253028399991763,
-  "commit_p95_ms": 2.4039961000113395,
+  "commit_mean_ms": 1.2610381400020287,
+  "commit_p95_ms": 2.2736149000067485,
   "baseline_quality": {
     "recall_at_10": 0.925,
     "mrr": 0.7819444444444444,

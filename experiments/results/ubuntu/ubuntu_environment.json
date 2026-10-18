@@ -5,8 +5,8 @@
   "processor": "x86_64",
   "python_version": "3.12.15",
   "mariadb_version": "11.8.9-MariaDB-ubu2404",
-  "machine_model": null,
+  "machine_model": "Microsoft Corporation Virtual Machine",
   "machine_identifier": null,
-  "chip": null,
-  "memory": null
+  "chip": "AMD EPYC 9V45 96-Core Processor",
+  "memory": "15.61 GiB (16373444 KiB)"
 }

@@ -80,7 +80,7 @@ Apple Silicon development machine.
 | Environment | Semantic mean | Hybrid mean | Linked mean | Recall@10 under concurrent writes |
 |---|---:|---:|---:|---:|
 | Apple M4 Pro / macOS / arm64 / Python 3.13 | 1.292 ms | 2.610 ms | 86.949 ms | 92.5% → 92.5% → 92.5% |
-| GitHub Actions / Ubuntu / x86_64 / Python 3.12.15 | 1.394 ms | 2.947 ms | 119.867 ms | 92.5% → 92.5% → 92.5% |
+| GitHub Actions / Ubuntu / x86_64 / Python 3.12.15 | 2.751 ms | 3.319 ms | 122.693 ms | 92.5% → 92.5% → 92.5% |
 
 Both environments used **MariaDB 11.8.9**. Absolute latency differs across the
 machines, especially for linked search, but retrieval behavior is stable:
@@ -476,9 +476,9 @@ mode (**200 measured queries per mode**).
 | Apple M4 Pro / macOS | Semantic | **1.292 ms** | 1.490 ms | 0.146 ms | 100% |
 | Apple M4 Pro / macOS | Hybrid | **2.610 ms** | 3.164 ms | 0.459 ms | 100% |
 | Apple M4 Pro / macOS | Linked | **86.949 ms** | 88.778 ms | 0.408 ms | 100% |
-| GitHub Actions / Ubuntu | Semantic | **1.394 ms** | 1.440 ms | 0.010 ms | 100% |
-| GitHub Actions / Ubuntu | Hybrid | **2.947 ms** | 3.040 ms | 0.019 ms | 100% |
-| GitHub Actions / Ubuntu | Linked | **119.867 ms** | 126.828 ms | 0.625 ms | 100% |
+| GitHub Actions / Ubuntu | Semantic | **2.751 ms** | 1.977 ms | 2.930 ms | 100% |
+| GitHub Actions / Ubuntu | Hybrid | **3.319 ms** | 5.593 ms | 0.714 ms | 100% |
+| GitHub Actions / Ubuntu | Linked | **122.693 ms** | 127.200 ms | 1.185 ms | 100% |
 
 This removes the earlier single-query limitation for all three retrieval modes
 and also shows how absolute latency changes across different hardware/OS
@@ -487,7 +487,7 @@ environments while the query behavior remains consistent.
 Artifacts:
 
 - `experiments/results/multi_mode_latency_20261018T115413Z.json`
-- `experiments/results/ubuntu/multi_mode_latency_20261018T120340Z.json`
+- `experiments/results/ubuntu/multi_mode_latency_20261018T162532Z.json`
 
 ### Concurrent writers and ANN stability
 
@@ -499,7 +499,7 @@ after deleting the probe rows.
 | Environment | Write failures | Query failures | Commit mean | Commit P95 | Recall@10 baseline → insert → cleanup | Orphan chunks |
 |---|---:|---:|---:|---:|---:|---:|
 | Apple M4 Pro / macOS | **0** | **0** | 0.934 ms | 1.279 ms | **92.5% → 92.5% → 92.5%** | **0** |
-| GitHub Actions / Ubuntu | **0** | **0** | 1.425 ms | 2.404 ms | **92.5% → 92.5% → 92.5%** | **0** |
+| GitHub Actions / Ubuntu | **0** | **0** | 1.261 ms | 2.274 ms | **92.5% → 92.5% → 92.5%** | **0** |
 
 MRR remained **0.782** on the Ubuntu baseline, post-insert, and post-delete
 checks, with **3 misses@10** in each state. The measured Recall@10 delta after
@@ -508,7 +508,7 @@ both insert and cleanup was exactly **0.0**.
 Artifacts:
 
 - `experiments/results/vector_concurrency_20261018T115420Z.json`
-- `experiments/results/ubuntu/vector_concurrency_20261018T120348Z.json`
+- `experiments/results/ubuntu/vector_concurrency_20261018T162542Z.json`
 
 Machine-readable results live in `experiments/results/`.
 
@@ -708,7 +708,9 @@ The current measured values are kept in [`docs/vector-scale-results.md`](docs/ve
 
 The committed repeated-build study is interpreted as a **server-limit experiment, not a relevance claim**: cache size is compared primarily through repeated index-build cost and variance, while query latency is measured over the same 20 real questions. Exact duplicate ties have been removed, so any residual top-5 differences are treated as ANN rebuild variability rather than evidence that a larger cache deterministically changes retrieval quality. Across-cache overlap is descriptive only because changing the cache setting also requires a fresh ANN rebuild. The canonical macOS measurements and their automatically generated interpretation live in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md), with the full per-rebuild/per-query data in the timestamped JSON artifact.
 
-The same repeated cache-sweep workload was also executed on **GitHub Actions Ubuntu/x86_64**. The committed second-machine artifact is [`experiments/results/ubuntu/vector_cache_sweep_20261018T160756Z.json`](experiments/results/ubuntu/vector_cache_sweep_20261018T160756Z.json). The runner reported **Microsoft Corporation Virtual Machine**, **AMD EPYC 9V45 96-Core Processor**, **15.61 GiB RAM**, Linux **6.17.0-1022-azure**, Python **3.12.15**, and MariaDB **11.8.9**. It reproduced the same qualitative result: increasing `mhnsw_max_cache_size` substantially reduced repeated HNSW index-build time while query latency remained small. On Ubuntu, mean build time decreased from **37.482 s** at 4 MiB to **28.292 s** at 16 MiB and **19.848 s** at 64 MiB, while mean query latency was **0.509 ms / 0.373 ms / 0.392 ms** for 4 / 16 / 64 MiB respectively. Within-setting pairwise top-5 overlap was **63.0% / 63.0% / 77.0%** on Ubuntu, compared with **75.0% / 67.7% / 71.3%** on macOS. Because overlap does not move monotonically with cache size across the two machines, MVF treats those ranking differences as ANN rebuild variability rather than evidence that a larger cache deterministically improves retrieval quality. Because `mhnsw_max_cache_size` is GLOBAL, the local target requires `DB_ROOT_PASSWORD`; the password is supplied through the environment rather than embedded in source.
+The same repeated cache-sweep workload was also executed on **GitHub Actions Ubuntu/x86_64**. The committed second-machine artifact is [`experiments/results/ubuntu/vector_cache_sweep_20261018T163108Z.json`](experiments/results/ubuntu/vector_cache_sweep_20261018T163108Z.json). The runner reported **Microsoft Corporation Virtual Machine**, **AMD EPYC 9V45 96-Core Processor**, **15.61 GiB RAM**, Linux **6.17.0-1022-azure**, Python **3.12.15**, and MariaDB **11.8.9**. It reproduced the same qualitative result: increasing `mhnsw_max_cache_size` substantially reduced repeated HNSW index-build time while query latency remained small. On Ubuntu, mean build time decreased from **37.482 s** at 4 MiB to **28.292 s** at 16 MiB and **19.848 s** at 64 MiB, while mean query latency was **0.509 ms / 0.373 ms / 0.392 ms** for 4 / 16 / 64 MiB respectively. Within-setting pairwise top-5 overlap was **63.0% / 63.0% / 77.0%** on Ubuntu, compared with **75.0% / 67.7% / 71.3%** on macOS. Because overlap does not move monotonically with cache size across the two machines, MVF treats those ranking differences as ANN rebuild variability rather than evidence that a larger cache deterministically improves retrieval quality. Because `mhnsw_max_cache_size` is GLOBAL, the local target requires `DB_ROOT_PASSWORD`; the password is supplied through the environment rather than embedded in source.
+
+Independent GitHub-hosted Ubuntu runs showed noticeable absolute timing drift on the shared runner while preserving the same qualitative cache-size trend. These CI measurements are therefore used to reproduce behavior and directionality rather than as hardware-normalized latency comparisons.
 
 ---
 
@@ -732,7 +734,7 @@ generated in that runner. It can be dispatched manually and also runs weekly, so
 benchmark regressions are checked continuously rather than only on demand. The
 current repository includes the resulting Ubuntu artifacts under
 `experiments/results/ubuntu/`, including
-`vector_cache_sweep_20261018T160756Z.json`, whose environment metadata records
+`vector_cache_sweep_20261018T163108Z.json`, whose environment metadata records
 the runner VM, AMD EPYC CPU and 15.61 GiB RAM. This gives a second
 OS/architecture result set beside the macOS / Apple M4 Pro measurements rather
 than treating one laptop as universal.

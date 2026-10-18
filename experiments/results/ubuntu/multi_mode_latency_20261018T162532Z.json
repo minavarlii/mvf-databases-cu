@@ -1,0 +1,174 @@
+{
+  "executed_at": "2026-10-18T16:25:32.251127+00:00",
+  "environment": {
+    "os": "Linux",
+    "os_release": "6.17.0-1022-azure",
+    "architecture": "x86_64",
+    "processor": "x86_64",
+    "python_version": "3.12.15",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "Microsoft Corporation Virtual Machine",
+    "machine_identifier": null,
+    "chip": "AMD EPYC 9V45 96-Core Processor",
+    "memory": "15.61 GiB (16373444 KiB)"
+  },
+  "questions": 40,
+  "warmup_passes": 1,
+  "measured_passes": 5,
+  "limit": 5,
+  "category": "Machine learning",
+  "source_title": "Machine learning",
+  "semantic": {
+    "mode": "semantic",
+    "measured_queries": 200,
+    "aggregate_mean_ms": 2.7513202249990343,
+    "aggregate_median_ms": 1.428848399996241,
+    "aggregate_p95_ms": 1.976036560008083,
+    "between_pass_mean_stddev_ms": 2.930188965444208,
+    "nonempty_result_rate": 1.0,
+    "passes": [
+      {
+        "pass_number": 1,
+        "mean_ms": 1.4553572500020096,
+        "median_ms": 1.4390469999909783,
+        "p95_ms": 1.5905623000065816,
+        "stddev_ms": 0.06511510808202049,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 2,
+        "mean_ms": 1.4224181249986145,
+        "median_ms": 1.4213349999891989,
+        "p95_ms": 1.4693841499948235,
+        "stddev_ms": 0.03470570916191565,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 3,
+        "mean_ms": 1.4396986249977317,
+        "median_ms": 1.402866999995922,
+        "p95_ms": 1.6680188500160396,
+        "stddev_ms": 0.101686287566134,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 4,
+        "mean_ms": 7.992957349998164,
+        "median_ms": 1.444535000004521,
+        "p95_ms": 3.604247950006822,
+        "stddev_ms": 40.12009870828428,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 5,
+        "mean_ms": 1.4461697749986513,
+        "median_ms": 1.4364580000005844,
+        "p95_ms": 1.547969550016148,
+        "stddev_ms": 0.06667542788511362,
+        "nonempty_results": 40
+      }
+    ]
+  },
+  "hybrid": {
+    "mode": "hybrid",
+    "measured_queries": 200,
+    "aggregate_mean_ms": 3.3188358550012254,
+    "aggregate_median_ms": 2.8620831000040425,
+    "aggregate_p95_ms": 5.592856700006052,
+    "between_pass_mean_stddev_ms": 0.7136736443799873,
+    "nonempty_result_rate": 1.0,
+    "passes": [
+      {
+        "pass_number": 1,
+        "mean_ms": 2.8132589750029524,
+        "median_ms": 2.700916500003814,
+        "p95_ms": 3.222984849992372,
+        "stddev_ms": 0.23559013191024303,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 2,
+        "mean_ms": 2.8850551500006816,
+        "median_ms": 2.7815279999998666,
+        "p95_ms": 3.3536994000087357,
+        "stddev_ms": 0.25551866953363916,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 3,
+        "mean_ms": 3.8537567749997947,
+        "median_ms": 3.1108584999941513,
+        "p95_ms": 7.215380650005442,
+        "stddev_ms": 1.5198596693834983,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 4,
+        "mean_ms": 4.303876550001462,
+        "median_ms": 2.9974430000123675,
+        "p95_ms": 11.258683600011919,
+        "stddev_ms": 3.0146882493066216,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 5,
+        "mean_ms": 2.738231825001236,
+        "median_ms": 2.7196695000100135,
+        "p95_ms": 2.913535000011791,
+        "stddev_ms": 0.10607792315422669,
+        "nonempty_results": 40
+      }
+    ]
+  },
+  "linked": {
+    "mode": "linked",
+    "measured_queries": 200,
+    "aggregate_mean_ms": 122.69250879499879,
+    "aggregate_median_ms": 122.60485590000485,
+    "aggregate_p95_ms": 127.199645339997,
+    "between_pass_mean_stddev_ms": 1.1846698323250984,
+    "nonempty_result_rate": 1.0,
+    "passes": [
+      {
+        "pass_number": 1,
+        "mean_ms": 123.49506257500025,
+        "median_ms": 122.83932450002055,
+        "p95_ms": 127.1600075999771,
+        "stddev_ms": 5.689157182816632,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 2,
+        "mean_ms": 123.33677829999985,
+        "median_ms": 122.9501345000159,
+        "p95_ms": 127.87789279999373,
+        "stddev_ms": 3.092425337991668,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 3,
+        "mean_ms": 122.13928122499809,
+        "median_ms": 121.96390949999625,
+        "p95_ms": 128.38096330000752,
+        "stddev_ms": 3.1176631075254373,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 4,
+        "mean_ms": 123.6330243999987,
+        "median_ms": 123.75754949998452,
+        "p95_ms": 127.24727265000837,
+        "stddev_ms": 2.383068138669608,
+        "nonempty_results": 40
+      },
+      {
+        "pass_number": 5,
+        "mean_ms": 120.85839747499705,
+        "median_ms": 121.51336150000702,
+        "p95_ms": 125.33209034999828,
+        "stddev_ms": 3.086711365103949,
+        "nonempty_results": 40
+      }
+    ]
+  }
+}
