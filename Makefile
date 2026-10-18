@@ -43,8 +43,11 @@ endif
 	vector-lifecycle \
 	multi-mode-latency \
 	vector-concurrency \
+	vector-scale \
 	prebuilt-export \
+	prebuilt-sql-export \
 	prebuilt-restore \
+	prebuilt-sql-restore \
 	offline-bootstrap \
 	sql-demo \
 	clean
@@ -260,16 +263,57 @@ vector-concurrency:
 		--queries 50
 
 
+vector-scale:
+	$(PYTHON) -m experiments.vector_scale \
+		--multipliers 1 5 10 25 \
+		--warmups 5 \
+		--runs 30
+
+
 prebuilt-export:
 	$(PYTHON) -m scripts.export_prebuilt \
 		--output data/prebuilt/mvf_corpus.json.gz
+
+
+prebuilt-sql-export:
+	@{ \
+		echo 'SET FOREIGN_KEY_CHECKS=0;'; \
+		echo 'DELETE FROM chunks;'; \
+		echo 'DELETE FROM article_links;'; \
+		echo 'DELETE FROM article_categories;'; \
+		echo 'DELETE FROM categories;'; \
+		echo 'DELETE FROM articles;'; \
+		docker compose exec -T mariadb mariadb-dump \
+			-u"$(DB_USER)" \
+			-p"$(DB_PASSWORD)" \
+			--no-create-info \
+			--skip-triggers \
+			--single-transaction \
+			--hex-blob \
+			"$(DB_NAME)" \
+			articles categories article_categories article_links chunks; \
+		echo 'SET FOREIGN_KEY_CHECKS=1;'; \
+		echo 'ANALYZE TABLE articles, categories, article_categories, article_links, chunks;'; \
+	} | gzip -9 > data/prebuilt/mvf_corpus.sql.gz
 
 
 prebuilt-restore:
 	@test -f data/prebuilt/mvf_corpus.json.gz || \
 		(echo "Missing data/prebuilt/mvf_corpus.json.gz; run make prebuilt-export first." >&2; exit 1)
 	$(PYTHON) -m scripts.restore_prebuilt \
-		--input data/prebuilt/mvf_corpus.json.gz
+		--input data/prebuilt/mvf_corpus.json.gz \
+		--confirm-reset \
+		--expected-database "$(DB_NAME)"
+
+
+prebuilt-sql-restore:
+	@test -f data/prebuilt/mvf_corpus.sql.gz || \
+		(echo "Missing data/prebuilt/mvf_corpus.sql.gz; run make prebuilt-sql-export first." >&2; exit 1)
+	gzip -dc data/prebuilt/mvf_corpus.sql.gz | docker compose exec -T mariadb \
+		mariadb \
+		-u"$(DB_USER)" \
+		-p"$(DB_PASSWORD)" \
+		"$(DB_NAME)"
 
 
 offline-bootstrap:

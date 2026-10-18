@@ -590,7 +590,25 @@ The snapshot is produced from the canonical local database with:
 make prebuilt-export
 ```
 
-`make sql-demo` restores that same snapshot and executes the complete
+The restore command is deliberately destructive only after two safeguards: the
+caller must pass an explicit reset acknowledgement and the connected database
+name must match the expected `DB_NAME`. `make offline-bootstrap` supplies both
+checks. `tests/integration/test_prebuilt_roundtrip.py` also exports the active
+corpus, restores it, and verifies all five table counts as a real round trip.
+
+For readers who want the corpus **without any project Python tooling**, the same
+checked-in data is also available as `data/prebuilt/mvf_corpus.sql.gz`.
+`make prebuilt-sql-export` regenerates it with MariaDB's own `mariadb-dump`
+client (`--single-transaction --hex-blob`), exercising the normal backup/export
+path for tables that contain a native `VECTOR INDEX`. After applying the two
+schema files, it can be loaded by a normal MariaDB client:
+
+```bash
+gzip -dc data/prebuilt/mvf_corpus.sql.gz | \
+  mariadb -h 127.0.0.1 -u mvf -p mvf
+```
+
+`make sql-demo` restores the JSON snapshot and executes the complete
 `sql/examples.sql` walkthrough, including `VECTOR`, `VECTOR INDEX`, hybrid and
 graph predicates, `EXPLAIN`, and `mhnsw_ef_search`. Docker itself must of course
 already be available locally.
@@ -600,6 +618,8 @@ already be available locally.
 [`sql/examples.sql`](sql/examples.sql) is a MariaDB-client walkthrough independent of the Python API. It uses an existing stored chunk as the query vector so the semantic, category-filtered, linked-article, relational-predicate, `EXPLAIN`, and `mhnsw_ef_search` examples can be pasted directly into a prepared MVF database. The temporal example explicitly uses MVF row-maintenance time (`articles.updated_at`) and does not claim that this is a Wikipedia revision timestamp.
 
 When reading the included `EXPLAIN` output, look for `ix_chunks_embedding` on the `chunks` row for semantic/hybrid ANN retrieval, `uq_categories_name` on the category side of the hybrid plan, and `ix_chunks_article_id` in linked search, where the relational-first plan is intentionally cheaper than forcing HNSW.
+
+A captured MariaDB 11.8.9 run is checked in at [`docs/sql-demo-output.txt`](docs/sql-demo-output.txt). It lets a reader inspect representative result rows and plans even without Docker or Python installed.
 
 ### Transactional consistency
 
@@ -637,9 +657,14 @@ make m-ground-truth
 make vector-lifecycle
 make multi-mode-latency
 make vector-concurrency
+make vector-scale
 ```
 
 `make environment` prints machine-readable host and MariaDB metadata. `make ef-search` evaluates MariaDB's session-level `mhnsw_ef_search` tuning surface at 200/400/800/1600 candidates over the complete 40-question ground-truth set, with three complete measured passes per setting and latency variance, then restores the production/default value (20). The current run found identical **92.5% Recall@10 / 0.782 MRR** at every setting, while aggregate mean latency rose from **15.523 ms** at 200 to **16.993 ms** at 1600. `make hybrid-index` measures the category-filtered query with `ix_chunks_embedding` enabled and optimizer-ignored; the current run measured **2.497 ms vs 232.818 ms (93.22×)** with identical top-k. `make ground-truth-latency` removes the single-query benchmark limitation by timing all **40 ground-truth questions across 5 measured passes (200 measured queries)** after a complete warm-up pass, preserving per-query timings and per-pass summaries. `make m-ground-truth` evaluates each `M` value with **3 complete measured ground-truth passes** rather than one. `make vector-lifecycle` checks second-session isolation before commit, ANN visibility after commit, and vector/index cleanup after cascade delete while recording insert/delete commit cost.
+
+`make vector-scale` isolates server/index scaling from retrieval quality. It builds a scratch table at **1×, 5×, 10× and 25×** the canonical corpus, rebuilds the production `M=8` cosine vector index at each size, records build time, query mean/P95, raw vector payload, and the server's configured `mhnsw_max_cache_size`, then drops the scratch table. MariaDB 11.8 does not expose a reliable per-index resident-memory figure through the metadata path used by this harness, so ordinary `information_schema.TABLES.INDEX_LENGTH` is deliberately **not** presented as HNSW memory. The command writes a timestamped JSON artifact plus `docs/vector-scale-results.md`; the repeated vectors make this a controlled index-cost probe rather than a new Recall/MRR claim.
+
+In the current macOS run, the scratch index scaled from **3,940** to **98,500 vectors**: index build time rose from **0.340 s** at 1× to **2.112 s** at 5×, **5.199 s** at 10× and **16.054 s** at 25×, while mean indexed top-5 query latency stayed between **0.586 ms and 0.624 ms**. This is an operational scaling result, not a recall claim.
 
 ---
 
@@ -656,13 +681,14 @@ vector retrieval:
   inserts, and after cleanup. It records write/query failures, commit-latency
   distribution and verifies that cascade cleanup leaves no orphan chunks.
 
-The manually dispatched `.github/workflows/benchmark.yml` workflow restores the
-checked-in prebuilt corpus on an **Ubuntu GitHub Actions runner**, executes the
-same multi-mode and concurrency harnesses, and uploads the JSON artifacts. The
-current repository includes the resulting Ubuntu artifacts under
-`experiments/results/ubuntu/`, giving a second OS/architecture result set beside
-the macOS / Apple M4 Pro measurements rather than treating one laptop as
-universal.
+The `.github/workflows/benchmark.yml` workflow restores the checked-in prebuilt
+corpus on an **Ubuntu GitHub Actions runner**, executes the same multi-mode and
+concurrency harnesses, and uploads only artifacts generated in that runner. It can
+be dispatched manually and also runs weekly, so benchmark regressions are checked
+continuously rather than only on demand. The current repository includes the
+resulting Ubuntu artifacts under `experiments/results/ubuntu/`, giving a second
+OS/architecture result set beside the macOS / Apple M4 Pro measurements rather
+than treating one laptop as universal.
 
 ## Testing and CI
 
@@ -672,7 +698,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 29 test cases**. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 33 test cases**. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip and destructive-restore safeguards, and the guided demo.
 
 Frontend checks:
 
@@ -704,7 +730,7 @@ The repository keeps secrets out of source control through environment configura
 ├── data/
 │   ├── raw/                  reproducible Wikipedia snapshots
 │   ├── ground_truth/         40-question retrieval ground truth
-│   ├── prebuilt/             portable full-corpus snapshot with vectors
+│   ├── prebuilt/             portable JSON + mariadb-client SQL corpus snapshots
 │   └── manifest.json         corpus/index configuration
 ├── experiments/              benchmark/evaluation harnesses
 │   └── results/              machine-readable result JSON + Ubuntu cross-machine runs
@@ -714,6 +740,8 @@ The repository keeps secrets out of source control through environment configura
 ├── tests/                    backend unit/integration tests + CI fixture
 ├── docs/
 │   ├── API.md
+│   ├── sql-demo-output.txt    captured SQL walkthrough output
+│   ├── vector-scale-results.md generated scale-probe summary after `make vector-scale`
 │   └── screenshots/
 ├── docker-compose.yml
 ├── Makefile
@@ -731,6 +759,7 @@ The repository keeps secrets out of source control through environment configura
 - Higher `M` values substantially increased index-build cost without improving the full 40-question article-level Recall@10. In the current single-query exact-top-5 probe, overlap improved from 80% at `M=4/8` to 100% at `M=16/32`, showing that chunk-level agreement and article-level retrieval quality can respond differently to index parameters.
 - The corpus is intentionally focused on the Wikipedia machine-learning neighborhood rather than general web search.
 - Absolute latency depends on host hardware/cache state; current canonical artifacts record environment metadata, and the final multi-mode/concurrency workloads were repeated on both macOS/arm64 and Ubuntu/x86_64.
+- A dedicated scratch-table scale probe now measures vector-index build time and query latency from 1× through 25× corpus size while recording raw vector payload and `mhnsw_max_cache_size`. It deliberately avoids presenting ordinary table `INDEX_LENGTH` as HNSW resident memory and separates index-scaling evidence from the real-corpus Recall/MRR harnesses.
 - OpenAI is an optional generation dependency. MariaDB retrieval, diagnostics, experiments, and the guided demo do not require it.
 
 These behaviors are part of the project result: MVF does not assume that every vector query should force the same index or that one ANN measurement is universally stable.

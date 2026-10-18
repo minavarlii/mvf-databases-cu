@@ -1,0 +1,63 @@
+{
+  "executed_at": "2026-10-18T13:49:24.801042+00:00",
+  "environment": {
+    "os": "Darwin",
+    "os_release": "24.5.0",
+    "architecture": "arm64",
+    "processor": "arm",
+    "python_version": "3.13.0",
+    "mariadb_version": "11.8.9-MariaDB-ubu2404",
+    "machine_model": "MacBook Pro",
+    "machine_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "memory": "24 GB"
+  },
+  "source_rows": 3940,
+  "dimensions": 384,
+  "mhnsw_max_cache_size_bytes": 16777216,
+  "memory_measurement_note": "No per-index HNSW resident-memory value is reported: information_schema.TABLES.INDEX_LENGTH is not treated as HNSW memory.",
+  "warmups": 5,
+  "runs": 30,
+  "results": [
+    {
+      "multiplier": 1,
+      "rows": 3940,
+      "raw_vector_bytes": 6051840,
+      "load_time_ms": 44.99658299755538,
+      "index_build_time_ms": 308.6447909954586,
+      "query_mean_ms": 0.4176138992382524,
+      "query_median_ms": 0.41291650268249214,
+      "query_p95_ms": 0.49324999417876825
+    },
+    {
+      "multiplier": 5,
+      "rows": 19700,
+      "raw_vector_bytes": 30259200,
+      "load_time_ms": 63.938792001863476,
+      "index_build_time_ms": 2292.1600000045146,
+      "query_mean_ms": 0.5430874322579863,
+      "query_median_ms": 0.48527099716011435,
+      "query_p95_ms": 0.98608299595071
+    },
+    {
+      "multiplier": 10,
+      "rows": 39400,
+      "raw_vector_bytes": 60518400,
+      "load_time_ms": 142.70679199398728,
+      "index_build_time_ms": 5372.0706250023795,
+      "query_mean_ms": 0.58393600047566,
+      "query_median_ms": 0.5592910019913688,
+      "query_p95_ms": 0.754166001570411
+    },
+    {
+      "multiplier": 25,
+      "rows": 98500,
+      "raw_vector_bytes": 151296000,
+      "load_time_ms": 386.98624999960884,
+      "index_build_time_ms": 16044.260333001148,
+      "query_mean_ms": 0.6598111666486753,
+      "query_median_ms": 0.6493130022136029,
+      "query_p95_ms": 0.8633339966763742
+    }
+  ]
+}

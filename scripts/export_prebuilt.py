@@ -57,13 +57,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-async def async_main() -> None:
+async def export_snapshot(path: Path) -> dict[str, int]:
     """Export all corpus tables while preserving vector text exactly."""
-    args = parse_args()
     payload: dict[str, Any] = {
         "format": "mvf-prebuilt-v1",
         "tables": {},
     }
+    counts: dict[str, int] = {}
 
     async with database_manager.session() as session:
         version = await session.scalar(text("SELECT VERSION()"))
@@ -76,12 +76,21 @@ async def async_main() -> None:
                 for row in result.mappings()
             ]
             payload["tables"][table] = rows
-            print(f"Exported {table}: {len(rows)} rows")
+            counts[table] = len(rows)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    with gzip.open(args.output, "wt", encoding="utf-8") as handle:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(path, "wt", encoding="utf-8") as handle:
         json.dump(payload, handle, separators=(",", ":"), ensure_ascii=False)
 
+    return counts
+
+
+async def async_main() -> None:
+    """Export the snapshot selected by command-line arguments."""
+    args = parse_args()
+    counts = await export_snapshot(args.output)
+    for table, count in counts.items():
+        print(f"Exported {table}: {count} rows")
     print(f"Saved portable prebuilt corpus to {args.output}")
     await database_manager.dispose()
 

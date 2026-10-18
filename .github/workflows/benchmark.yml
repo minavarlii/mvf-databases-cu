@@ -2,6 +2,8 @@ name: Cross-machine benchmark
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
 
 jobs:
   benchmark:
@@ -72,7 +74,16 @@ jobs:
           mariadb -h 127.0.0.1 -P 3306 -u mvf -pmvf_benchmark_password mvf < database/schema/002_vector_index.sql
 
       - name: Restore checked-in prebuilt corpus
-        run: python -m scripts.restore_prebuilt --input data/prebuilt/mvf_corpus.json.gz
+        run: >-
+          python -m scripts.restore_prebuilt
+          --input data/prebuilt/mvf_corpus.json.gz
+          --confirm-reset
+          --expected-database mvf
+
+      - name: Remove checked-in local benchmark artifacts from runner workspace
+        run: |
+          rm -f experiments/results/multi_mode_latency_*.json
+          rm -f experiments/results/vector_concurrency_*.json
 
       - name: Capture runner environment
         run: python -m experiments.environment | tee experiments/results/ubuntu_environment.json

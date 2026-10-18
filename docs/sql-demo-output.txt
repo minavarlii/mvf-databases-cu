@@ -1,0 +1,53 @@
+MVF sql/examples.sql — captured output from MariaDB 11.8.9
+
+Command:
+  docker compose exec -T mariadb mariadb -u"mvf" -p"***" "mvf" < sql/examples.sql
+
+The output below was captured against the canonical 285-article / 3,940-vector corpus.
+It is checked in so readers can inspect representative result rows and EXPLAIN plans
+without first installing Docker. Password text is intentionally redacted.
+
+chunk_id        article_id      article_title   chunk_index     distance
+558     1       Machine learning        0       0
+620     2       Outline of machine learning     0       0.19912832349371556
+564     1       Machine learning        6       0.25542872762245283
+566     1       Machine learning        8       0.2667446326376789
+568     1       Machine learning        10      0.3014731978911086
+chunk_id        article_id      article_title   chunk_index     distance
+558     1       Machine learning        0       0
+620     2       Outline of machine learning     0       0.19912832349371556
+564     1       Machine learning        6       0.25542872762245283
+566     1       Machine learning        8       0.2667446326376789
+568     1       Machine learning        10      0.3014731978911086
+chunk_id        article_id      article_title   chunk_index     distance
+620     2       Outline of machine learning     0       0.19912832349371556
+1000    24      Automated decision-making       4       0.36548067510762283
+2279    110     Glossary of artificial intelligence     131     0.36972433931634885
+4211    260     Statistical learning theory     0       0.3801362682327085
+2193    110     Glossary of artificial intelligence     45      0.3868318028248565
+id      select_type     table   type    possible_keys   key     key_len ref     rows    Extra
+1       SIMPLE  c       index   NULL    ix_chunks_embedding     1538    NULL    5
+id      select_type     table   type    possible_keys   key     key_len ref     rows    Extra
+1       PRIMARY cat     const   PRIMARY,uq_categories_name      uq_categories_name      2050     const   1       Using index
+1       PRIMARY c       index   uq_chunks_article_chunk_index,ix_chunks_article_id      ix_chunks_embedding      1538    NULL    5
+1       PRIMARY ac      eq_ref  PRIMARY,fk_article_categories_category  fk_article_categories_category   16      const,mvf.c.article_id  1       Using index
+chunk_id        article_id      article_title   word_count      distance
+558     1       Machine learning        8589    0
+620     2       Outline of machine learning     3077    0.19912832349371556
+564     1       Machine learning        8589    0.25542872762245283
+566     1       Machine learning        8589    0.2667446326376789
+568     1       Machine learning        8589    0.3014731978911086
+chunk_id        article_id      article_title   updated_at      distance
+558     1       Machine learning        2026-10-08 13:24:18.069234      0
+620     2       Outline of machine learning     2026-10-08 13:24:18.552558      0.19912832349371556
+564     1       Machine learning        2026-10-08 13:24:18.069234      0.25542872762245283
+566     1       Machine learning        2026-10-08 13:24:18.069234      0.2667446326376789
+568     1       Machine learning        2026-10-08 13:24:18.069234      0.3014731978911086
+id      select_type     table   type    possible_keys   key     key_len ref     rows    Extra
+1       SIMPLE  c       index   NULL    ix_chunks_embedding     1538    NULL    5
+chunk_id        article_title   distance
+558     Machine learning        0
+620     Outline of machine learning     0.19912832349371556
+564     Machine learning        0.25542872762245283
+566     Machine learning        0.2667446326376789
+568     Machine learning        0.3014731978911086

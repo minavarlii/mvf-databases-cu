@@ -11,6 +11,7 @@ from typing import Any, cast
 
 from sqlalchemy import text
 
+from backend.app.core import get_settings
 from backend.app.db import analyze_core_tables, database_manager
 
 DEFAULT_INPUT = Path("data/prebuilt/mvf_corpus.json.gz")
@@ -65,7 +66,41 @@ def parse_args() -> argparse.Namespace:
     """Parse restore options."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument(
+        "--confirm-reset",
+        action="store_true",
+        help=(
+            "Required acknowledgement that the target corpus tables will be "
+            "deleted before restore."
+        ),
+    )
+    parser.add_argument(
+        "--expected-database",
+        default=None,
+        help=(
+            "Database name that must match SELECT DATABASE() before destructive "
+            "work starts. Defaults to DB_NAME."
+        ),
+    )
     return parser.parse_args()
+
+
+def validate_restore_request(
+    *,
+    confirm_reset: bool,
+    expected_database: str,
+) -> None:
+    """Reject an unsafe or ambiguous destructive restore request."""
+    if not confirm_reset:
+        raise ValueError(
+            "Restore refused: pass --confirm-reset to acknowledge that existing "
+            "MVF corpus rows will be deleted."
+        )
+    if not expected_database.strip():
+        raise ValueError(
+            "Restore refused: expected database name is empty. Set DB_NAME or "
+            "pass --expected-database explicitly."
+        )
 
 
 def load_payload(path: Path) -> dict[str, Any]:
@@ -94,13 +129,29 @@ async def execute_many(
         await session.execute(text(statement), rows)
 
 
-async def async_main() -> None:
-    """Replace current corpus rows with the portable snapshot."""
-    args = parse_args()
-    payload = load_payload(args.input)
+async def restore_snapshot(
+    path: Path,
+    *,
+    confirm_reset: bool,
+    expected_database: str,
+) -> dict[str, int]:
+    """Replace the current corpus after explicit reset and database checks."""
+    validate_restore_request(
+        confirm_reset=confirm_reset,
+        expected_database=expected_database,
+    )
+    payload = load_payload(path)
     tables = payload["tables"]
 
     async with database_manager.session() as session:
+        active_database = await session.scalar(text("SELECT DATABASE()"))
+        if str(active_database) != expected_database:
+            raise RuntimeError(
+                "Restore refused: connected database "
+                f"{active_database!r} does not match expected database "
+                f"{expected_database!r}."
+            )
+
         for statement in DELETE_SQL:
             await session.execute(text(statement))
 
@@ -117,11 +168,30 @@ async def async_main() -> None:
         await analyze_core_tables(session)
         await session.commit()
 
+    return {
+        "articles": len(tables["articles"]),
+        "categories": len(tables["categories"]),
+        "article_categories": len(tables["article_categories"]),
+        "article_links": len(tables["article_links"]),
+        "chunks": len(tables["chunks"]),
+    }
+
+
+async def async_main() -> None:
+    """Restore the snapshot selected by command-line arguments."""
+    args = parse_args()
+    expected_database = args.expected_database or get_settings().db_name
+    counts = await restore_snapshot(
+        args.input,
+        confirm_reset=args.confirm_reset,
+        expected_database=expected_database,
+    )
+
     print(
         "Restored prebuilt corpus: "
-        f"{len(tables['articles'])} articles, "
-        f"{len(tables['chunks'])} vectors, "
-        f"{len(tables['article_links'])} links."
+        f"{counts['articles']} articles, "
+        f"{counts['chunks']} vectors, "
+        f"{counts['article_links']} links."
     )
     await database_manager.dispose()
 
