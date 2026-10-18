@@ -34,6 +34,7 @@ dev = [
 include = [
     "backend*",
     "scripts*",
+    "experiments*",
 ]
 exclude = [
     "data*",
