@@ -8,6 +8,7 @@ import platform
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
+from pathlib import Path
 
 from sqlalchemy import text
 
@@ -61,23 +62,78 @@ def _mac_hardware() -> dict[str, str | None]:
         return {}
 
 
+def _read_text(path: Path) -> str | None:
+    """Read one small system metadata file, returning None when unavailable."""
+    try:
+        value = path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    return value or None
+
+
+def _linux_hardware() -> dict[str, str | None]:
+    """Return Linux CPU, VM/model and memory metadata from proc/sysfs."""
+    if platform.system() != "Linux":
+        return {}
+
+    vendor = _read_text(Path("/sys/devices/virtual/dmi/id/sys_vendor"))
+    product = _read_text(Path("/sys/devices/virtual/dmi/id/product_name"))
+
+    machine_model: str | None
+    if vendor and product:
+        machine_model = f"{vendor} {product}"
+    else:
+        machine_model = product or vendor
+
+    chip: str | None = None
+    try:
+        for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
+            if line.lower().startswith("model name") and ":" in line:
+                chip = line.split(":", 1)[1].strip() or None
+                break
+    except OSError:
+        pass
+
+    memory: str | None = None
+    try:
+        for line in Path("/proc/meminfo").read_text(encoding="utf-8").splitlines():
+            if line.startswith("MemTotal:"):
+                parts = line.split()
+                if len(parts) >= 2:
+                    kib = int(parts[1])
+                    gib = kib / (1024 * 1024)
+                    memory = f"{gib:.2f} GiB ({kib} KiB)"
+                break
+    except (OSError, ValueError):
+        pass
+
+    return {
+        "machine_model": machine_model,
+        "machine_identifier": None,
+        "chip": chip,
+        "memory": memory,
+    }
+
+
 async def collect_environment() -> EnvironmentMetadata:
     """Collect host, hardware, Python, and MariaDB version metadata."""
     async with database_manager.session() as session:
         mariadb_version = await session.scalar(text("SELECT VERSION()"))
 
-    hardware = _mac_hardware()
+    hardware = _mac_hardware() or _linux_hardware()
+    chip = hardware.get("chip")
+    processor = platform.processor() or chip or "unknown"
 
     return EnvironmentMetadata(
         os=platform.system(),
         os_release=platform.release(),
         architecture=platform.machine(),
-        processor=platform.processor() or "unknown",
+        processor=processor,
         python_version=sys.version.split()[0],
         mariadb_version=str(mariadb_version or "unknown"),
         machine_model=hardware.get("machine_model"),
         machine_identifier=hardware.get("machine_identifier"),
-        chip=hardware.get("chip"),
+        chip=chip,
         memory=hardware.get("memory"),
     )
 
