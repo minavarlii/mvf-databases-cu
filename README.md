@@ -18,7 +18,7 @@ It keeps **vector storage, cosine similarity, ANN indexing, relational filtering
 | 40-question semantic mean | **15.442 ms** |
 | Native VECTOR INDEX vs brute force | **169.33×** |
 | Filtered ANN speedup | **93.22×** |
-| Backend pytest cases | **41 passed** |
+| Backend pytest cases | **46 passed** |
 | Frontend Vitest cases | **60 passed** |
 
 For methodology, repeated passes, optimizer plans, variance and failure modes,
@@ -749,7 +749,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 41 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, an explicit committed `VECTOR(384)` UPDATE probe **before and after HNSW rebuild**, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 46 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, an explicit committed `VECTOR(384)` UPDATE probe **before and after HNSW rebuild**, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
 
 Frontend checks:
 
