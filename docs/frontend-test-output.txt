@@ -1,0 +1,31 @@
+MVF frontend verification — local captured run, 2026-10-18
+
+Commands:
+  cd frontend
+  npm run lint
+  npm test
+  npm run build
+
+Vitest summary:
+  Test Files  6 passed (6)
+  Tests       60 passed (60)
+
+Passing suites:
+  src/api/errors.test.ts       7 tests
+  src/components/filters.test.ts 7 tests
+  src/api/mock.test.ts         6 tests
+  src/eval/data.test.ts       13 tests
+  src/pages/askFlow.test.tsx   8 tests
+  src/api/client.test.ts      19 tests
+
+Production build summary:
+  vite v8.3.1
+  47 modules transformed
+  dist/index.html                  0.78 kB | gzip 0.42 kB
+  dist/assets/index-DdfJWut6.css  46.66 kB | gzip 9.47 kB
+  dist/assets/index-Cf-AtK0e.js  307.96 kB | gzip 94.59 kB
+  build completed successfully
+
+This file is evidence for the README's frontend test-count statement. GitHub CI
+also runs frontend lint, tests and the production build; this capture records the
+verified local gate used for the final submission snapshot.

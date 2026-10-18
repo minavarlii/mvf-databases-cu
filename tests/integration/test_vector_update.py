@@ -1,4 +1,4 @@
-"""Exercise UPDATE semantics for a MariaDB VECTOR column on an indexed table."""
+"""Measure committed UPDATE visibility for a MariaDB VECTOR INDEX."""
 
 from __future__ import annotations
 
@@ -11,21 +11,20 @@ from sqlalchemy.pool import NullPool
 
 from backend.app.core import get_settings
 
-TABLE_NAME = "vector_update_probe"
-INDEX_NAME = "ix_vector_update_probe_embedding"
-
-CREATE_TABLE_SQL = f"""
-CREATE TABLE {TABLE_NAME} (
+CREATE_TABLE_SQL = """
+CREATE TABLE vector_update_probe (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     embedding VECTOR(384) NOT NULL,
     PRIMARY KEY (id),
-    VECTOR INDEX {INDEX_NAME} (embedding) M = 8 DISTANCE = cosine
+    VECTOR INDEX ix_vector_update_probe_embedding (embedding)
+        M = 8
+        DISTANCE = cosine
 ) ENGINE=InnoDB
 """
 
-SEARCH_SQL = f"""
+SEARCH_SQL = """
 SELECT id
-FROM {TABLE_NAME}
+FROM vector_update_probe
 ORDER BY VEC_DISTANCE_COSINE(
     embedding,
     VEC_FromText(:embedding)
@@ -33,10 +32,29 @@ ORDER BY VEC_DISTANCE_COSINE(
 LIMIT 1
 """
 
-DROP_INDEX_SQL = f"DROP INDEX {INDEX_NAME} ON {TABLE_NAME}"
-CREATE_INDEX_SQL = f"""
-CREATE VECTOR INDEX {INDEX_NAME}
-ON {TABLE_NAME} (embedding)
+UPDATE_SQL = """
+UPDATE vector_update_probe
+SET embedding = VEC_FromText(:embedding)
+WHERE id = :probe_id
+"""
+
+DISTANCE_SQL = """
+SELECT VEC_DISTANCE_COSINE(
+    embedding,
+    VEC_FromText(:embedding)
+)
+FROM vector_update_probe
+WHERE id = :probe_id
+"""
+
+DROP_INDEX_SQL = """
+DROP INDEX ix_vector_update_probe_embedding
+ON vector_update_probe
+"""
+
+CREATE_INDEX_SQL = """
+CREATE VECTOR INDEX ix_vector_update_probe_embedding
+ON vector_update_probe (embedding)
 M = 8
 DISTANCE = cosine
 """
@@ -50,14 +68,14 @@ def one_hot(index: int) -> str:
 
 
 @pytest.mark.asyncio
-async def test_vector_update_is_committed_and_searchable_after_index_rebuild() -> None:
-    """Update an indexed vector, then verify storage and rebuilt ANN visibility.
+async def test_vector_update_visibility_before_and_after_index_rebuild() -> None:
+    """Measure ANN visibility of a committed in-place VECTOR update.
 
-    The test deliberately does not assume that an already-built HNSW graph must
-    expose an UPDATE immediately. It first proves that the committed VECTOR value
-    changed in InnoDB, then rebuilds the scratch VECTOR INDEX and verifies that ANN
-    search uses the updated value. This keeps the test deterministic while still
-    exercising UPDATE against a vector-indexed table.
+    On the MariaDB 11.8.9 configuration used by MVF, the committed VECTOR value
+    is immediately visible both to ordinary SQL distance evaluation and to the
+    already-built HNSW index in this controlled scratch-table probe. The test
+    checks that visibility before rebuilding the index, then rebuilds it and
+    verifies that the same updated vector remains searchable afterwards.
     """
     before_embedding = one_hot(0)
     after_embedding = one_hot(1)
@@ -78,7 +96,7 @@ async def test_vector_update_is_committed_and_searchable_after_index_rebuild() -
 
     try:
         async with session_factory() as session:
-            await session.execute(text(f"DROP TABLE IF EXISTS {TABLE_NAME}"))
+            await session.execute(text("DROP TABLE IF EXISTS vector_update_probe"))
             await session.commit()
             await session.execute(text(CREATE_TABLE_SQL))
             await session.commit()
@@ -86,8 +104,8 @@ async def test_vector_update_is_committed_and_searchable_after_index_rebuild() -
             try:
                 await session.execute(
                     text(
-                        f"""
-                        INSERT INTO {TABLE_NAME} (embedding)
+                        """
+                        INSERT INTO vector_update_probe (embedding)
                         VALUES
                             (VEC_FromText(:before_embedding)),
                             (VEC_FromText(:distractor_a)),
@@ -112,54 +130,30 @@ async def test_vector_update_is_committed_and_searchable_after_index_rebuild() -
                 assert probe_id > 0
 
                 await session.execute(
-                    text(
-                        f"""
-                        UPDATE {TABLE_NAME}
-                        SET embedding = VEC_FromText(:embedding)
-                        WHERE id = :probe_id
-                        """
-                    ),
-                    {
-                        "embedding": after_embedding,
-                        "probe_id": probe_id,
-                    },
+                    text(UPDATE_SQL),
+                    {"embedding": after_embedding, "probe_id": probe_id},
                 )
                 await session.commit()
 
                 old_distance = await session.scalar(
-                    text(
-                        f"""
-                        SELECT VEC_DISTANCE_COSINE(
-                            embedding,
-                            VEC_FromText(:embedding)
-                        )
-                        FROM {TABLE_NAME}
-                        WHERE id = :probe_id
-                        """
-                    ),
-                    {
-                        "embedding": before_embedding,
-                        "probe_id": probe_id,
-                    },
+                    text(DISTANCE_SQL),
+                    {"embedding": before_embedding, "probe_id": probe_id},
                 )
                 new_distance = await session.scalar(
-                    text(
-                        f"""
-                        SELECT VEC_DISTANCE_COSINE(
-                            embedding,
-                            VEC_FromText(:embedding)
-                        )
-                        FROM {TABLE_NAME}
-                        WHERE id = :probe_id
-                        """
-                    ),
-                    {
-                        "embedding": after_embedding,
-                        "probe_id": probe_id,
-                    },
+                    text(DISTANCE_SQL),
+                    {"embedding": after_embedding, "probe_id": probe_id},
                 )
                 assert float(old_distance or 0.0) > 0.9
                 assert abs(float(new_distance or 0.0)) < 1e-6
+
+                # Critical UPDATE observation: query the already-built HNSW
+                # graph before any rebuild. On the verified MariaDB 11.8.9
+                # scratch-table probe, the committed update is immediately visible.
+                pre_rebuild_top = await session.scalar(
+                    text(SEARCH_SQL),
+                    {"embedding": after_embedding},
+                )
+                assert int(pre_rebuild_top or 0) == probe_id
 
                 await session.execute(text(DROP_INDEX_SQL))
                 await session.commit()
@@ -172,7 +166,7 @@ async def test_vector_update_is_committed_and_searchable_after_index_rebuild() -
                 )
                 assert int(rebuilt_top or 0) == probe_id
             finally:
-                await session.execute(text(f"DROP TABLE IF EXISTS {TABLE_NAME}"))
+                await session.execute(text("DROP TABLE IF EXISTS vector_update_probe"))
                 await session.commit()
     finally:
         await engine.dispose()
