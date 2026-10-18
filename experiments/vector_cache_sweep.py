@@ -143,7 +143,7 @@ class RebuildMeasurement:
     query_mean_ms: float
     query_median_ms: float
     query_p95_ms: float
-    top5_overlap_with_reference: float
+    overlap_with_first_rebuild_in_setting: float
     queries: tuple[QueryMeasurement, ...]
 
 
@@ -162,7 +162,7 @@ class CacheSweepResult:
     query_mean_ms: float
     query_median_ms: float
     query_p95_ms: float
-    mean_top5_overlap_with_reference: float
+    within_setting_pairwise_top5_overlap: float
 
 
 def parse_args() -> argparse.Namespace:
@@ -202,25 +202,44 @@ def set_global_cache_size(cache_bytes: int) -> int:
             f"{cache_bytes} bytes. Supported MiB values: {supported}."
         )
 
-    command = [
-        "docker",
-        "compose",
-        "exec",
-        "-T",
-        "-e",
-        f"MYSQL_PWD={root_password}",
-        "mariadb",
-        "mariadb",
-        "-uroot",
-        "-N",
-        "-e",
-        sql,
-    ]
+    admin_host = os.environ.get("MVF_CACHE_ADMIN_HOST", "").strip()
+    if admin_host:
+        command = [
+            "mariadb",
+            "-h",
+            admin_host,
+            "-P",
+            os.environ.get("DB_PORT", "3306"),
+            "-uroot",
+            "-N",
+            "-e",
+            sql,
+        ]
+        process_env = os.environ.copy()
+        process_env["MYSQL_PWD"] = root_password
+    else:
+        command = [
+            "docker",
+            "compose",
+            "exec",
+            "-T",
+            "-e",
+            f"MYSQL_PWD={root_password}",
+            "mariadb",
+            "mariadb",
+            "-uroot",
+            "-N",
+            "-e",
+            sql,
+        ]
+        process_env = None
+
     completed = subprocess.run(
         command,
         check=True,
         capture_output=True,
         text=True,
+        env=process_env,
     )
     lines = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
     if not lines:
@@ -403,19 +422,59 @@ async def measure_query(
     )
 
 
-def mean_top5_overlap(
-    current: tuple[QueryMeasurement, ...],
-    reference: dict[str, set[int]],
+def mean_top5_overlap_between_rebuilds(
+    left: tuple[QueryMeasurement, ...],
+    right: tuple[QueryMeasurement, ...],
 ) -> float:
-    """Return mean set overlap with the first rebuild across all queries."""
-    if not reference:
-        return 1.0
-    overlaps = []
-    for measurement in current:
-        expected = reference[measurement.question_id]
+    """Return mean top-5 set overlap across matching query ids."""
+    right_by_id = {item.question_id: set(item.top5_ids) for item in right}
+    overlaps: list[float] = []
+    for measurement in left:
+        expected = right_by_id[measurement.question_id]
         observed = set(measurement.top5_ids)
         overlaps.append(len(expected & observed) / 5)
     return statistics.mean(overlaps)
+
+
+def mean_pairwise_overlap_within_setting(
+    rebuilds: list[RebuildMeasurement],
+) -> float:
+    """Average every distinct rebuild pair; never compare a rebuild to itself."""
+    overlaps: list[float] = []
+    for left_index, left in enumerate(rebuilds):
+        for right in rebuilds[left_index + 1 :]:
+            overlaps.append(
+                mean_top5_overlap_between_rebuilds(left.queries, right.queries)
+            )
+    if not overlaps:
+        raise ValueError("At least two rebuilds are required for pairwise overlap")
+    return statistics.mean(overlaps)
+
+
+def cross_setting_first_rebuild_overlaps(
+    results: list[CacheSweepResult],
+) -> list[tuple[int, float | None]]:
+    """Compare first rebuilds across settings.
+
+    Keep this separate from within-setting rebuild variance.
+    """
+    if not results:
+        return []
+    baseline = results[0].rebuilds[0].queries
+    comparisons: list[tuple[int, float | None]] = []
+    for index, result in enumerate(results):
+        if index == 0:
+            comparisons.append((result.cache_mib, None))
+            continue
+        comparisons.append(
+            (
+                result.cache_mib,
+                mean_top5_overlap_between_rebuilds(
+                    baseline, result.rebuilds[0].queries
+                ),
+            )
+        )
+    return comparisons
 
 
 async def measure_rebuild(
@@ -425,7 +484,7 @@ async def measure_rebuild(
     queries: list[tuple[str, str]],
     warmups: int,
     runs: int,
-    reference: dict[str, set[int]],
+    setting_reference: dict[str, set[int]],
 ) -> RebuildMeasurement:
     """Build one fresh HNSW index and measure all prepared queries."""
     await drop_index_if_present(session)
@@ -452,8 +511,8 @@ async def measure_rebuild(
     )
     all_query_samples = [sample for item in query_results for sample in item.samples_ms]
 
-    if not reference:
-        reference.update(
+    if not setting_reference:
+        setting_reference.update(
             {item.question_id: set(item.top5_ids) for item in query_results}
         )
 
@@ -463,7 +522,14 @@ async def measure_rebuild(
         query_mean_ms=statistics.mean(all_query_samples),
         query_median_ms=statistics.median(all_query_samples),
         query_p95_ms=percentile(all_query_samples, 0.95),
-        top5_overlap_with_reference=mean_top5_overlap(query_results, reference),
+        overlap_with_first_rebuild_in_setting=(
+            1.0
+            if rebuild_number == 1
+            else statistics.mean(
+                len(setting_reference[item.question_id] & set(item.top5_ids)) / 5
+                for item in query_results
+            )
+        ),
         queries=query_results,
     )
 
@@ -483,7 +549,6 @@ def summarize_cache_setting(
         for query in rebuild.queries
         for sample in query.samples_ms
     ]
-    overlaps = [item.top5_overlap_with_reference for item in rebuilds]
     return CacheSweepResult(
         cache_mib=cache_mib,
         cache_bytes=cache_bytes,
@@ -498,7 +563,9 @@ def summarize_cache_setting(
         query_mean_ms=statistics.mean(all_query_samples),
         query_median_ms=statistics.median(all_query_samples),
         query_p95_ms=percentile(all_query_samples, 0.95),
-        mean_top5_overlap_with_reference=statistics.mean(overlaps),
+        within_setting_pairwise_top5_overlap=(
+            mean_pairwise_overlap_within_setting(rebuilds)
+        ),
     )
 
 
@@ -530,7 +597,7 @@ def render_markdown(
         "",
         (
             "| Cache | Rows | Build mean | Build stddev | Build min–max | "
-            "Query mean | Query P95 | Mean top-5 overlap |"
+            "Query mean | Query P95 | Within-setting pairwise top-5 overlap |"
         ),
         "|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
@@ -541,7 +608,7 @@ def render_markdown(
             f"{item.build_stddev_ms / 1000:.3f} s | "
             f"{item.build_min_ms / 1000:.3f}–{item.build_max_ms / 1000:.3f} s | "
             f"{item.query_mean_ms:.3f} ms | {item.query_p95_ms:.3f} ms | "
-            f"{item.mean_top5_overlap_with_reference * 100:.1f}% |"
+            f"{item.within_setting_pairwise_top5_overlap * 100:.1f}% |"
         )
 
     if results:
@@ -550,19 +617,52 @@ def render_markdown(
         build_ratio = slowest.build_mean_ms / fastest.build_mean_ms
         query_values = [item.query_mean_ms for item in results]
         query_spread = max(query_values) - min(query_values)
-        minimum_overlap = min(item.mean_top5_overlap_with_reference for item in results)
+        minimum_overlap = min(
+            item.within_setting_pairwise_top5_overlap for item in results
+        )
         interpretation = (
             f"Across repeated rebuilds, the fastest mean build occurred at "
             f"{fastest.cache_mib} MiB and the slowest at {slowest.cache_mib} MiB "
             f"({build_ratio:.2f}× apart). Mean query latency varied by only "
-            f"{query_spread:.3f} ms across cache settings. The minimum mean top-5 "
-            f"overlap with the first rebuild was {minimum_overlap * 100:.1f}%. "
+            f"{query_spread:.3f} ms across cache settings. The minimum "
+            f"within-setting pairwise top-5 overlap was {minimum_overlap * 100:.1f}%. "
             "Because exact duplicate vectors were removed, any remaining ordering "
             "differences are treated as ANN rebuild variability rather than duplicate "
             "ties; this experiment does not claim that cache size deterministically "
             "changes retrieval quality."
         )
         lines.extend(["", "## Interpretation", "", interpretation])
+
+        comparisons = cross_setting_first_rebuild_overlaps(results)
+        baseline_cache = comparisons[0][0]
+        lines.extend(
+            [
+                "",
+                "## Across-cache first-rebuild comparison",
+                "",
+                (
+                    "This table is intentionally separate from the within-setting "
+                    "pairwise metric above. It compares only the first rebuild from "
+                    f"each setting against the {baseline_cache} MiB first rebuild."
+                ),
+                "",
+                "| Cache | First rebuild top-5 overlap vs baseline |",
+                "|---:|---:|",
+            ]
+        )
+        for cache_mib, overlap in comparisons:
+            value = "reference" if overlap is None else f"{overlap * 100:.1f}%"
+            lines.append(f"| {cache_mib} MiB | {value} |")
+        lines.extend(
+            [
+                "",
+                (
+                    "Across-cache overlap is descriptive only: changing cache size "
+                    "also requires a fresh ANN rebuild, so it is not interpreted "
+                    "as a causal retrieval-quality effect of the cache setting."
+                ),
+            ]
+        )
 
     lines.extend(
         [
@@ -593,8 +693,6 @@ async def async_main() -> None:
     environment = await collect_environment()
     queries = await prepare_query_embeddings(args.queries)
     results: list[CacheSweepResult] = []
-    reference_rankings: dict[str, set[int]] = {}
-
     async with database_manager.session() as session:
         original_cache_bytes = int(
             await session.scalar(text("SELECT @@GLOBAL.mhnsw_max_cache_size")) or 0
@@ -611,6 +709,7 @@ async def async_main() -> None:
             )
 
             for cache_mib in args.cache_mib:
+                setting_reference_rankings: dict[str, set[int]] = {}
                 requested_bytes = cache_mib * 1024 * 1024
                 applied_bytes = set_global_cache_size(requested_bytes)
                 if applied_bytes != requested_bytes:
@@ -627,7 +726,7 @@ async def async_main() -> None:
                         queries=queries,
                         warmups=args.warmups,
                         runs=args.runs,
-                        reference=reference_rankings,
+                        setting_reference=setting_reference_rankings,
                     )
                     rebuilds.append(rebuild)
                     print(
@@ -635,7 +734,8 @@ async def async_main() -> None:
                         f"{args.rebuilds}: build="
                         f"{rebuild.index_build_time_ms / 1000:.3f}s, "
                         f"query_mean={rebuild.query_mean_ms:.3f}ms, "
-                        f"overlap={rebuild.top5_overlap_with_reference * 100:.1f}%"
+                        f"overlap_vs_first_in_setting="
+                        f"{rebuild.overlap_with_first_rebuild_in_setting * 100:.1f}%"
                     )
 
                 summary = summarize_cache_setting(

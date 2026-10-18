@@ -18,11 +18,24 @@ It keeps **vector storage, cosine similarity, ANN indexing, relational filtering
 | 40-question semantic mean | **15.442 ms** |
 | Native VECTOR INDEX vs brute force | **169.33×** |
 | Filtered ANN speedup | **93.22×** |
-| Backend pytest cases | **35 passed** |
+| Backend pytest cases | **36 passed** |
 | Frontend Vitest cases | **60 passed** |
 
 For methodology, repeated passes, optimizer plans, variance and failure modes,
 see [Measured results](#measured-results).
+
+### Contents
+
+- [What the project demonstrates](#what-the-project-demonstrates)
+- [Architecture](#architecture)
+- [Data model](#data-model-and-why-it-is-shaped-this-way)
+- [Retrieval modes](#retrieval-modes)
+- [Measured results](#measured-results)
+- [Reproduce the project](#reproduce-the-project)
+- [User guide](#user-guide)
+- [Additional reproducibility probes](#additional-reproducibility-probes)
+- [Testing and CI](#testing-and-ci)
+- [Important findings and limitations](#important-findings-and-limitations)
 
 ### 10-minute MariaDB path
 
@@ -35,10 +48,11 @@ make demo
 ```
 
 The first command restores the checked-in relational corpus and all 3,940 stored
-vectors. The second walks through native `VECTOR`, cosine ranking, hybrid filters,
-link joins and `EXPLAIN` with the MariaDB client. The third runs the guided Python
-demo and prints ranked results, SQL, timings and optimizer plans. No OpenAI key is
-required for any of these three commands.
+vectors. `make sql-demo` is also self-contained and will run the offline bootstrap
+again if needed before walking through native `VECTOR`, cosine ranking, hybrid
+filters, link joins and `EXPLAIN` with the MariaDB client. The third command runs
+the guided Python demo and prints ranked results, SQL, timings and optimizer plans.
+No OpenAI key is required for any of these commands.
 
 ### Why some development-run numbers changed
 
@@ -683,9 +697,9 @@ make vector-cache-sweep
 
 The current measured values are kept in [`docs/vector-scale-results.md`](docs/vector-scale-results.md), which is generated from the same run that writes the timestamped JSON artifact. The README deliberately does not duplicate those scale numbers so the prose cannot drift from the committed machine-readable result. This is an operational scaling result, not a recall claim.
 
-`make vector-cache-sweep` goes one step further with a **25× / 98,500-vector** scratch workload under multiple GLOBAL `mhnsw_max_cache_size` limits (4, 16 and 64 MiB by default). Unlike the simpler scale probe, the cache study removes exact duplicates: every copied vector receives a tiny deterministic two-coordinate rotation that preserves its L2 norm. It embeds **20 real ground-truth questions**, performs **3 independent HNSW rebuilds per cache setting**, and reports build mean/stddev/min/max, multi-query mean/P95 latency, and mean top-5 overlap with the first rebuild. The original server cache value is restored in a `finally` block.
+`make vector-cache-sweep` goes one step further with a **25× / 98,500-vector** scratch workload under multiple GLOBAL `mhnsw_max_cache_size` limits (4, 16 and 64 MiB by default). Unlike the simpler scale probe, the cache study removes exact duplicates: every copied vector receives a tiny deterministic two-coordinate rotation that preserves its L2 norm. It embeds **20 real ground-truth questions**, performs **3 independent HNSW rebuilds per cache setting**, and reports build mean/stddev/min/max plus multi-query mean/P95 latency. ANN variability is now summarized with a **within-setting pairwise top-5 overlap** that compares only distinct rebuild pairs, so no rebuild is ever compared with itself. A separate across-cache table compares the first rebuild from each setting against the first setting's first rebuild and is explicitly kept separate from the within-setting statistic. The original server cache value is restored in a `finally` block.
 
-The committed repeated-build study is interpreted as a **server-limit experiment, not a relevance claim**: cache size is compared primarily through repeated index-build cost and variance, while query latency is measured over the same 20 real questions. Exact duplicate ties have been removed, so any residual top-5 differences are treated as ANN rebuild variability rather than evidence that a larger cache deterministically changes retrieval quality. The canonical measurements and their automatically generated interpretation live in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md), with the full per-rebuild/per-query data in the timestamped JSON artifact. Because `mhnsw_max_cache_size` is GLOBAL, the target requires the local `DB_ROOT_PASSWORD`; the password is supplied to the MariaDB client through the container environment rather than embedded in source.
+The committed repeated-build study is interpreted as a **server-limit experiment, not a relevance claim**: cache size is compared primarily through repeated index-build cost and variance, while query latency is measured over the same 20 real questions. Exact duplicate ties have been removed, so any residual top-5 differences are treated as ANN rebuild variability rather than evidence that a larger cache deterministically changes retrieval quality. Across-cache overlap is descriptive only because changing the cache setting also requires a fresh ANN rebuild. The canonical measurements and their automatically generated interpretation live in [`docs/vector-cache-sweep-results.md`](docs/vector-cache-sweep-results.md), with the full per-rebuild/per-query data in the timestamped JSON artifact. The weekly GitHub benchmark also runs this cache sweep on Ubuntu so the experiment is not laptop-only. Because `mhnsw_max_cache_size` is GLOBAL, the target requires the local `DB_ROOT_PASSWORD`; the password is supplied to the MariaDB client through the environment rather than embedded in source.
 
 ---
 
@@ -719,7 +733,7 @@ Backend quality gate:
 make quality
 ```
 
-It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 35 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, committed VECTOR update/index maintenance, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
+It runs Ruff, formatting checks, strict mypy, and pytest. In the verified local quality run, pytest **collected and passed 36 test cases**. CI additionally loads `data/prebuilt/mvf_corpus.sql.gz` into a fresh scratch database using the stock `mariadb` client, verifies the five canonical table counts, and drops the scratch database again; this exercises the client-only SQL restore path independently of the Python JSON restore. This is the pytest collected-case count (including parametrized cases), not a count of `def test_...` source functions. Coverage includes API integration, semantic/hybrid/linked retrieval, RAG behavior, chunking, embedding behavior, transactional vector rollback, the prebuilt export/restore round trip, destructive-restore safeguards, committed `VECTOR(384)` update persistence plus ANN visibility after a scratch-index rebuild, deterministic norm-preserving cache-sweep perturbations, and the guided demo.
 
 Frontend checks:
 
@@ -783,7 +797,7 @@ The repository keeps secrets out of source control through environment configura
 - Absolute latency depends on host hardware/cache state; current canonical artifacts record environment metadata, and the final multi-mode/concurrency workloads were repeated on both macOS/arm64 and Ubuntu/x86_64.
 - A dedicated scratch-table scale probe now measures vector-index build time and query latency from 1× through 25× corpus size while recording raw vector payload and `mhnsw_max_cache_size`. It deliberately avoids presenting ordinary table `INDEX_LENGTH` as HNSW resident memory and separates index-scaling evidence from the real-corpus Recall/MRR harnesses.
 - The cache-limit study uses 98,500 deterministically distinct vectors, 20 real questions and three independent index rebuilds per cache setting. It reports build variance and top-5 overlap explicitly, so cache effects are not inferred from one build or from exact duplicated vectors.
-- Integration coverage also updates an existing stored `VECTOR(384)`, commits it, and verifies that indexed nearest-neighbor search immediately sees the new embedding; this exercises vector-index maintenance on `UPDATE`, not only insert/delete.
+- Integration coverage also updates an existing stored `VECTOR(384)` and commits it. The test verifies that the new vector value is persisted and that cosine distances change as expected, then rebuilds a scratch HNSW index and confirms that ANN retrieval sees the updated vector. This deliberately separates transactional vector persistence from post-rebuild ANN visibility instead of assuming undocumented immediate HNSW maintenance semantics for an updated indexed vector.
 - OpenAI is an optional generation dependency. MariaDB retrieval, diagnostics, experiments, and the guided demo do not require it.
 
 These behaviors are part of the project result: MVF does not assume that every vector query should force the same index or that one ANN measurement is universally stable.

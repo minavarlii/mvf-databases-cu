@@ -37,6 +37,8 @@ jobs:
       DB_PASSWORD: mvf_benchmark_password
       OPENAI_API_KEY: ""
       FRONTEND_ORIGIN: http://localhost:5173
+      DB_ROOT_PASSWORD: mvf_benchmark_root_password
+      MVF_CACHE_ADMIN_HOST: 127.0.0.1
 
     steps:
       - name: Checkout
@@ -84,6 +86,7 @@ jobs:
         run: |
           rm -f experiments/results/multi_mode_latency_*.json
           rm -f experiments/results/vector_concurrency_*.json
+          rm -f experiments/results/vector_cache_sweep_*.json
 
       - name: Capture runner environment
         run: python -m experiments.environment | tee experiments/results/ubuntu_environment.json
@@ -94,6 +97,16 @@ jobs:
       - name: Run concurrency stress
         run: python -m experiments.vector_concurrency --writers 2 --rows-per-writer 25 --queries 50
 
+      - name: Run repeated HNSW cache sweep
+        run: >-
+          python -m experiments.vector_cache_sweep
+          --cache-mib 4 16 64
+          --multiplier 25
+          --rebuilds 3
+          --queries 20
+          --warmups 2
+          --runs 5
+
       - name: Upload benchmark artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -102,4 +115,6 @@ jobs:
             experiments/results/ubuntu_environment.json
             experiments/results/multi_mode_latency_*.json
             experiments/results/vector_concurrency_*.json
+            experiments/results/vector_cache_sweep_*.json
+            docs/vector-cache-sweep-results.md
           if-no-files-found: error
